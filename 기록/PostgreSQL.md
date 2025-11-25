@@ -53,3 +53,108 @@ Spring Boot 백엔드 개발자(Service Layer)의 역할은 이제 **계산 로�
   * **데이터 변환:** 클라이언트가 전달한 위도/경도(문자열/숫자)를 DB가 이해할 수 있는 좌표 타입으로 변환하여 쿼리에 바인딩합니다.
 
 결론적으로, 로직은 **SQL 문장 하나**로 끝납니다. 개발자는 복잡한 수학 공식 대신 DB의 강력한 기능을 활용하는 데 집중할 수 있습니다.
+
+
+
+
+
+
+
+
+-----
+# 예시
+
+## 1\. 스터디 테이블 및 위치 컬럼 생성
+
+아래 SQL은 스터디 정보를 저장할 `study` 테이블을 생성합니다. 핵심은 위치 정보를 저장하는 **`location`** 컬럼입니다.
+
+```sql
+-- 1. PostGIS 확장 활성화 확인 (최초 1회만 실행)
+-- 만약 아직 확장을 설치하지 않았다면 이 명령을 먼저 실행해야 합니다.
+CREATE EXTENSION IF NOT EXISTS postgis;
+
+-- 2. study 테이블 생성
+CREATE TABLE study (
+    study_id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    max_capacity INTEGER NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'RECRUITING',
+    -- === PostGIS 핵심 컬럼 ===
+    -- GEOGRAPHY(Point, 4326) 타입으로 설정:
+    --   - GEOGRAPHY: 지구 곡률을 반영하여 정확한 거리 계산 보장.
+    --   - Point: 스터디 위치는 하나의 점(경도/위도)으로 표현.
+    --   - 4326: WGS84 좌표계 (GPS 표준) SRID.
+    location GEOGRAPHY(Point, 4326),
+    -- =========================
+    created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+-----
+
+## 2\. 공간 검색을 위한 GiST 인덱스 생성 (필수)
+
+`location` 컬럼을 사용하여 "반경 X km 이내" 검색을 할 때 속도 저하를 막기 위해 **공간 인덱스**를 생성해야 합니다. PostGIS에서 가장 많이 사용되는 공간 인덱스는 **GiST (Generalized Search Tree)** 인덱스입니다.
+
+```sql
+-- GiST 공간 인덱스를 location 컬럼에 생성하여 검색 성능을 최적화합니다.
+CREATE INDEX idx_study_location ON study USING GIST (location);
+```
+
+### 💡 왜 GiST 인덱스가 필요한가요?
+
+일반적인 B-Tree 인덱스는 단순 값(숫자, 문자열)의 비교에는 빠르지만, 2차원 공간 상의 \*\*'인접성(Nearness)'\*\*을 찾는 작업에는 비효율적입니다. GiST 인덱스는 공간 데이터를 효율적으로 관리하고, 특히 `ST_DWithin`과 같은 **거리 기반 쿼리**를 실행할 때 엄청난 속도 향상을 가져옵니다.
+
+-----
+
+## 3\. 더미 데이터 삽입 및 확인
+
+테스트를 위해 스터디 데이터를 하나 삽입해 보겠습니다.
+
+```sql
+-- 예시: 'StudyHub Backend' 스터디를 서울 강남역 근처에 생성 (경도: 127.0276, 위도: 37.4981)
+
+INSERT INTO study (title, description, max_capacity, location)
+VALUES (
+    'StudyHub 백엔드 개발 스터디', 
+    'Spring Boot와 PostGIS를 활용한 웹 서비스 개발', 
+    5,
+    -- ST_SetSRID(ST_MakePoint(경도, 위도), SRID)
+    ST_SetSRID(ST_MakePoint(127.0276, 37.4981), 4326)::geography
+);
+```
+
+-----
+
+## 4\. 핵심 기능: 위치 기반 검색 쿼리 (반경 검색)
+
+이제 사용자의 현재 위치를 기준으로 **반경 5km 이내**에 있는 스터디를 찾는 쿼리입니다. 이 쿼리가 바로 프로젝트의 핵심 기능입니다.
+
+```sql
+-- 사용자 위치: 서울대학교 입구 (경도: 126.9537, 위도: 37.4784)
+-- 검색 반경: 5000m (5km)
+
+SELECT 
+    study_id,
+    title,
+    -- 사용자 위치와 스터디 위치 간의 거리를 미터(m)로 계산
+    ST_Distance(
+        location, 
+        ST_SetSRID(ST_MakePoint(126.9537, 37.4784), 4326)::geography
+    ) AS distance_meters
+FROM 
+    study
+WHERE 
+    -- ST_DWithin: 스터디 위치(location)가 사용자 위치로부터 5000m(5km) 이내인지 확인
+    ST_DWithin(
+        location, 
+        ST_SetSRID(ST_MakePoint(126.9537, 37.4784), 4326)::geography, 
+        5000 -- 거리는 항상 미터(m) 단위로 입력해야 합니다.
+    )
+ORDER BY 
+    distance_meters;
+```
+
+이 쿼리는 GiST 인덱스를 사용하여 매우 빠르게 5km 이내의 스터디 목록을 찾고, 거리 순으로 정렬하여 반환합니다. 이 구조를 **Spring Boot의 QueryDSL**로 변환하여 API를 구현
