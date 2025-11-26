@@ -42,7 +42,9 @@ public class SecurityConfig {
                                 "/auth/**", // 로그인, 회원가입 등
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api-docs/**"
+                                "/api-docs/**",
+                                "/auth/login",
+                                "/auth/register"
                         ).permitAll()
                         // 나머지 모든 요청은 인증 필요
                         .anyRequest().authenticated()
@@ -54,7 +56,6 @@ public class SecurityConfig {
                 )
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 

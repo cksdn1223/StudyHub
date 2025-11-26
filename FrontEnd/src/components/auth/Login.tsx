@@ -1,7 +1,27 @@
+import { useState } from "react";
+import { UserLogin } from "../../type";
+import axios from "axios";
 
 function Login() {
+  const [user, setUser] = useState<UserLogin>({
+    email: '',
+    password: ''
+  })
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, user);
+    console.log(response.data);
+  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setUser(prev => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
   return (
-    <form className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 border border-gray-200 rounded-xl shadow-lg p-8 bg-white">
       <h3 className="text-center text-gray-600 mb-6">
         스터디 메이트를 찾기 위해 로그인하세요.
       </h3>
@@ -11,8 +31,9 @@ function Login() {
         <label htmlFor="email" className="sr-only">이메일</label>
         <input
           id="email"
-          name="email"
-          type="email"
+          type="text"
+          value={user.email}
+          onChange={handleChange}
           required
           placeholder="이메일을 입력하세요"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 placeholder-gray-500 text-sm"
@@ -24,8 +45,9 @@ function Login() {
         <label htmlFor="password" className="sr-only">비밀번호</label>
         <input
           id="password"
-          name="password"
           type="password"
+          value={user.password}
+          onChange={handleChange}
           required
           placeholder="비밀번호를 입력하세요"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 placeholder-gray-500 text-sm"

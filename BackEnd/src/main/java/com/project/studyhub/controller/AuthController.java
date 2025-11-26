@@ -1,7 +1,9 @@
 package com.project.studyhub.controller;
 
 import com.project.studyhub.dto.login.LoginRequest;
+import com.project.studyhub.dto.user.UserSignUpRequest;
 import com.project.studyhub.security.JwtService;
+import com.project.studyhub.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> getToken(@RequestBody LoginRequest request) {
@@ -30,5 +33,10 @@ public class AuthController {
         return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
                 .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
                 .build();
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signUp(@RequestBody UserSignUpRequest dto) {
+        return userService.signUp(dto);
     }
 }

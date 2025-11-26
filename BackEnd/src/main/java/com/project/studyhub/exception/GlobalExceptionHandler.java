@@ -3,6 +3,9 @@ package com.project.studyhub.exception;
 import com.project.studyhub.dto.exception.ErrorResponseRecord;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -50,24 +53,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.FORBIDDEN);
     }
 
-    /**
-     * 중복 이메일 시 발생하는 사용자 지정 예외
-     *
-     * @param ex - EmailExistsException
-     * @return 409 HttpStatus.CONFLICT
-     */
-    // @ExceptionHandler: 특정 예외 클래스를 지정하여 처리할 메소드를 정의합니다.
-    @ExceptionHandler(EmailExistsException.class)
-    public ResponseEntity<ErrorResponseRecord> EmailExistsException(EmailExistsException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                "Email Exists",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", ""));
-        // 구성된 에러 메시지와 함께 HTTP 404 (Not Found) 상태 코드를 응답합니다.
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
-    }
 
     /**
      * 권한이 없을 때 (403)
@@ -102,6 +87,29 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
+    public ResponseEntity<ErrorResponseRecord> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
+        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "UnAuthorized",
+                "자격 증명에 실패하였습니다. (이메일 또는 비밀번호 불일치)",
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponseRecord, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(EmailExistsException.class)
+    public ResponseEntity<ErrorResponseRecord> handleRegisterException(EmailExistsException ex, WebRequest request) {
+        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "CONFLICT",
+                "이미 사용중인 이메일 입니다.",
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
+    }
 
 
 

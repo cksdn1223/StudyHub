@@ -1,7 +1,7 @@
 
 function Register() {
   return (
-    <form className="space-y-6">
+    <form className="space-y-6 border border-gray-200 rounded-xl shadow-lg p-8 bg-white">
       <h3 className="text-center text-gray-600 mb-6">
         스터디 매칭을 위한 새로운 계정을 만드세요.
       </h3>
@@ -25,7 +25,7 @@ function Register() {
         <input
           id="email"
           name="email"
-          type="email"
+          type="text"
           required
           placeholder="이메일 주소"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-red-500 focus:border-red-500 placeholder-gray-500 text-sm"

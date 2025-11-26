@@ -2,17 +2,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
-
-// 💡 아이콘을 위해 Lucide React 아이콘 라이브러리 사용을 가정합니다.
-// 만약 SVG를 직접 사용하신다면, <IconComponent className="w-6 h-6 mr-3" /> 대신 SVG 코드를 사용하시면 됩니다.
-// 여기서는 Tailwind-friendly 아이콘을 사용하도록 구조만 변경하겠습니다.
 import { BookOpenText, MapPin, MessageCircle, Shield } from 'lucide-react';
 
 function AuthPage({ authType }: { authType: 'login' | 'register' }) {
   const [authMode, setAuthMode] = useState<'login' | 'register'>(authType);
-
   const isLoginMode = authMode === 'login';
-
   const BANNER_BG_COLOR = "bg-red-400"; // 커스텀 살구색 사용
 
   return (
@@ -23,8 +17,7 @@ function AuthPage({ authType }: { authType: 'login' | 'register' }) {
         className={`relative hidden lg:flex w-1/2 p-12 flex-col justify-center items-center ${BANNER_BG_COLOR} text-white`}
       >
 
-        {/* StudyMatch 로고 (좌측 상단) */}
-        <Link to="/" className="text-3xl font-bold absolute top-12 left-12 text-white flex items-center">
+        <Link to="/" className="text-3xl font-bold absolute top-6 left-12 text-white flex items-center">
           {/* 💡 아이콘 스타일 반영 */}
           <BookOpenText className="w-7 h-7 mr-2" />
           StudyHub

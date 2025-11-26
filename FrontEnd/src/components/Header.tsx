@@ -1,17 +1,14 @@
 import { BookOpenText } from "lucide-react";
 import { Link } from "react-router-dom";
+import { HeaderProps } from "../type";
 
-type HeaderProps = {
-  isLoggedIn: boolean;
-  // 실제 앱에서는 유저 데이터도 받을 수 있습니다. (예: userName: string)
-}
 
 function Header({ isLoggedIn }: HeaderProps) {
   const textColor = "text-white";
 
   return (
     <header className="flex justify-between items-center h-16 px-4 sm:px-6 md:px-8 bg-transparent backdrop-blur-sm shadow-none">
-      <Link to="/" className="text-xl sm:text-2xl font-bold text-red-400 flex items-center">
+      <Link to="/" className="text-xl sm:text-3xl font-bold text-red-400 flex items-center">
         <BookOpenText className="w-7 h-7 mr-2" />
         StudyHub
       </Link>

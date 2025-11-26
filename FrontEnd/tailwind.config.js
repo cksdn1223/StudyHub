@@ -33,7 +33,6 @@ export default {
         'fade-in-delay-300': 'fadeIn 1s ease-out forwards 0.3s',
         'fade-in-delay-500': 'fadeIn 1s ease-out forwards 0.5s',
         'fade-in-delay-700': 'fadeIn 1s ease-out forwards 0.7s',
-        'fade-in-slide': 'fade-in-slide 0.5s ease-out forwards',
       },
     },
   },
