@@ -1,5 +1,5 @@
 
-function MainPage() {
+function FindStudy() {
   return (
     <div>
       
@@ -7,4 +7,4 @@ function MainPage() {
   );
 }
 
-export default MainPage;
+export default FindStudy;
