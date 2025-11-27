@@ -2,20 +2,17 @@ package com.project.studyhub.security;
 
 import com.project.studyhub.entity.User;
 import com.project.studyhub.repository.UserRepository;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.function.Function;
 
 @Component
 @RequiredArgsConstructor
@@ -33,9 +30,14 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String getToken(String username) {
+    public String getToken(User user) { // 💡 인수를 CustomUserDetails 객체로 변경
+        // 💡 1. 사용자 ID와 닉네임 클레임 추가
         return Jwts.builder()
-                .subject(username)
+                .claim("userId", user.getUserId())
+                .claim("email", user.getEmail())
+                .claim("nickname", user.getNickname())
+                .claim("role", user.getRole())
+                .subject(user.getUsername())
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey())
                 .compact();

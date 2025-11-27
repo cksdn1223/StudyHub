@@ -1,10 +1,15 @@
 import { BookOpenText } from "lucide-react";
 import { Link } from "react-router-dom";
-import { HeaderProps } from "../type";
+import { useAuth } from "../context/AuthContext";
 
 
-function Header({ isLoggedIn }: HeaderProps) {
+function Header() {
   const textColor = "text-white";
+  const { user, isLoggedIn, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout("성공적으로 로그아웃 하였습니다.", "success");
+  };
 
   return (
     <header className="flex justify-between items-center h-16 px-4 sm:px-6 md:px-8 bg-transparent backdrop-blur-sm shadow-none">
@@ -23,6 +28,13 @@ function Header({ isLoggedIn }: HeaderProps) {
             // A. 로그인 상태일 때: 채팅, 알림, 프로필 표시
             // ==========================================================
             <>
+              {/* 로그아웃 아이콘 */}
+              <li className={`cursor-pointer hover:text-red-400 transition duration-150 ${textColor}`}
+                onClick={handleLogout}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+              </li>
               {/* 채팅 아이콘 */}
               <li className={`hover:text-red-400 transition duration-150 cursor-pointer text-sm sm:text-base hidden sm:block ${textColor}`}>
                 <Link to="/chat">
@@ -51,7 +63,7 @@ function Header({ isLoggedIn }: HeaderProps) {
                     alt="프로필 이미지"
                   />
                   <span className={`ml-2 ${textColor} group-hover:text-red-400 font-medium text-sm sm:text-base hidden md:inline`}>
-                    유저 닉네임
+                    {user?.nickname}
                   </span>
                 </Link>
               </li>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import FeatureSection from "./FeatureSection";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
-import Toast from "../Toast";
+import { useToast } from "../../context/ToastContext";
 
 const HEADER_HEIGHT = 80;
 
@@ -12,8 +12,8 @@ function MainPage() {
   const [isHeaderFixed, setIsHeaderFixed] = useState(true);
   const featureSectionRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [toastVisible, setToastVisible] = useState(false);
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const scrollToFeatures = () => {
     if (featureSectionRef.current === null) return;
@@ -42,19 +42,14 @@ function MainPage() {
     if (isLoggedIn) {
       navigate(path);
     } else {
-      setToastVisible(true);
+      showToast('로그인이 필요한 서비스입니다.', 'info');
       setTimeout(() => {
-        setToastVisible(false);
         navigate('/login');
-      }, 3000);
+      }, 500);
     }
   };
   return (
     <div>
-      <Toast
-        message="로그인이 필요한 서비스입니다. 로그인 페이지로 이동합니다."
-        isVisible={toastVisible}
-      />
       <div
         className={`
           fixed top-0 left-0 w-full z-50 
@@ -62,7 +57,7 @@ function MainPage() {
           ${isHeaderFixed ? 'translate-y-0' : '-translate-y-full'} 
         `}
       >
-        <Header isLoggedIn={isLoggedIn} />
+        <Header/>
       </div>
       <div className="relative w-full min-h-screen bg-cover bg-left bg-no-repeat flex flex-col items-center justify-center p-4 pt-20"
         style={{ backgroundImage: `url(${mainBg})` }}>

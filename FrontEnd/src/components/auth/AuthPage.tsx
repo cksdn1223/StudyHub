@@ -84,7 +84,7 @@ function AuthPage({ authType }: { authType: 'login' | 'register' }) {
             {isLoginMode ? (
               <Login />
             ) : (
-              <Register />
+              <Register setAuthMode={setAuthMode}/>
             )}
             {/* 하단 전환 링크 */}
             <div className="mt-8 text-center text-sm text-gray-600">

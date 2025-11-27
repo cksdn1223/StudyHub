@@ -1,6 +1,3 @@
-export type HeaderProps = {
-  isLoggedIn: boolean;
-}
 
 export type UserLogin = {
   email: string;

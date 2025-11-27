@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { UserLogin } from "../../type";
-import axios from "axios";
+import { useAuthApi } from "../../hooks/useAuthApi";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const { handleLogin } = useAuthApi();
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserLogin>({
     email: '',
     password: ''
@@ -10,8 +13,7 @@ function Login() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, user);
-    console.log(response.data);
+    if(await handleLogin(user)) navigate("/");
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;

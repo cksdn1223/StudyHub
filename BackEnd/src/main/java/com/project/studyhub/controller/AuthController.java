@@ -2,6 +2,7 @@ package com.project.studyhub.controller;
 
 import com.project.studyhub.dto.login.LoginRequest;
 import com.project.studyhub.dto.user.UserSignUpRequest;
+import com.project.studyhub.entity.User;
 import com.project.studyhub.security.JwtService;
 import com.project.studyhub.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,14 +29,14 @@ public class AuthController {
         UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         Authentication auth = authenticationManager.authenticate(creds);
 
-        String jwts = jwtService.getToken(auth.getName());
+        String jwts = jwtService.getToken((User) auth.getPrincipal());
 
         return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
                 .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
                 .build();
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ResponseEntity<?> signUp(@RequestBody UserSignUpRequest dto) {
         return userService.signUp(dto);
     }
