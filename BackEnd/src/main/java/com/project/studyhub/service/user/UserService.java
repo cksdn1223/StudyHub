@@ -6,6 +6,10 @@ import com.project.studyhub.exception.EmailExistsException;
 import com.project.studyhub.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +22,10 @@ public class UserService {
 
     public ResponseEntity<?> signUp(UserSignUpRequest dto) {
         if(userRepository.existsByEmail(dto.email())) throw new EmailExistsException("이미 존재하는 Email 입니다.");
-        userRepository.save(new User(dto.email(), passwordEncoder.encode(dto.password()), dto.nickname()));
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Coordinate coordinate = new Coordinate(dto.longitude(), dto.latitude());
+        Point point = geometryFactory.createPoint(coordinate);
+        userRepository.save(new User(dto.email(), passwordEncoder.encode(dto.password()), dto.nickname(), dto.address(), point));
         return ResponseEntity.ok().build();
 
     }

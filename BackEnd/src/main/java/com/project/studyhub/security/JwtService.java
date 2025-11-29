@@ -30,8 +30,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String getToken(User user) { // 💡 인수를 CustomUserDetails 객체로 변경
-        // 💡 1. 사용자 ID와 닉네임 클레임 추가
+    public String getToken(User user) {
         return Jwts.builder()
                 .claim("userId", user.getUserId())
                 .claim("email", user.getEmail())

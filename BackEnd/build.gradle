@@ -55,7 +55,8 @@ dependencies {
 
 	// Hibernate Spatial: PostGIS의 GEOMETRY 타입을 JPA Entity에 매핑하기 위해 필수
 	implementation 'org.hibernate.orm:hibernate-spatial:6.4.4.Final' // hibernate-spatial -> hibernate.orm:hibernate-spatial
-
+    // WebClient 의존성
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	// Web Push: 서버에서 VAPID 인증 및 푸시 메시지 전송을 위해 필수
 	// N.B. VAPID 인증 및 메시지 암호화/전송을 위한 적절한 라이브러리 선택
 	implementation 'nl.martijndwars:web-push:5.1.1'

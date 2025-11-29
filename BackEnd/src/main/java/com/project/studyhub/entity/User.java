@@ -7,11 +7,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import org.locationtech.jts.geom.Point;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -29,7 +31,12 @@ public class User implements UserDetails {
     private String password;
 
     private String nickname;
-    
+    private String address;
+
+    @Column(columnDefinition = "GEOMETRY(Point, 4326)")
+    // double longitude / double latitude 경도,위도 순서대로 저장
+    private Point geom;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -38,10 +45,20 @@ public class User implements UserDetails {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    public User(String email, String password, String nickname) {
+    // User가 리더인 Study 목록
+    @OneToMany(mappedBy = "leader")
+    private List<Study> leadingStudies = new ArrayList<>();
+
+    // User가 받은 Notification 목록
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
+    public User(String email, String password, String nickname, String address, Point geom) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.address = address;
+        this.geom = geom;
         this.role = Role.USER;
     }
 

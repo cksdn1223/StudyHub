@@ -5,13 +5,14 @@ import FeatureSection from "./FeatureSection";
 import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
 
 const HEADER_HEIGHT = 80;
 
 function MainPage() {
   const [isHeaderFixed, setIsHeaderFixed] = useState(true);
   const featureSectionRef = useRef<HTMLDivElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -44,7 +45,7 @@ function MainPage() {
     } else {
       showToast('로그인이 필요한 서비스입니다.', 'info');
       setTimeout(() => {
-        navigate('/login');
+        navigate('/auth/login');
       }, 500);
     }
   };
@@ -67,7 +68,7 @@ function MainPage() {
           className="absolute inset-0 z-10"
           style={{
             backgroundColor: 'rgba(0, 0, 0, 0.6)',
-            backgroundImage: 'radial-gradient(circle at 20% 25%, transparent 30%, rgba(0, 0, 0, 0.8) 70%)'
+            backgroundImage: 'radial-gradient(circle at 16% 30%, transparent 10%, rgba(0, 0, 0, 0.6) 30%)'
           }}
         ></div>
 
@@ -106,7 +107,7 @@ function MainPage() {
           </svg>
         </div>
       </div>
-      <div ref={featureSectionRef}>
+      <div ref={featureSectionRef} style={{backgroundColor:"#FAFAFA"}}>
         <FeatureSection />
       </div>
       <Footer />

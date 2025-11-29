@@ -1,14 +1,23 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
 import { BookOpenText, MapPin, MessageCircle, Shield } from 'lucide-react';
 
-function AuthPage({ authType }: { authType: 'login' | 'register' }) {
-  const [authMode, setAuthMode] = useState<'login' | 'register'>(authType);
+const VALID_AUTH_TYPES = ['login', 'register'];
+function AuthPage() {
+  const { type } = useParams<{ type: string }>();
+  const navigate = useNavigate();
+  if (!type || !VALID_AUTH_TYPES.includes(type)) {
+    console.error(`[AuthPage Error] Invalid path parameter received: ${type}. Redirecting to home.`);
+    navigate("/", { replace: true });
+    return null;
+  }
+  const authMode = type as 'login' | 'register';
   const isLoginMode = authMode === 'login';
-  const BANNER_BG_COLOR = "bg-red-400"; // 커스텀 살구색 사용
-
+  const BANNER_BG_COLOR = "bg-red-400";
+  const handleAuthModeChange = (mode: 'login' | 'register') => {
+    navigate(`/auth/${mode}`);
+  };
   return (
     <div className="flex w-full min-h-screen">
 
@@ -84,7 +93,7 @@ function AuthPage({ authType }: { authType: 'login' | 'register' }) {
             {isLoginMode ? (
               <Login />
             ) : (
-              <Register setAuthMode={setAuthMode}/>
+              <Register />
             )}
             {/* 하단 전환 링크 */}
             <div className="mt-8 text-center text-sm text-gray-600">
@@ -92,7 +101,7 @@ function AuthPage({ authType }: { authType: 'login' | 'register' }) {
                 <>
                   계정이 없으신가요?
                   <button
-                    onClick={() => setAuthMode('register')}
+                    onClick={() => handleAuthModeChange('register')}
                     className="font-semibold text-red-500 hover:text-red-600 ml-1 transition duration-150"
                   >
                     회원가입
@@ -102,7 +111,7 @@ function AuthPage({ authType }: { authType: 'login' | 'register' }) {
                 <>
                   이미 계정이 있으신가요?
                   <button
-                    onClick={() => setAuthMode('login')}
+                    onClick={() => handleAuthModeChange('login')}
                     className="font-semibold text-red-500 hover:text-red-600 ml-1 transition duration-150"
                   >
                     로그인

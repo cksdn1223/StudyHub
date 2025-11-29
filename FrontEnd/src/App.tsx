@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import LayoutWrapper from './utils/LayoutWrapper';
 import MainPage from './components/main/MainPage';
 import FindStudy from './components/find-study/FindStudy';
 import CreateStudy from './components/create-study/CreateStudy';
@@ -8,11 +9,22 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/find" element={<FindStudy />} />
-        <Route path="/create" element={<CreateStudy />} />
-        <Route path="/login" element={<AuthPage authType='login'/>} />
-        <Route path="/register" element={<AuthPage authType='register' />} />
+        <Route
+          path="/"
+          element={<MainPage />}
+        />
+        <Route
+          path="/find"
+          element={<LayoutWrapper><FindStudy /></LayoutWrapper>}
+        />
+        <Route
+          path="/create"
+          element={<LayoutWrapper><CreateStudy /></LayoutWrapper>}
+        />
+        <Route
+          path="/auth/:type"
+          element={<AuthPage />}
+        />
       </Routes>
     </div>
   );

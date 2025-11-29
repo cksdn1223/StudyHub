@@ -3,6 +3,7 @@ package com.project.studyhub.controller;
 import com.project.studyhub.dto.login.LoginRequest;
 import com.project.studyhub.dto.user.UserSignUpRequest;
 import com.project.studyhub.entity.User;
+import com.project.studyhub.repository.UserRepository;
 import com.project.studyhub.security.JwtService;
 import com.project.studyhub.service.user.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +23,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
     private final UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> getToken(@RequestBody LoginRequest request) {
-        UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(request.email(), request.password());
+    public ResponseEntity<?> login(@RequestBody LoginRequest lr) {
+        UsernamePasswordAuthenticationToken creds = new UsernamePasswordAuthenticationToken(lr.email(), lr.password());
+
         Authentication auth = authenticationManager.authenticate(creds);
 
-        String jwts = jwtService.getToken((User) auth.getPrincipal());
+        // 인증된 이메일로 User 조회
+        String email = auth.getName(); // 일반적으로 username(email) 이 들어있음
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        return ResponseEntity.ok().header(HttpHeaders.AUTHORIZATION, "Bearer " + jwts)
+        String jwt = jwtService.getToken(user);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
                 .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Authorization")
                 .build();
     }
