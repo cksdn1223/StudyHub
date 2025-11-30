@@ -58,4 +58,13 @@ export type StudyList = {
   createdAt: string;
   detailLocation: string;
   address: string;
+  detailAddress: string;
+}
+
+export type UserInfo = {
+  nickname: string;
+  email: string;
+  role: string;
+  description: string;
+  address: string;
 }

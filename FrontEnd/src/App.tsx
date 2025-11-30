@@ -4,6 +4,7 @@ import MainPage from './components/main/MainPage';
 import FindStudy from './components/find-study/FindStudy';
 import CreateStudy from './components/create-study/CreateStudy';
 import AuthPage from './components/auth/AuthPage';
+import StudyDetail from './components/study-detail/StudyDetail';
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
         <Route
           path="/find"
           element={<LayoutWrapper><FindStudy /></LayoutWrapper>}
+        />
+        <Route
+          path="/study/:id"
+          element={<LayoutWrapper><StudyDetail /></LayoutWrapper>}
         />
         <Route
           path="/create"

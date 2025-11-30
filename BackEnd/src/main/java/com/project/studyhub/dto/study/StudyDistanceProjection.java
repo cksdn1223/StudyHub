@@ -12,6 +12,7 @@ public interface StudyDistanceProjection {
     String getFrequency();
     String getDuration();
     String getAddress();
+    String getDetailAddress();
     String getStatus();
     LocalDateTime getCreatedAt();
     String getDetailLocation();

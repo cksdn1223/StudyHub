@@ -32,6 +32,7 @@ public class User implements UserDetails {
 
     private String nickname;
     private String address;
+    private String description;
 
     @Column(columnDefinition = "GEOMETRY(Point, 4326)")
     // double longitude / double latitude 경도,위도 순서대로 저장

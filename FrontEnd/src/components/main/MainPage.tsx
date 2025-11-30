@@ -2,7 +2,7 @@ import Header from "../Header";
 import mainBg from "../../assets/main-background.jpg"
 import { useEffect, useRef, useState } from "react";
 import FeatureSection from "./FeatureSection";
-import Footer from "./Footer";
+import Footer from "../../Footer";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";

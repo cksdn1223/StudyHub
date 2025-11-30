@@ -13,6 +13,7 @@ public record StudyDistanceResponse(
         String frequency,
         String duration,
         String address,
+        String detailAddress,
         String status,
         LocalDateTime createdAt,
         String detailLocation,

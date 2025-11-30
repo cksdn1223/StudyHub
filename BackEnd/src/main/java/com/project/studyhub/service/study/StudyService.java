@@ -61,6 +61,7 @@ public class StudyService {
                                     projection.getFrequency(),
                                     projection.getDuration(),
                                     projection.getAddress(),
+                                    projection.getDetailAddress(),
                                     projection.getStatus(),
                                     projection.getCreatedAt(),
                                     projection.getDetailLocation(),

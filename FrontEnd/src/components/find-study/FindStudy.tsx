@@ -1,27 +1,16 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudyCard from './StudyCard';
-import { getHeaders } from '../../context/AxiosConfig';
-import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
-import { StudyList } from '../../type';
-
-const fetchStudyList = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study`, getHeaders());
-  return response.data;
-};
+import Footer from '../../Footer';
+import { useStudyList } from '../../hooks/useStudyList';
 
 function FindStudy() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [distanceFilter, setDistanceFilter] = useState<number | 'ALL'>(5);
+  const [distanceFilter, setDistanceFilter] = useState<number | 'ALL'>('ALL');
   const [sortOption, setSortOption] = useState<'latest' | 'distance' | 'popular'>('latest');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'RECRUITING' | 'FULL' | 'FINISHED'>('ALL');
-
-  const { data, isLoading, error } = useQuery<StudyList[]>({
-    queryKey: ['studyList'],
-    queryFn: fetchStudyList,
-  });
+  const { data, isLoading, isError } = useStudyList();
 
 
   const filteredStudies = useMemo(() => {
@@ -54,7 +43,7 @@ function FindStudy() {
   }, [data, distanceFilter, searchTerm, sortOption, statusFilter]);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16">
         <section className="bg-red-50 rounded-xl p-8 mb-10">
           <h1 className="text-2xl font-bold text-gray-800 mb-3">
@@ -83,7 +72,7 @@ function FindStudy() {
             <input
               type="text"
               placeholder="스터디 검색 (제목, 내용, 기술 스택)"
-              className="flex-grow outline-none text-gray-700 placeholder-gray-400"
+              className="flex-grow outline-none bg-transparent text-gray-700 placeholder-gray-400"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
@@ -93,7 +82,7 @@ function FindStudy() {
           <div className="flex justify-between items-center text-sm text-gray-600">
             <div className="flex space-x-4">
               {/* 거리 필터 */}
-              <label className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition duration-150">
+              <label className="flex items-center space-x-2 hover:text-red-500 transition duration-150">
                 <span className="font-semibold text-red-500">거리</span>
                 <select
                   className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400"
@@ -102,6 +91,7 @@ function FindStudy() {
                     setDistanceFilter(event.target.value === 'ALL' ? 'ALL' : Number(event.target.value))
                   }
                 >
+                  <option value="ALL">전체</option>
                   <option value="5">5km 이내</option>
                   <option value="10">10km 이내</option>
                   <option value="20">20km 이내</option>
@@ -112,8 +102,8 @@ function FindStudy() {
               <div className="text-gray-300">|</div>
 
               {/* 기준 필터 */}
-              <label className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition duration-150">
-                <span>정렬</span>
+              <label className="flex items-center space-x-2 hover:text-red-500 transition duration-150">
+                <span className='font-semibold text-red-500'>정렬</span>
                 <select
                   className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400"
                   value={sortOption}
@@ -128,8 +118,8 @@ function FindStudy() {
               <div className="text-gray-300">|</div>
 
               {/* 모집 상태 필터 */}
-              <label className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition duration-150">
-                <span>모집상태</span>
+              <label className="flex items-center space-x-2 hover:text-red-500 transition duration-150">
+                <span className='font-semibold text-red-500'>모집상태</span>
                 <select
                   className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400"
                   value={statusFilter}
@@ -151,7 +141,7 @@ function FindStudy() {
 
           {/* 선택된 태그 목록 (이미지 기반) */}
           <div className="flex space-x-2 mt-4 text-xs">
-            <span className="text-gray-500 font-medium">인기 태그:</span>
+            <span className="font-semibold text-red-500 x-3 py-1">인기 태그 </span>
             {['React', 'Spring', 'Node.js', 'Python', 'Java', 'TypeScript', 'Vue.js'].map(tag => (
               <button
                 key={tag}
@@ -167,7 +157,7 @@ function FindStudy() {
 
         {/* --- 3. 스터디 목록 섹션 --- */}
         <section>
-          {isLoading ? '로딩중...' : error ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
+          {isLoading ? '로딩중...' : isError ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
             <div className="border-t border-gray-200">
               {filteredStudies.length > 0 ? (
                 filteredStudies.map(study => (
@@ -179,8 +169,8 @@ function FindStudy() {
             </div>
           }
         </section>
-
       </main>
+      <Footer />
     </div >
   );
 }

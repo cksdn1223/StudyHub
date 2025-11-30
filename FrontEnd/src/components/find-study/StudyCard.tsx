@@ -1,11 +1,10 @@
 import { StudyList } from "../../type";
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
-
-
-
+import { useNavigate } from "react-router-dom";
 
 function StudyCard(study: StudyList) {
+  const navigate = useNavigate();
   const dateObject = parseISO(study.createdAt);
   const timeAgo = formatDistanceToNow(dateObject, {
     addSuffix: true,
@@ -37,17 +36,23 @@ function StudyCard(study: StudyList) {
   };
 
   return (
-    <div className="flex justify-between border-b border-gray-200 py-6 hover:bg-gray-50 transition duration-150">
-      <div className="flex-grow pr-4">
+    <div
+      role="button"
+      tabIndex={0}
+      className="flex justify-between border-b border-gray-200 py-6 hover:bg-gray-50 transition duration-150 focus:outline-none"
+    >
+      <div className="flex-grow pr-4 ">
         <div className="flex items-center text-sm mb-1 text-gray-500">
           <StudyStatusBadge />
           <span className="text-green-600 font-semibold mr-3">{Math.ceil(study.distanceKm * 10) / 10} Km</span>
           <span className="mr-3 text-gray-400">|</span>
           <span className="mr-3">{timeAgo}</span>
         </div>
-        <h4 className="text-lg font-semibold text-gray-800 mb-2 hover:text-red-500 cursor-pointer">
+        <span
+          className="text-lg font-semibold text-gray-800 hover:text-red-500 mb-2  cursor-pointer"
+          onClick={() => navigate(`/study/${study.id}`)}>
           {study.title}
-        </h4>
+        </span>
         <p className="text-sm text-gray-600 mb-3 line-clamp-1">{study.description}</p>
 
         {/* 태그 목록 */}
