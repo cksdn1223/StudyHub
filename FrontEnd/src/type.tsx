@@ -59,6 +59,31 @@ export type StudyList = {
   detailLocation: string;
   address: string;
   detailAddress: string;
+  formattedCreatedAt: string;
+}
+
+export type MyStudyList = {
+  address: string;
+  description: string;
+  detailAddress: string;
+  detailLocation: string;
+  duration: string;
+  frequency: string;
+  maxMembers: string;
+  memberCount: string;
+  members: [
+    member:{
+      email: string;
+      leader: boolean;
+      nickname: string;
+      status: string | null;
+      userId: number
+    }
+  ]
+  status: string;
+  studyId: number;
+  title: string;
+
 }
 
 export type UserInfo = {

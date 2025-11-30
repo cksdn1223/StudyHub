@@ -1,15 +1,8 @@
 import { StudyList } from "../../type";
-import { formatDistanceToNow, parseISO } from 'date-fns';
-import { ko } from 'date-fns/locale';
 import { useNavigate } from "react-router-dom";
 
 function StudyCard(study: StudyList) {
   const navigate = useNavigate();
-  const dateObject = parseISO(study.createdAt);
-  const timeAgo = formatDistanceToNow(dateObject, {
-    addSuffix: true,
-    locale: ko
-  });
   const StudyStatusBadge = () => {
     switch (study.status) {
       case 'RECRUITING':
@@ -46,7 +39,7 @@ function StudyCard(study: StudyList) {
           <StudyStatusBadge />
           <span className="text-green-600 font-semibold mr-3">{Math.ceil(study.distanceKm * 10) / 10} Km</span>
           <span className="mr-3 text-gray-400">|</span>
-          <span className="mr-3">{timeAgo}</span>
+          <span className="mr-3">{study.formattedCreatedAt}</span>
         </div>
         <span
           className="text-lg font-semibold text-gray-800 hover:text-red-500 mb-2  cursor-pointer"

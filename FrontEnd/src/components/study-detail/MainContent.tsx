@@ -1,17 +1,10 @@
 import { ChevronRight, MapPin } from "lucide-react";
 import { StudyList } from "../../type";
-import { formatDistanceToNow, parseISO } from 'date-fns';
-import { ko } from 'date-fns/locale';
 import { useNavigate } from "react-router-dom";
 
 function MainContent({ data }: { data: StudyList }) {
   const navigate = useNavigate();
-  const dateObject = parseISO(data.createdAt);
-  const timeAgo = formatDistanceToNow(dateObject, {
-    addSuffix: true,
-    locale: ko
-  });
-
+  
   return (
     <div className="lg:w-8/12 pr-6">
       <div className="text-sm text-gray-500 mb-4 flex items-center">
@@ -21,7 +14,7 @@ function MainContent({ data }: { data: StudyList }) {
 
       <div className="flex items-center text-sm text-red-500 font-semibold mb-2">
         <MapPin size={16} className="mr-1" />
-        <span>{Math.ceil(data.distanceKm * 10) / 10}Km · {timeAgo} 등록</span>
+        <span>{Math.ceil(data.distanceKm * 10) / 10}Km · {data.formattedCreatedAt} 등록</span>
       </div>
 
       <h1 className="text-3xl font-bold text-gray-900 mb-4">{data.title}</h1>

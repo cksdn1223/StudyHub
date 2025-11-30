@@ -1,12 +1,11 @@
 package com.project.studyhub.service.study;
 
-import com.project.studyhub.dto.study.StudyCreateRequest;
-import com.project.studyhub.dto.study.StudyDistanceProjection;
-import com.project.studyhub.dto.study.StudyDistanceResponse;
-import com.project.studyhub.dto.study.StudyResponse;
+import com.project.studyhub.dto.study.*;
 import com.project.studyhub.entity.Study;
+import com.project.studyhub.entity.StudyParticipant;
 import com.project.studyhub.entity.Tag;
 import com.project.studyhub.entity.User;
+import com.project.studyhub.enums.ParticipantStatus;
 import com.project.studyhub.repository.StudyRepository;
 import com.project.studyhub.repository.TagRepository;
 import com.project.studyhub.repository.UserRepository;
@@ -71,4 +70,64 @@ public class StudyService {
                         })
                 .collect(Collectors.toList());
     }
+
+    public List<MyStudyResponse> getJoinStudy(Principal principal) {
+        User me = userRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        List<Study> studies = studyRepository.findMyStudiesWithMembers(me, ParticipantStatus.ACCEPTED);
+        return studies.stream()
+                .map(this::toMyStudyResponseDto)
+                .collect(Collectors.toList());
+    }
+
+
+    private MyStudyResponse toMyStudyResponseDto(Study study) {
+
+        User leader = study.getLeader();
+        StudyMemberDto leaderDto = StudyMemberDto.builder()
+                .userId(leader.getUserId())
+                .nickname(leader.getNickname())
+                .email(leader.getEmail())
+                .leader(true)
+                .status(null)
+                .build();
+
+        List<StudyMemberDto> participantDtos = study.getParticipants().stream()
+                .map(StudyParticipant::getUser)
+                .filter(user -> !user.getUserId().equals(leader.getUserId())) // 리더 중복 방지
+                .map(user -> {
+                    ParticipantStatus status = study.getParticipants().stream()
+                            .filter(sp -> sp.getUser().getUserId().equals(user.getUserId()))
+                            .findFirst()
+                            .map(StudyParticipant::getStatus)
+                            .orElse(null);
+                    return StudyMemberDto.builder()
+                            .userId(user.getUserId())
+                            .nickname(user.getNickname())
+                            .email(user.getEmail())
+                            .leader(false)
+                            .status(status)
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        participantDtos.add(0, leaderDto);
+
+        return MyStudyResponse.builder()
+                .studyId(study.getId())
+                .title(study.getTitle())
+                .description(study.getDescription())
+                .maxMembers(study.getMaxMembers())
+                .memberCount(study.getMemberCount())
+                .frequency(study.getFrequency())
+                .duration(study.getDuration())
+                .address(study.getAddress())
+                .detailAddress(study.getDetailAddress())
+                .detailLocation(study.getDetailLocation())
+                .status(study.getStatus())
+                .members(participantDtos)
+                .build();
+    }
+
+
 }

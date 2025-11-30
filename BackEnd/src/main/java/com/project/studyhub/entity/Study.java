@@ -60,6 +60,8 @@ public class Study {
 
     @OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyTag> studyTags = new ArrayList<>();
+    @OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudyParticipant> participants = new ArrayList<>();
 
     public Study(String title, String description, Integer maxMembers, Integer memberCount, String frequency, String duration, String address, String detailAddress, String detailLocation, Point geom, User leader) {
         this.title = title;

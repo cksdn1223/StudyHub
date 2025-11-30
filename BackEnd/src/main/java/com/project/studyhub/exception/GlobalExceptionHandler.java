@@ -111,6 +111,18 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(ParticipantExistsException.class)
+    public ResponseEntity<ErrorResponseRecord> handleRegisterException(ParticipantExistsException ex, WebRequest request) {
+        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "CONFLICT",
+                "이미 신청한 스터디 입니다.",
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
+    }
+
 
 
 

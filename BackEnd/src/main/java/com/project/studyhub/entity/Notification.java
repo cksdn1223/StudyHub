@@ -41,4 +41,11 @@ public class Notification {
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
+    public Notification(User receiver, String message, NotificationType type) {
+        this.receiver = receiver;
+        this.message = message;
+        this.isRead = false;
+        this.type = type;
+    }
 }

@@ -1,0 +1,45 @@
+package com.project.studyhub.service.studyParticipant;
+
+import com.project.studyhub.entity.Notification;
+import com.project.studyhub.entity.Study;
+import com.project.studyhub.entity.StudyParticipant;
+import com.project.studyhub.entity.User;
+import com.project.studyhub.enums.NotificationType;
+import com.project.studyhub.exception.ParticipantExistsException;
+import com.project.studyhub.exception.ResourceNotFoundException;
+import com.project.studyhub.repository.NotificationRepository;
+import com.project.studyhub.repository.StudyParticipantRepository;
+import com.project.studyhub.repository.StudyRepository;
+import com.project.studyhub.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import java.security.Principal;
+
+@Service
+@RequiredArgsConstructor
+public class StudyParticipantService {
+    private final StudyParticipantRepository studyParticipantRepository;
+    private final StudyRepository studyRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
+
+    public void createParticipant(Long studyId, Principal principal) {
+        Study study = studyRepository.findById(studyId)
+                .orElseThrow(()-> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
+        User user = userRepository.findByEmail(principal.getName())
+                .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+        // 기본 대기중 상태
+        if(studyParticipantRepository.existsByStudyAndUser(study,user))
+            throw new ParticipantExistsException("이미 참여한 스터디입니다.");
+        StudyParticipant studyParticipant = new StudyParticipant(study, user);
+        Notification notification = new Notification(study.getLeader(), "신청", NotificationType.JOIN_REQUEST);
+        notificationRepository.save(notification);
+        studyParticipantRepository.save(studyParticipant);
+    }
+
+    // TODO: Patch하는 엔드포인트 만들고 PENDING 대기, ACCEPTED 승인, REJECTED 거절 / 변경가능하게 만들기
+    // TODO: study 인원수 가득차거나 비슷해지면 승인해도 거절되고 study status 바꾸기 모집중(RECRUITING), 모집완료(FULL), 활동종료(FINISHED)
+}

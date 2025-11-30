@@ -2,8 +2,10 @@ import axios from "axios";
 import { ChevronRight, MapPin, User } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getHeaders } from "../../context/AxiosConfig";
-import { StudyList, UserInfo } from "../../type";
+import { axiosErrorType, StudyList, UserInfo } from "../../type";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 
 const tagLink = [
   // 프론트엔드 (Frontend)
@@ -60,6 +62,9 @@ const tagLink = [
 
 function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] }) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { user } = useAuth();
+
   const [leader, setLeader] = useState<UserInfo>();
   useEffect(() => {
     const getLeaderData = async () => {
@@ -82,13 +87,37 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
     .sort((a, b) => b.sameTagCount - a.sameTagCount)
     .slice(0, 5);
 
+  if (!user) return null;
+  const isLeader = leader?.email === user.email;
+  const buttonClasses = isLeader ?
+    'w-full bg-gray-500 text-white text-center font-bold py-3 rounded-lg transition duration-150 shadow-md cursor-not-allowed' :
+    'w-full bg-red-500 hover:cursor-pointer text-center hover:bg-red-600 text-white font-bold py-3 rounded-lg transition duration-150 shadow-md';
+  const buttonText = isLeader
+    ? '🔥 본인의 스터디에 참여하실 수 없습니다.'
+    : '🔥 스터디 참여 신청하기';
+  const handleApply = async () => {
+    if (!isLeader) {
+      try{
+        await axios.post(`${import.meta.env.VITE_BASE_URL}/participant/${data.id}`, null, getHeaders());
+        showToast('스터디 참여 신청이 완료되었습니다.', 'success')
+      } catch (error) {
+        showToast((error as axiosErrorType).response.data.message, 'error');
+      }
+      
+    }
+  };
   if (!leader) return <div>유저정보를 불러올 수 없습니다.</div>
   return (
     <div className="lg:w-4/12 lg:sticky lg:top-8 mt-8 lg:mt-0">
       {/* --- 신청 버튼 섹션 --- */}
       <div className="mb-6">
-        <button className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition duration-150 shadow-md">
-          🔥 스터디 참여 신청하기
+        <button
+          type="button"
+          className={buttonClasses}
+          onClick={handleApply}
+          disabled={isLeader}
+        >
+          {buttonText}
         </button>
       </div>
 
@@ -113,7 +142,7 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
       <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">📍 추천 학습 자료</h2>
         <ul className="space-y-3 text-sm">
-          {data.tags.filter(tag=>tagLink.find(list=>list.tag===tag)?.link !== undefined).map(tag => (
+          {data.tags.filter(tag => tagLink.find(list => list.tag === tag)?.link !== undefined).map(tag => (
             <li key={tag}>
               <a
                 className="text-blue-600 hover:underline cursor-pointer"
@@ -139,7 +168,7 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
             <div
               key={study.id}
               className="mb-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer"
-              onClick={()=>navigate(`/study/${study.id}`)}
+              onClick={() => navigate(`/study/${study.id}`)}
             >
               <p className="font-semibold text-gray-800">{study.title}</p>
 

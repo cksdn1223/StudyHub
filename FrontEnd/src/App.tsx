@@ -5,6 +5,7 @@ import FindStudy from './components/find-study/FindStudy';
 import CreateStudy from './components/create-study/CreateStudy';
 import AuthPage from './components/auth/AuthPage';
 import StudyDetail from './components/study-detail/StudyDetail';
+import StudyInfo from './components/study/StudyInfo';
 
 function App() {
   return (
@@ -23,6 +24,10 @@ function App() {
           element={<LayoutWrapper><StudyDetail /></LayoutWrapper>}
         />
         <Route
+          path="/chat"
+          element={<LayoutWrapper><StudyInfo /></LayoutWrapper>}
+        />
+        <Route
           path="/create"
           element={<LayoutWrapper><CreateStudy /></LayoutWrapper>}
         />
@@ -30,6 +35,7 @@ function App() {
           path="/auth/:type"
           element={<AuthPage />}
         />
+        <Route path="*" element={<div>Not Found</div>} />
       </Routes>
     </div>
   );

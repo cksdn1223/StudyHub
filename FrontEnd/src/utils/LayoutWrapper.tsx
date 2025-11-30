@@ -1,8 +1,7 @@
-// src/components/LayoutWrapper.tsx (수정)
-
 import React from 'react';
 import Header from '../components/Header';
-import { useLocation } from 'react-router-dom'; // useLocation 추가
+import { useLocation } from 'react-router-dom'; 
+
 
 function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const location = useLocation();

@@ -1,5 +1,6 @@
 package com.project.studyhub.controller;
 
+import com.project.studyhub.dto.study.MyStudyResponse;
 import com.project.studyhub.dto.study.StudyCreateRequest;
 import com.project.studyhub.dto.study.StudyDistanceResponse;
 import com.project.studyhub.dto.study.StudyResponse;
@@ -26,5 +27,10 @@ public class StudyController {
     @GetMapping
     public ResponseEntity<List<StudyDistanceResponse>> getAllStudy(Principal principal) {
         return ResponseEntity.ok(studyService.getAllStudy(principal));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<List<MyStudyResponse>> getJoinStudy(Principal principal) {
+        return ResponseEntity.ok(studyService.getJoinStudy(principal));
     }
 }

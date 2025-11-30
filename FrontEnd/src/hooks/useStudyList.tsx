@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { getHeaders } from '../context/AxiosConfig';
 import { StudyList } from '../type';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 const fetchStudyList = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study`, getHeaders());
@@ -13,9 +15,24 @@ const fetchStudyList = async () => {
  * @returns {object} data, isLoading, error
  */
 export const useStudyList = () => {
-  return useQuery<StudyList[]>({
+  const { data, isLoading, error } = useQuery<StudyList[]>({
     queryKey: ['studyList'],
     queryFn: fetchStudyList,
-    staleTime: 1000 * 60 * 5, // 5분 동안 캐시된 데이터 사용
+    staleTime: 1000 * 60 * 5,
   });
+
+  const formattedData = data?.map(study => {
+    const dateObject = parseISO(study.createdAt);
+    const timeAgo = formatDistanceToNow(dateObject, {
+      addSuffix: true,
+      locale: ko,
+    });
+
+    return {
+      ...study,
+      formattedCreatedAt: timeAgo
+    };
+  });
+
+  return { data: formattedData, isLoading, error };
 };

@@ -37,4 +37,10 @@ public class StudyParticipant {
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private ParticipantStatus status;
+
+    public StudyParticipant(Study study, User user) {
+        this.study = study;
+        this.user = user;
+        this.status = ParticipantStatus.PENDING;
+    }
 }

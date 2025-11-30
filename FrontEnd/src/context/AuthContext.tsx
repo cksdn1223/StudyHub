@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useToast } from './ToastContext';
+import { useNavigate } from 'react-router-dom';
 
 type User = {
   id: number;
@@ -21,14 +22,16 @@ const TOKEN_KEY = 'jwt';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { showToast } = useToast();
+  const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const isLoggedIn = !!user;
 
   const logout = useCallback((message: string, type: 'success' | 'error' | 'info') => {
+    navigate("/")
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
     showToast(message, type);
-  }, [showToast]);
+  }, [showToast, navigate]);
 
   const checkTokenExpiration = useCallback((token: string) => {
     try {
@@ -76,7 +79,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem(TOKEN_KEY, token);
     checkTokenExpiration(token);
   };
-
   return (
     <AuthContext.Provider value={{ user, isLoggedIn, login, logout }}>
       {children}
