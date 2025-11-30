@@ -38,7 +38,7 @@
 | 필드명 | 데이터 타입 | 제약 조건 | 설명 |
 | :--- | :--- | :--- | :--- |
 | `tag_id` | **SERIAL** | **PK**, NOT NULL | 태그 고유 ID. |
-| `name` | VARCHAR(50) | NOT NULL, UNIQUE | 태그 이름 (예: React, SpringBoot, QueryDSL). |
+| `name` | VARCHAR(50) | NOT NULL, UNIQUE | 태그 이름 (예: React, SpringBoot). |
 
 ### Study_Tag 테이블 (중간 테이블)
 

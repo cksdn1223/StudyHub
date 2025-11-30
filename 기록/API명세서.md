@@ -10,8 +10,6 @@
 
 ## 2. 📚 스터디 모집 및 검색 API (Study & Search)
 
-이 섹션은 **QueryDSL**과 **PostGIS**를 활용하는 가장 복잡한 엔드포인트입니다.
-
 | Method | URI | 설명 | 요청 Body / Query Parameter |
 | :--- | :--- | :--- | :--- |
 | **POST** | `/studies` | **스터디 모집글 생성** | `title`, `content`, `max_members`, `location_name`, **`latitude`**, **`longitude`**, `tag_ids` |

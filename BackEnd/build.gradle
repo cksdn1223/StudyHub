@@ -47,11 +47,6 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.13.0'
 	// swagger
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
-	// QueryDSL: 검색 기능 구현을 위해 필수
-	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
-	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
-	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
 	// Hibernate Spatial: PostGIS의 GEOMETRY 타입을 JPA Entity에 매핑하기 위해 필수
 	implementation 'org.hibernate.orm:hibernate-spatial:6.4.4.Final' // hibernate-spatial -> hibernate.orm:hibernate-spatial

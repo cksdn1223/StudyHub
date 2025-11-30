@@ -1,4 +1,4 @@
-import { Bell, Bookmark, EllipsisVertical, Image as MoreVertical, Phone, Send, Video } from 'lucide-react';
+import { EllipsisVertical, Image as Send } from 'lucide-react';
 import Card from '../Card';
 import axios from 'axios';
 import { getHeaders } from '../../context/AxiosConfig';
