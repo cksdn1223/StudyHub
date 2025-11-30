@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem(TOKEN_KEY);
     setUser(null);
     showToast(message, type);
-  }, []);
+  }, [showToast]);
 
   const checkTokenExpiration = useCallback((token: string) => {
     try {

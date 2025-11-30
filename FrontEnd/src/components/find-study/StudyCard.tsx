@@ -48,7 +48,7 @@ function StudyCard(study: StudyList) {
         <h4 className="text-lg font-semibold text-gray-800 mb-2 hover:text-red-500 cursor-pointer">
           {study.title}
         </h4>
-        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{study.description}</p>
+        <p className="text-sm text-gray-600 mb-3 line-clamp-1">{study.description}</p>
 
         {/* 태그 목록 */}
         <div className="flex space-x-2 mb-3">
@@ -70,7 +70,7 @@ function StudyCard(study: StudyList) {
       </div>
 
       {/* 아바타 (임시) */}
-      <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0 self-start">
+      <div className="w-14 h-14 rounded-full bg-gray-300 flex-shrink-0 self-start">
         {/*  */}
       </div>
     </div>

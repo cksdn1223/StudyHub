@@ -49,6 +49,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
 };
 
 // 💡 커스텀 Hook: 컴포넌트에서 Toast 기능을 쉽게 사용하도록 합니다.
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (context === undefined) {

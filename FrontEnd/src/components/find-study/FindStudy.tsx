@@ -1,4 +1,4 @@
-
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StudyCard from './StudyCard';
 import { getHeaders } from '../../context/AxiosConfig';
@@ -13,10 +13,45 @@ const fetchStudyList = async () => {
 
 function FindStudy() {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [distanceFilter, setDistanceFilter] = useState<number | 'ALL'>(5);
+  const [sortOption, setSortOption] = useState<'latest' | 'distance' | 'popular'>('latest');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'RECRUITING' | 'FULL' | 'FINISHED'>('ALL');
+
   const { data, isLoading, error } = useQuery<StudyList[]>({
     queryKey: ['studyList'],
     queryFn: fetchStudyList,
   });
+
+
+  const filteredStudies = useMemo(() => {
+    if (!data) return [];
+
+    const normalizedTerm = searchTerm.trim().toLowerCase();
+    const filtered = data.filter((study) => {
+      const matchesDistance =
+        distanceFilter === 'ALL' || study.distanceKm <= distanceFilter;
+      const matchesStatus = statusFilter === 'ALL' || study.status === statusFilter;
+      const matchesSearch =
+        normalizedTerm === '' ||
+        study.title.toLowerCase().includes(normalizedTerm) ||
+        study.description.toLowerCase().includes(normalizedTerm) ||
+        study.tags.some((tag) => tag.toLowerCase().includes(normalizedTerm));
+
+      return matchesDistance && matchesStatus && matchesSearch;
+    });
+
+    return filtered.sort((a, b) => {
+      switch (sortOption) {
+        case 'distance':
+          return a.distanceKm - b.distanceKm;
+        case 'popular':
+          return b.memberCount - a.memberCount;
+        default:
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [data, distanceFilter, searchTerm, sortOption, statusFilter]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -49,47 +84,68 @@ function FindStudy() {
               type="text"
               placeholder="스터디 검색 (제목, 내용, 기술 스택)"
               className="flex-grow outline-none text-gray-700 placeholder-gray-400"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
             />
-            <button className="px-5 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 transition duration-150 ml-3">
-              검색
-            </button>
           </div>
 
           {/* 필터 및 정렬 */}
           <div className="flex justify-between items-center text-sm text-gray-600">
             <div className="flex space-x-4">
               {/* 거리 필터 */}
-              <div className="flex items-center cursor-pointer hover:text-red-500 transition duration-150">
-                <span className="text-red-500 font-semibold mr-1">5km 이내</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 ml-1">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                </svg>
-              </div>
+              <label className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition duration-150">
+                <span className="font-semibold text-red-500">거리</span>
+                <select
+                  className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400"
+                  value={distanceFilter}
+                  onChange={(event) =>
+                    setDistanceFilter(event.target.value === 'ALL' ? 'ALL' : Number(event.target.value))
+                  }
+                >
+                  <option value="5">5km 이내</option>
+                  <option value="10">10km 이내</option>
+                  <option value="20">20km 이내</option>
+                  <option value="50">50km 이내</option>
+                </select>
+              </label>
 
               <div className="text-gray-300">|</div>
 
               {/* 기준 필터 */}
-              <div className="flex items-center cursor-pointer hover:text-red-500 transition duration-150">
-                <span>최신순</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 ml-1">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                </svg>
-              </div>
+              <label className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition duration-150">
+                <span>정렬</span>
+                <select
+                  className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400"
+                  value={sortOption}
+                  onChange={(event) => setSortOption(event.target.value as 'latest' | 'distance' | 'popular')}
+                >
+                  <option value="latest">최신순</option>
+                  <option value="distance">가까운순</option>
+                  <option value="popular">인원 많은순</option>
+                </select>
+              </label>
 
               <div className="text-gray-300">|</div>
 
               {/* 모집 상태 필터 */}
-              <div className="flex items-center cursor-pointer hover:text-red-500 transition duration-150">
+              <label className="flex items-center space-x-2 cursor-pointer hover:text-red-500 transition duration-150">
                 <span>모집상태</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 ml-1">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                </svg>
-              </div>
+                <select
+                  className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400"
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}
+                >
+                  <option value="ALL">전체</option>
+                  <option value="RECRUITING">모집중</option>
+                  <option value="FULL">모집완료</option>
+                  <option value="FINISHED">활동종료</option>
+                </select>
+              </label>
             </div>
 
             {/* 총 개수 */}
             <div className="text-gray-500">
-              총 <span className="text-red-500 font-semibold">127개</span>의 스터디
+              총 <span className="text-red-500 font-semibold">{filteredStudies.length}</span>개의 스터디
             </div>
           </div>
 
@@ -97,26 +153,35 @@ function FindStudy() {
           <div className="flex space-x-2 mt-4 text-xs">
             <span className="text-gray-500 font-medium">인기 태그:</span>
             {['React', 'Spring', 'Node.js', 'Python', 'Java', 'TypeScript', 'Vue.js'].map(tag => (
-              <span key={tag} className="border border-gray-300 text-gray-700 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100 transition duration-150">
+              <button
+                key={tag}
+                type="button"
+                onClick={() => setSearchTerm(tag)}
+                className="border border-gray-300 text-gray-700 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-100 transition duration-150"
+              >
                 {tag}
-              </span>
+              </button>
             ))}
           </div>
         </section>
 
         {/* --- 3. 스터디 목록 섹션 --- */}
         <section>
-          {isLoading ? '로딩중...': error ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
+          {isLoading ? '로딩중...' : error ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
             <div className="border-t border-gray-200">
-              {data.map(study => (
-                <StudyCard key={study.id} {...study} />
-              ))}
+              {filteredStudies.length > 0 ? (
+                filteredStudies.map(study => (
+                  <StudyCard key={study.id} {...study} />
+                ))
+              ) : (
+                <p className="py-6 text-center text-gray-500">조건에 맞는 스터디가 없습니다.</p>
+              )}
             </div>
           }
         </section>
 
       </main>
-    </div>
+    </div >
   );
 }
 

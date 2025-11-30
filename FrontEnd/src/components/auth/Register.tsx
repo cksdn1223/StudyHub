@@ -5,7 +5,6 @@ import { useToast } from "../../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import axios from "axios";
-import { getHeaders } from "../../context/AxiosConfig";
 
 const NICKNAME_MIN_LENGTH = 2;
 
