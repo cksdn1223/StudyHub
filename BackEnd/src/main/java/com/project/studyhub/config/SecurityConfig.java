@@ -45,7 +45,8 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/auth/login",
                                 "/auth/register",
-                                "/vworld"
+                                "/vworld",
+                                "/ws-stomp/**"
                         ).permitAll()
                         // 나머지 모든 요청은 인증 필요
                         .anyRequest().authenticated()
