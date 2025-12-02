@@ -1,65 +1,114 @@
-import { EllipsisVertical, Image as Send } from 'lucide-react';
+import { EllipsisVertical, Send } from 'lucide-react';
 import Card from '../Card';
 import axios from 'axios';
 import { getHeaders } from '../../context/AxiosConfig';
-import { useQuery } from '@tanstack/react-query';
-import { MyStudyList } from '../../type';
-import { useEffect, useState } from 'react';
-
-
-
-type ChatMessage = {
-  id: number;
-  sender?: string;
-  time?: string;
-  text?: string;
-  fromMe?: boolean;
-  accent?: 'primary' | 'highlight';
-  attachment?: { name: string; size: string };
-  type?: 'date' | 'system';
-};
-const chatMessages: ChatMessage[] = [
-  { id: 100, type: 'date', text: '2024년 11월 26일' },
-  { id: 1, sender: '김현수', time: '오후 2:31', text: '안녕하세요! 다음 주 프로젝트 일정에 대해서 논의해보면 좋을 것 같습니다.', accent: 'primary' },
-  { id: 2, sender: '김현수', time: '오후 2:31', text: '현재 진행 상황을 공유하고 다음 단계를 계획해보죠!' },
-  { id: 3, sender: '김개발', time: '오후 2:35', text: '좋은 아이디어네요! 저도 참여하고 싶습니다.', fromMe: true, accent: 'highlight' },
-  { id: 4, sender: '박민지', time: '오후 2:42', text: '저희 팀 프로젝트 진행 상황 공유드릴게요!' },
-  {
-    id: 5,
-    sender: '박민지',
-    time: '오후 2:42',
-    text: 'React_프로젝트_계획서.pdf',
-    attachment: { name: 'React_프로젝트_계획서.pdf', size: '2.3 MB' },
-  },
-  { id: 6, sender: '박명희', time: '오후 3:15', text: '안녕하세요! 새로 참여하게 된 박명희입니다. 잘 부탁드립니다!' },
-];
-
-
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ChatMessage, MyStudyList } from '../../type';
+import { useEffect, useRef, useState } from 'react';
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const getData = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
   return response.data;
 }
-function StudyInfo() {
-  const { data, isLoading, error } = useQuery<MyStudyList[]>({
-    queryKey: ['myStudyList'],
-    queryFn: getData
-  })
+const getChatData = async (studyId: number) => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/${studyId}/messages`, getHeaders());
+  return response.data;
+}
 
+function StudyInfo() {
+  const [stompClient, setStompClient] = useState<Client | null>(null);
+  const [inputMessage, setInputMessage] = useState('');
+  const [selectStudy, setSelectStudy] = useState<MyStudyList | null>(null);
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  // 스터디 리스트 불러오는 useQuery
+  const { data = [], isLoading, error } = useQuery<MyStudyList[]>({
+    queryKey: ['myStudyList'],
+    queryFn: getData,
+    refetchOnWindowFocus: false,
+  })
+  // 기본 선택 스터디 첫번째로 만드는 useEffect
+  useEffect(() => {
+    if (data.length === 0) return;
+    setSelectStudy(data[0])
+  }, [data])
+  const selectedStudyId = selectStudy?.studyId;
+  // 채팅내역 불러오는 useQuery
+  const { data: chatList, isLoading: chatListLoading, error: chatListError } = useQuery<ChatMessage[]>({
+    queryKey: ['chatList', selectedStudyId],
+    queryFn: () => {
+      if (!selectedStudyId) {
+        throw new Error('studyId가 없습니다.');
+      }
+      return getChatData(selectedStudyId);
+    },
+    enabled: !!selectedStudyId,
+    refetchOnWindowFocus: false,
+  })
+  // 채팅창 드래그 자동스크롤 관리
+  useEffect(() => {
+    if (!messagesContainerRef.current) return;
+    const el = messagesContainerRef.current;
+    el.scrollTop = el.scrollHeight; 
+  }, [chatList]);
+  // 웹소켓 연결용 useEffect
+  useEffect(() => {
+    if (!selectedStudyId) return;
+    const client = new Client({
+      webSocketFactory: () => new SockJS("/ws-stomp"),
+      reconnectDelay: 5000,
+      onConnect: () => {
+        client.subscribe(`/sub/message/${selectedStudyId}`, (message) => {
+          const newMessage: ChatMessage = JSON.parse(message.body);
+          queryClient.setQueryData<ChatMessage[]>(
+            ["chatList", selectedStudyId],
+            (old) => (old ? [...old, newMessage] : [newMessage])
+          );
+        });
+      },
+    });
+    client.activate();
+    setStompClient(client);
+    return () => {
+      if (client.active) {
+        client.deactivate();
+      }
+    };
+  }, [selectedStudyId, queryClient]);
+  // 메시지 전송용 함수
+  const sendMessage = () => {
+    if (stompClient && stompClient.connected && inputMessage.trim() !== "") {
+      stompClient.publish({
+        destination: `/pub/message/${selectedStudyId}`,
+        body: JSON.stringify(
+          {
+            userId: user?.id,
+            content: inputMessage,
+          }),
+      });
+      setInputMessage('');
+    }
+  };
+
+  // 상태에 따라서 채팅 오른쪽 점 색이 바뀜
   const statusColorMap: Record<string, string> = {
     RECRUITING: 'bg-emerald-500',
     FULL: 'bg-yellow-400',
     FINISHED: 'bg-gray-400',
   };
-  const [selectStudy, setSelectStudy] = useState<MyStudyList>();
-  useEffect(() => {
-    if (!data) return;
-    setSelectStudy(data[0])
-  }, [data])
-
+  if (!user) return;
   if (isLoading) return <div>로딩중...</div>
   if (error) return <div>문제가 발생했습니다.. 관리자에게 문의해주세요.</div>
-  if (data && selectStudy) {
+  if (data && selectStudy && chatList) {
     return (
       <div className="bg-gray-50">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -101,15 +150,15 @@ function StudyInfo() {
             <Card className="flex flex-col min-h-[700px] max-h-[85vh] overflow-hidden">
               <div className="flex items-start justify-between pb-4 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-semibold">
-                    N
+                  <div className="w-11 h-11 rounded-xl bg-red-500 text-white flex items-center justify-center font-semibold">
+                    {selectStudy.title?.[0] ?? "?"}
                   </div>
                   <div>
                     <p className="text-lg font-bold text-gray-800">{selectStudy.title}</p>
                     <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                       <span>{selectStudy.address}</span>
                       <span>·</span>
-                      <span>{selectStudy.detailAddress}</span>
+                      <span>{selectStudy.detailAddress ? selectStudy.detailAddress : '세부 위치 없음'}</span>
                       <span>·</span>
                       <span>{selectStudy.detailLocation}</span>
                     </div>
@@ -117,61 +166,85 @@ function StudyInfo() {
                 </div>
               </div>
 
-              <div className="py-4 space-y-4 flex-1 overflow-y-auto">
-                {chatMessages.map((message) => {
-                  if (message.type === 'date') {
-                    return (
-                      <div key={message.id} className="flex justify-center">
-                        <div className="px-4 py-1 text-xs text-gray-500 bg-gray-100 rounded-full">
-                          {message.text}
-                        </div>
-                      </div>
-                    );
-                  }
+              <div
+                ref={messagesContainerRef}
+                className="py-4 space-y-4 flex-1 overflow-y-auto chat-scroll scroll-smooth"
+              >
+                {chatListLoading
+                  ? "로딩중입니다..."
+                  : chatListError
+                    ? "채팅내역을 불러오는데 실패했습니다.. 관리자에게 문의해주세요."
+                    : chatList.map((message, index) => {
+                      const isMine = message.senderId === user.id;
 
-                  const isMine = message.fromMe;
-                  const bubbleClasses = `
-                  max-w-[70%] rounded-2xl px-4 py-3 shadow-sm border
-                  bg-red-50 border-red-100 text-red-600
-                `;
+                      const formattedTime = new Intl.DateTimeFormat("ko-KR", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                        timeZone: "Asia/Seoul",
+                      }).format(new Date(message.sentAt));
 
-                  return (
-                    <div key={message.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-                      <div className="flex items-start gap-3 max-w-full">
-                        {/* 아이콘 */}
-                        {!isMine && (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-semibold">
-                            {message.sender?.[0] ?? '?'}
-                          </div>
-                        )}
-                        <div className={`space-y-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
-                          {/* 이름, 날짜 */}
+                      return (
+                        <div
+                          key={index}
+                          className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+                        >
+                          {/* 상대방일 때: 아바타 */}
                           {!isMine && (
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold text-gray-800">{message.sender}</p>
-                              <span className="text-xs text-gray-400">{message.time}</span>
+                            <div className="mr-2">
+                              <div className="w-10 h-10 rounded-2xl bg-blue-200 flex items-center justify-center text-white font-semibold text-sm">
+                                {message.senderNickname?.[0] ?? "?"}
+                              </div>
                             </div>
                           )}
-                          {/* 채팅내용 */}
-                          <div className={`${bubbleClasses}`}>
-                            <p className="text-sm text-gray-800">{message.text}</p>
+
+                          {/* 말풍선 + 이름/시간 영역 */}
+                          <div
+                            className={`flex flex-col ${isMine ? "items-end" : "items-start"
+                              } max-w-[70%]`}
+                          >
+                            {/* 상대방 이름 */}
+                            {!isMine && (
+                              <span className="text-xs text-gray-700 mb-1">
+                                {message.senderNickname}
+                              </span>
+                            )}
+
+                            {/* 말풍선 + 시간 한 줄 */}
+                            <div
+                              className={`flex items-end gap-1 ${isMine ? "flex-row" : "flex-row"
+                                }`}
+                            >
+                              {/* 내 메시지: 시간 - 말풍선(노랑) */}
+                              {/* 상대 메시지: 말풍선(흰색) - 시간 */}
+                              {isMine && (
+                                <span className="text-[11px] text-gray-500">
+                                  {formattedTime}
+                                </span>
+                              )}
+
+                              <div
+                                className={`rounded-xl px-3 py-2 shadow-sm ${isMine
+                                  ? "bg-yellow-300"
+                                  : "bg-white border border-gray-200"
+                                  }`}
+                              >
+                                <p className={`text-sm break-words font-medium ${isMine ? "text-gray-900" : "text-gray-900"}`}>
+                                  {message.content}
+                                </p>
+                              </div>
+
+                              {!isMine && (
+                                <span className="text-[11px] text-gray-500">
+                                  {formattedTime}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          {isMine && (
-                            <div className="text-right">
-                              <span className="text-xs text-gray-400">{message.time}</span>
-                            </div>
-                          )}
                         </div>
-                        {/* 내 아이콘 */}
-                        {isMine && (
-                          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 font-semibold">
-                            나
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    })}
+                <div ref={messagesEndRef}></div>
               </div>
               {/* 메시지 전송 구역 */}
               <div className="mt-auto border-t border-gray-100 pt-4 flex-shrink-0">
@@ -179,22 +252,30 @@ function StudyInfo() {
                   <div className="flex-1 flex items-center rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
                     <input
                       type="text"
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                       placeholder="메시지를 입력하세요..."
                       className="flex-1 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none"
                     />
                   </div>
                   <button
                     type="button"
+                    onClick={sendMessage}
                     className="p-3 rounded-xl bg-red-400 text-white hover:bg-red-500 shadow-sm"
                   >
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex items-center gap-3 mt-3 text-xs text-gray-500 flex-wrap">
-                  <span className="px-3 py-1 rounded-full bg-gray-100">예시 답장: 좋아요!</span>
-                  <span className="px-3 py-1 rounded-full bg-gray-100">감사합니다.</span>
-                  <span className="px-3 py-1 rounded-full bg-gray-100">안녕하세요.</span>
-                  <span className="px-3 py-1 rounded-full bg-gray-100">확인했습니다.</span>
+                <div className="flex items-center gap-3 mt-3 text-xs text-gray-900 font-sans flex-wrap">
+                  <span className="px-3 py-1 rounded-full bg-red-300 hover:cursor-pointer"
+                    onClick={() => setInputMessage('좋아요!')}>좋아요!</span>
+                  <span className="px-3 py-1 rounded-full bg-red-300 hover:cursor-pointer"
+                    onClick={() => setInputMessage('감사합니다.')}>감사합니다.</span>
+                  <span className="px-3 py-1 rounded-full bg-red-300 hover:cursor-pointer"
+                    onClick={() => setInputMessage('안녕하세요.')}>안녕하세요.</span>
+                  <span className="px-3 py-1 rounded-full bg-red-300 hover:cursor-pointer"
+                    onClick={() => setInputMessage('확인했습니다.')}>확인했습니다.</span>
                 </div>
               </div>
             </Card>

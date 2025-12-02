@@ -93,3 +93,10 @@ export type UserInfo = {
   description: string;
   address: string;
 }
+
+export type ChatMessage = {
+  senderId: number;
+  senderNickname: string;
+  content: string;
+  sentAt: string;
+}

@@ -6,6 +6,7 @@ import Footer from "../../Footer";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
+import { ArrowDown } from "lucide-react";
 
 const HEADER_HEIGHT = 80;
 
@@ -102,9 +103,7 @@ function MainPage() {
         </div>
 
         <div className="absolute bottom-8 z-20 cursor-pointer animate-fade-in delay-700" onClick={scrollToFeatures}>
-          <svg className="w-8 h-8 text-white animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
-          </svg>
+          <ArrowDown className="w-8 h-8 text-white animate-bounce" />
         </div>
       </div>
       <div ref={featureSectionRef} style={{backgroundColor:"#FAFAFA"}}>

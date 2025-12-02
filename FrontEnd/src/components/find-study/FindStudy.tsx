@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import StudyCard from './StudyCard';
 import Footer from '../../Footer';
 import { useStudyList } from '../../hooks/useStudyList';
+import { Search } from 'lucide-react';
 
 function FindStudy() {
   const navigate = useNavigate();
@@ -66,9 +67,9 @@ function FindStudy() {
           <section className="mb-10">
             {/* 검색 입력창 */}
             <div className="flex border border-gray-300 rounded-lg shadow-sm p-3 mb-6">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 mr-3 self-center">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-              </svg>
+              <Search
+                className="w-5 h-5 text-gray-500 mr-3 self-center"
+              />
               <input
                 type="text"
                 placeholder="스터디 검색 (제목, 내용, 기술 스택)"

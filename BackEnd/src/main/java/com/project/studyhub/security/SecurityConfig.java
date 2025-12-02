@@ -1,8 +1,5 @@
-package com.project.studyhub.config;
+package com.project.studyhub.security;
 
-import com.project.studyhub.security.AuthEntryPoint;
-import com.project.studyhub.security.AuthenticationFilter;
-import com.project.studyhub.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
