@@ -25,6 +25,7 @@ public class ChatService {
     private final StudyRepository studyRepository;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final ChatPresenceService chatPresenceService;
 
     public void handleChatMessage(Long studyId, ChatMessageRequest request) {
         Study study = studyRepository.findById(studyId)
@@ -34,20 +35,22 @@ public class ChatService {
 
         ChatMessage chatMessage = new ChatMessage(study, sender, request.content());
         chatMessageRepository.save(chatMessage);
-
         ChatMessageResponse send = ChatMessageResponse.from(chatMessage);
 
         study.getParticipants().stream()
                 .map(StudyParticipant::getUser)
                 .filter(receiver -> !receiver.getUserId().equals(sender.getUserId())) // 본인 제외
+                .filter(receiver -> !chatPresenceService.isInRoom(studyId, receiver.getUserId())) // 방 안 제외
                 .filter(receiver -> shouldNotify(receiver, study)) // 3분 쿨타임
                 .forEach(receiver -> {
-                    String message = "[" + study.getTitle().substring(0, 5) + "...]에 새 채팅 메시지가 도착했습니다.";
+                    String title = study.getTitle();
+                    String preview = title.length() > 5 ? title.substring(0, 5) + "..." : title;
+                    String message = "[" + preview + "]에 새 채팅 메시지가 도착했습니다.";
                     notificationRepository.save(
                             new Notification(study, receiver, sender, message, NotificationType.MESSAGE)
                     );
                 });
-        
+
         messagingTemplate.convertAndSend("/sub/message/" + studyId, send);
     }
 
