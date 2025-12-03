@@ -14,6 +14,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,17 +31,23 @@ public class ChatService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
         User sender = userRepository.findById(request.userId())
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+
         ChatMessage chatMessage = new ChatMessage(study, sender, request.content());
         chatMessageRepository.save(chatMessage);
+
         ChatMessageResponse send = ChatMessageResponse.from(chatMessage);
+
         study.getParticipants().stream()
                 .map(StudyParticipant::getUser)
                 .filter(receiver -> !receiver.getUserId().equals(sender.getUserId())) // 본인 제외
-                .forEach(receiver ->
-                        notificationRepository.save(
-                                new Notification(study, receiver, sender, request.content(), NotificationType.MESSAGE)
-                        )
-                );
+                .filter(receiver -> shouldNotify(receiver, study)) // 3분 쿨타임
+                .forEach(receiver -> {
+                    String message = "[" + study.getTitle().substring(0, 5) + "...]에 새 채팅 메시지가 도착했습니다.";
+                    notificationRepository.save(
+                            new Notification(study, receiver, sender, message, NotificationType.MESSAGE)
+                    );
+                });
+        
         messagingTemplate.convertAndSend("/sub/message/" + studyId, send);
     }
 
@@ -49,5 +56,16 @@ public class ChatService {
                 .stream()
                 .map(ChatMessageResponse::from)
                 .toList();
+    }
+
+//    헬퍼 메서드
+    private boolean shouldNotify(User receiver, Study study) {
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(3); //3분 쿨타임
+        return !notificationRepository.existsByReceiverAndStudyAndTypeAndCreatedAtAfter(
+                receiver,
+                study,
+                NotificationType.MESSAGE,
+                threshold
+        );
     }
 }
