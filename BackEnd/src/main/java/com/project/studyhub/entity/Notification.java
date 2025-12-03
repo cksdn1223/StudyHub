@@ -27,6 +27,10 @@ public class Notification {
     @JoinColumn(name = "receiver_id")
     private User receiver;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "sender_id")
+    private User sender;
+
     @Column(nullable = false)
     private String message;
 
@@ -38,12 +42,18 @@ public class Notification {
     @Column(length = 50)
     private NotificationType type;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "study_id")
+    private Study study;
+
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    public Notification(User receiver, String message, NotificationType type) {
+    public Notification(Study study, User receiver, User sender, String message, NotificationType type) {
+        this.study = study;
         this.receiver = receiver;
+        this.sender = sender;
         this.message = message;
         this.isRead = false;
         this.type = type;

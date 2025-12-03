@@ -17,7 +17,9 @@ public class StudyParticipantController {
     private final StudyParticipantService participantService;
 
     @PostMapping("/{studyId}")
-    public ResponseEntity<Void> createParticipant(@PathVariable Long studyId, Principal principal) {
+    public ResponseEntity<Void> createParticipant(
+            @PathVariable Long studyId,
+            Principal principal) {
         participantService.createParticipant(studyId, principal);
         return ResponseEntity.ok().build();
     }
