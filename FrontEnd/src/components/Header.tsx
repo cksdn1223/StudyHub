@@ -1,15 +1,18 @@
 import { Bell, BookOpenText, LogOut, MessageCircleCode, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useNotification } from "../context/NotificationContext";
 
 
 function Header() {
   const { user, isLoggedIn, logout } = useAuth();
   const location = useLocation();
+  const { unreadCount } = useNotification();
   const isMainPage = location.pathname === '/';
   const handleLogout = () => {
     logout("성공적으로 로그아웃 하였습니다.", "success");
   };
+
 
   return (
     <header className="flex justify-between items-center h-16 px-4 sm:px-6 md:px-8">
@@ -47,6 +50,20 @@ function Header() {
               <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150`}>
                 <Link to="/notifications">
                   <Bell />
+                  {/* 🔴 안 읽은 알림이 있을 때만 뱃지 표시 */}
+                  {unreadCount > 0 && (
+                    <span
+                      className="
+                      absolute -top-1 -right-1
+                      flex items-center justify-center
+                      min-w-[16px] h-[16px]
+                      rounded-full bg-red-500 text-white
+                      text-[10px] leading-none px-[3px]
+                      "
+                    >
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </li>
 

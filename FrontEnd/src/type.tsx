@@ -100,3 +100,23 @@ export type ChatMessage = {
   content: string;
   sentAt: string;
 }
+
+export type Notification = {
+  id: number,
+  message: string,
+  isRead: boolean,
+  type: "JOIN_REQUEST" | "REQUEST_ACCEPTED" | "REQUEST_REJECTED" | "MESSAGE",
+  studyId: number,
+  studyTitle: string,
+  senderId: number,
+  senderNickname: string,
+  createdAt: string
+}
+
+export type NotificationContextType = {
+  notifications: Notification[];
+  unreadCount: number;
+  addNotification: (n: Notification) => void;
+  markAsRead: (id: number) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+};
