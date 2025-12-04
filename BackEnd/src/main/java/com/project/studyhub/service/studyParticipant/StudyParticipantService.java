@@ -35,8 +35,7 @@ public class StudyParticipantService {
         if(studyParticipantRepository.existsByStudyAndUser(study,user))
             throw new ParticipantExistsException("이미 참여한 스터디입니다.");
         StudyParticipant studyParticipant = new StudyParticipant(study, user);
-        Notification notification = new Notification(study.getLeader(), "신청", NotificationType.JOIN_REQUEST);
-        notificationRepository.save(notification);
+        notificationRepository.save(new Notification(study, study.getLeader(), user,user.getNickname()+"님이 가입 요청을 보냈습니다.", NotificationType.JOIN_REQUEST));
         studyParticipantRepository.save(studyParticipant);
     }
 

@@ -1,10 +1,9 @@
-package com.project.studyhub.controller.websocket;
+package com.project.studyhub.controller.chat;
 
 import com.project.studyhub.dto.chat.ChatMessageRequest;
 import com.project.studyhub.dto.chat.ChatMessageResponse;
-import com.project.studyhub.service.websocket.ChatService;
+import com.project.studyhub.service.chat.ChatService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,22 +12,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 public class ChatController {
     private final ChatService chatService;
 
     @MessageMapping("/message/{studyId}")
     public void sendMassage(
             @DestinationVariable Long studyId,
-            @Payload ChatMessageRequest request,
-            Principal principal
+            @Payload ChatMessageRequest request
     ){
-        log.info("studyId = {}, msg = {}", studyId, request);
         chatService.handleChatMessage(studyId, request);
     }
 
