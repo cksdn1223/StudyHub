@@ -146,7 +146,7 @@ function StudyInfo() {
 
 
             {/* 중앙: 채팅 영역 */}
-            <Card className="flex flex-col min-h-[700px] max-h-[85vh] overflow-hidden">
+            <Card className="flex flex-col min-h-[80vh] max-h-[85vh] overflow-hidden">
               <div className="flex items-start justify-between pb-4 border-b border-gray-100 flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-red-500 text-white flex items-center justify-center font-semibold">

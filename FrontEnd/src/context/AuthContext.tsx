@@ -18,7 +18,7 @@ type AuthContextType = {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-const TOKEN_KEY = 'jwt';
+const TOKEN_KEY = 'studyhub_jwt';
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { showToast } = useToast();

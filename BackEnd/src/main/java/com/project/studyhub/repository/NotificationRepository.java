@@ -7,6 +7,7 @@ import com.project.studyhub.enums.NotificationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 //    이 사용자가 이 스터디에서 최근에 받은 알림이 있는지 체크하는 메서드
@@ -16,4 +17,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             NotificationType type,
             LocalDateTime createdAt
     );
+
+    List<Notification> findByReceiver_Id(Long receiverId);
 }

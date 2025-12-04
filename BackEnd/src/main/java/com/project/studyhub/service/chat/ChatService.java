@@ -49,6 +49,8 @@ public class ChatService {
                     notificationRepository.save(
                             new Notification(study, receiver, sender, message, NotificationType.MESSAGE)
                     );
+//                    messagingTemplate.convertAndSend("/sub/notification");
+//                    알람 쪽으로 보내는거 아직안햇음
                 });
 
         messagingTemplate.convertAndSend("/sub/message/" + studyId, send);
