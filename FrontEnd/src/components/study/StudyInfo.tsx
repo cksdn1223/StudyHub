@@ -8,7 +8,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const getData = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
