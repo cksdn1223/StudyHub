@@ -6,11 +6,11 @@ import com.project.studyhub.entity.User;
 import com.project.studyhub.repository.NotificationRepository;
 import com.project.studyhub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ProblemDetail;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -22,7 +22,8 @@ public class NotificationService {
     public List<NotificationResponse> getNotification(Principal principal) {
         User user = userRepository.findByEmail(principal.getName())
                         .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
-        List<Notification> notificationList = notificationRepository.findByReceiver_Id(user.getUserId());
+        List<Notification> notificationList = notificationRepository.findByReceiver_UserId(user.getUserId());
+        if(notificationList.isEmpty()) return new ArrayList<>();
         return notificationList.stream()
                 .map(NotificationResponse::from)
                 .toList();

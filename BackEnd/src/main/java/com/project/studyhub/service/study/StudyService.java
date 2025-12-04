@@ -75,6 +75,7 @@ public class StudyService {
         User me = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
         List<Study> studies = studyRepository.findMyStudiesWithMembers(me, ParticipantStatus.ACCEPTED);
+
         return studies.stream()
                 .map(this::toMyStudyResponseDto)
                 .collect(Collectors.toList());
@@ -84,34 +85,34 @@ public class StudyService {
     private MyStudyResponse toMyStudyResponseDto(Study study) {
 
         User leader = study.getLeader();
+        Long leaderId = leader.getUserId();
+
+        // 1. 리더 DTO
         StudyMemberDto leaderDto = StudyMemberDto.builder()
-                .userId(leader.getUserId())
+                .userId(leaderId)
                 .nickname(leader.getNickname())
                 .email(leader.getEmail())
                 .leader(true)
-                .status(null)
+                .status(null) // 리더는 status 개념 X
                 .build();
 
-        List<StudyMemberDto> participantDtos = study.getParticipants().stream()
-                .map(StudyParticipant::getUser)
-                .filter(user -> !user.getUserId().equals(leader.getUserId())) // 리더 중복 방지
-                .map(user -> {
-                    ParticipantStatus status = study.getParticipants().stream()
-                            .filter(sp -> sp.getUser().getUserId().equals(user.getUserId()))
-                            .findFirst()
-                            .map(StudyParticipant::getStatus)
-                            .orElse(null);
+        // 2. ACCEPTED 멤버들만 필터링 (리더는 participants에 포함 안 된다고 가정)
+        List<StudyMemberDto> acceptedMemberDtos = study.getParticipants().stream()
+                .filter(sp -> sp.getStatus() == ParticipantStatus.ACCEPTED) // ✅ ACCEPTED만
+                .map(sp -> {
+                    User u = sp.getUser();
                     return StudyMemberDto.builder()
-                            .userId(user.getUserId())
-                            .nickname(user.getNickname())
-                            .email(user.getEmail())
+                            .userId(u.getUserId())
+                            .nickname(u.getNickname())
+                            .email(u.getEmail())
                             .leader(false)
-                            .status(status)
+                            .status(sp.getStatus()) // 여기서는 항상 ACCEPTED
                             .build();
                 })
                 .collect(Collectors.toList());
 
-        participantDtos.add(0, leaderDto);
+        // 3. 리더 + ACCEPTED 멤버들 합치기 (리더를 맨 앞에)
+        acceptedMemberDtos.add(0, leaderDto);
 
         return MyStudyResponse.builder()
                 .studyId(study.getId())
@@ -125,7 +126,7 @@ public class StudyService {
                 .detailAddress(study.getDetailAddress())
                 .detailLocation(study.getDetailLocation())
                 .status(study.getStatus())
-                .members(participantDtos)
+                .members(acceptedMemberDtos)
                 .build();
     }
 

@@ -41,25 +41,20 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
             @Param("userGeom") Point userGeom
     );
 
-    /**
-     * 해당 유저가
-     *  - 스터디 리더이거나
-     *  - 승인된 참여자인 스터디 목록을 가져오고,
-     * 각 스터디의 participants 와 user 를 fetch join.
-     */
+
     @Query("""
-        select distinct s
-        from Study s
-        left join fetch s.participants p
-        left join fetch p.user u
-        where s.leader = :user
-           or exists (
-               select 1 from StudyParticipant sp
-               where sp.study = s
-                 and sp.user = :user
-                 and sp.status = :status
-           )
-        """)
+    select distinct s
+    from Study s
+    left join fetch s.participants p
+    left join fetch p.user u
+    where s.leader = :user
+       or exists (
+           select 1 from StudyParticipant sp
+           where sp.study = s
+             and sp.user = :user
+             and sp.status = :status
+       )
+    """)
     List<Study> findMyStudiesWithMembers(@Param("user") User user,
                                          @Param("status") ParticipantStatus status);
 }

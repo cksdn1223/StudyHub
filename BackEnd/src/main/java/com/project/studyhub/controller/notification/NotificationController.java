@@ -15,8 +15,9 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
 
-    @GetMapping("/notification")
+    @GetMapping("/notifications")
     public ResponseEntity<List<NotificationResponse>> getNotification(Principal principal) {
         return ResponseEntity.ok(notificationService.getNotification(principal));
     }
+
 }

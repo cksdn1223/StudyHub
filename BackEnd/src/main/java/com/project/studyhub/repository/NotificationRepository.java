@@ -18,5 +18,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
             LocalDateTime createdAt
     );
 
-    List<Notification> findByReceiver_Id(Long receiverId);
+    List<Notification> findByReceiver_UserId(Long receiverId);
 }
