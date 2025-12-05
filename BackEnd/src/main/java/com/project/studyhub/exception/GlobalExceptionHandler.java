@@ -105,7 +105,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 "CONFLICT",
-                "이미 사용중인 이메일 입니다.",
+                ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
@@ -117,12 +117,23 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 "CONFLICT",
-                "이미 신청한 스터디 입니다.",
+                ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(MemberMaxException.class)
+    public ResponseEntity<ErrorResponseRecord> handleRegisterException(MemberMaxException ex, WebRequest request) {
+        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "CONFLICT",
+                "스터디가 가득 찼습니다.",
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
+    }
 
 
 

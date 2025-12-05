@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 사용자의 스터디 참여 정보를 관리하는 엔티티.
@@ -36,6 +37,7 @@ public class StudyParticipant {
 
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
+    @Setter
     private ParticipantStatus status;
 
     public StudyParticipant(Study study, User user) {

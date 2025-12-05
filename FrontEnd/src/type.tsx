@@ -121,3 +121,11 @@ export type NotificationContextType = {
   markAllAsRead: () => Promise<void>;
   removeNotification: (id: number) => void | Promise<void>
 };
+
+export type ParticipantStatus = "PENDING" | "ACCEPTED" | "REJECTED"
+
+
+export type ParticipantRequest = {
+  userId: number,
+  status: ParticipantStatus
+}

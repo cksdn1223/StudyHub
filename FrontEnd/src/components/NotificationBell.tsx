@@ -1,37 +1,46 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
-import type { Notification } from "../type";
+import type { Notification, ParticipantStatus } from "../type";
 import { useNotification } from "../context/NotificationContext";
 import { useMyStudy } from "../context/MyStudyContext";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
+import axios from "axios";
+import { getHeaders } from "../context/AxiosConfig";
 
-
+const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {
+  await axios.put(`${import.meta.env.VITE_BASE_URL}/participant/${studyId}`, {
+    userId: senderId,
+    status: status
+  }, getHeaders())
+}
 
 function NotificationBell() {
   const { notifications, markAsRead, markAllAsRead, removeNotification } = useNotification();
   const [open, setOpen] = useState(false);
+  const { showToast } = useToast();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { myStudyList, setSelectStudy } = useMyStudy();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const onClickNotification = (n: Notification) => {
-    if (location.pathname !== "/chat") navigate("/chat");
-    if (n.type === "MESSAGE") setSelectStudy(myStudyList.find(study => study.studyId === n.studyId) || myStudyList[0])
-    else if (n.type === "JOIN_REQUEST") {
-    //TODO 참여 쪽으로 넘어가게
-      console.log('join_request')
+    if (n.type === "MESSAGE" && location.pathname !== "/chat") {
+      navigate("/chat");
+      setSelectStudy(myStudyList.find(study => study.studyId === n.studyId) || myStudyList[0])
     }
     if (!n.isRead) markAsRead(n.id);
   };
   const handleAccept = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
-    if (!n.isRead) markAsRead(n.id);
-    console.log("가입 요청 수락:", n);
+    participantStatusChange(n.studyId, n.senderId, "ACCEPTED")
+    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5)+'...' : n.studyTitle} 가입을 수락하셨습니다.`, "info")
+    removeNotification(n.id);
   };
   const handleReject = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
-    if (!n.isRead) markAsRead(n.id);
-    console.log("가입 요청 거절:", n);
+    participantStatusChange(n.studyId, n.senderId, "REJECTED")
+    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5)+'...' : n.studyTitle} 가입을 거절하셨습니다.`, "info")
+    removeNotification(n.id);
   };
   const handleDelete = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
@@ -135,7 +144,7 @@ function NotificationBell() {
                 <button
                   key={n.id}
                   onClick={() => onClickNotification?.(n)}
-                  className={`w-full text-left px-4 py-3 flex gap-3 hover:bg-gray-50 transition ${!n.isRead ? "bg-indigo-50/60" : ""
+                  className={`w-full text-left px-4 py-3 flex gap-3 rounded-xl hover:bg-gray-50 transition ${!n.isRead ? "bg-indigo-50/60" : ""
                     }`}
                 >
 
@@ -160,13 +169,13 @@ function NotificationBell() {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
-                        <button
+                        {n.type !== "JOIN_REQUEST" && <button
                           type="button"
                           onClick={(e) => handleDelete(e, n)}
                           className=" text-gray-300 w-4 h-4 hover:text-red-500"
                         >
                           ✕
-                        </button>
+                        </button>}
                       </span>
                     </div>
 

@@ -1,12 +1,11 @@
 package com.project.studyhub.controller.studyParticipant;
 
+import com.project.studyhub.dto.participant.StudyParticipantRequest;
+import com.project.studyhub.entity.StudyParticipant;
 import com.project.studyhub.service.studyParticipant.StudyParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -23,4 +22,13 @@ public class StudyParticipantController {
         participantService.createParticipant(studyId, principal);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{studyId}")
+    public ResponseEntity<Void> participantStatusChange(
+            @PathVariable Long studyId,
+            @RequestBody StudyParticipantRequest request) {
+        participantService.participantStatusChange(studyId, request);
+        return ResponseEntity.ok().build();
+    }
+
 }

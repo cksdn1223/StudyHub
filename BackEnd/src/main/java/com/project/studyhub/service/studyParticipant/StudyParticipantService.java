@@ -1,11 +1,14 @@
 package com.project.studyhub.service.studyParticipant;
 
 import com.project.studyhub.dto.notification.NotificationResponse;
+import com.project.studyhub.dto.participant.StudyParticipantRequest;
 import com.project.studyhub.entity.Notification;
 import com.project.studyhub.entity.Study;
 import com.project.studyhub.entity.StudyParticipant;
 import com.project.studyhub.entity.User;
 import com.project.studyhub.enums.NotificationType;
+import com.project.studyhub.enums.ParticipantStatus;
+import com.project.studyhub.exception.MemberMaxException;
 import com.project.studyhub.exception.ParticipantExistsException;
 import com.project.studyhub.exception.ResourceNotFoundException;
 import com.project.studyhub.repository.NotificationRepository;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 
@@ -46,6 +50,28 @@ public class StudyParticipantService {
                 NotificationResponse.from(notification));
     }
 
-    // TODO: Patch하는 엔드포인트 만들고 PENDING 대기, ACCEPTED 승인, REJECTED 거절 / 변경가능하게 만들기
+    @Transactional
+    public void participantStatusChange(Long studyId, StudyParticipantRequest request) {
+        StudyParticipant studyParticipant = studyParticipantRepository.findByStudy_IdAndUser_UserId(studyId, request.userId())
+                .orElseThrow(()-> new ResourceNotFoundException("해당 신청을 찾을 수 없습니다."));
+        if(request.status().equals(ParticipantStatus.ACCEPTED)){
+            Study study = studyParticipant.getStudy();
+            if(study.getMemberCount() < study.getMaxMembers()) {
+                study.addMemberCount();
+                User receiver = userRepository.findById(request.userId())
+                                .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+                Notification notification = new Notification(study,receiver, study.getLeader(), String.format(
+                        "[%s] 스터디 가입 요청이 수락되었습니다.",
+                        study.getTitle()
+                ), NotificationType.REQUEST_ACCEPTED);
+                notificationRepository.save(notification);
+                messagingTemplate.convertAndSend(
+                        "/sub/notification/" + receiver.getUserId(),
+                        NotificationResponse.from(notification));
+            }
+            else throw new MemberMaxException("이미 가득 찬 스터디입니다.");
+        }
+        studyParticipant.setStatus(request.status());
+    }
     // TODO: study 인원수 가득차거나 비슷해지면 승인해도 거절되고 study status 바꾸기 모집중(RECRUITING), 모집완료(FULL), 활동종료(FINISHED)
 }

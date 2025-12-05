@@ -38,6 +38,7 @@ public class NotificationService {
         notification.markAsRead();
     }
 
+    @Transactional
     public void readAllNotification(Principal principal) {
         User receiver = userRepository.findByEmail(principal.getName())
                 .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
@@ -45,6 +46,7 @@ public class NotificationService {
         notification.stream().filter(noti-> !noti.isRead()).forEach(Notification::markAsRead);
     }
 
+    @Transactional
     public void deleteNotification(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(()->new ResourceNotFoundException("해당 알림을 찾을 수 없습니다. "));

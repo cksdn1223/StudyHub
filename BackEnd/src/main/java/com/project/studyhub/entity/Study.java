@@ -83,4 +83,11 @@ public class Study {
         StudyTag studyTag = StudyTag.createStudyTag(this, tag);
         this.studyTags.add(studyTag);
     }
+
+    public void addMemberCount() {
+        if(this.memberCount < this.maxMembers) this.memberCount++;
+    }
+    public void reduceMemberCount() {
+        if(this.memberCount > 0) this.memberCount--;
+    }
 }

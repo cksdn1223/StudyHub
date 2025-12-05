@@ -217,6 +217,7 @@ function CreateStudy() {
                       <input
                         type="number"
                         min="1"
+                        disabled
                         id='memberCount'
                         onChange={handleChange}
                         value={studyData.memberCount}
