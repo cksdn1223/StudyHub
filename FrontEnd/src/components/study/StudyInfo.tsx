@@ -3,16 +3,14 @@ import Card from '../Card';
 import axios from 'axios';
 import { getHeaders } from '../../context/AxiosConfig';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChatMessage, MyStudyList } from '../../type';
+import { ChatMessage } from '../../type';
 import { useEffect, useRef, useState } from 'react';
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useAuth } from '../../context/AuthContext';
+import { useMyStudy } from '../../context/MyStudyContext';
 
-const getData = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
-  return response.data;
-}
+
 const getChatData = async (studyId: number) => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/${studyId}/messages`, getHeaders());
   return response.data;
@@ -21,8 +19,6 @@ const getChatData = async (studyId: number) => {
 function StudyInfo() {
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const [inputMessage, setInputMessage] = useState('');
-  const [selectStudy, setSelectStudy] = useState<MyStudyList | null>(null);
-
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -30,16 +26,12 @@ function StudyInfo() {
   const queryClient = useQueryClient();
 
   // 스터디 리스트 불러오는 useQuery
-  const { data = [], isLoading, error } = useQuery<MyStudyList[]>({
-    queryKey: ['myStudyList'],
-    queryFn: getData,
-    refetchOnWindowFocus: false,
-  })
+  const { myStudyList: data, isLoading, error, selectStudy, setSelectStudy } = useMyStudy();
   // 기본 선택 스터디 첫번째로 만드는 useEffect
   useEffect(() => {
     if (data.length === 0) return;
-    setSelectStudy(data[0])
-  }, [data])
+    else if(selectStudy === null) setSelectStudy(data[0])
+  }, [data, setSelectStudy, selectStudy])
   const selectedStudyId = selectStudy?.studyId;
   // 채팅내역 불러오는 useQuery
   const { data: chatList, isLoading: chatListLoading, error: chatListError } = useQuery<ChatMessage[]>({

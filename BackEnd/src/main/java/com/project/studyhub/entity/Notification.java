@@ -58,4 +58,8 @@ public class Notification {
         this.isRead = false;
         this.type = type;
     }
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }

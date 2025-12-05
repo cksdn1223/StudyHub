@@ -1,13 +1,12 @@
-import { Bell, BookOpenText, LogOut, MessageCircleCode, Search } from "lucide-react";
+import { BookOpenText, LogOut, MessageCircleCode, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useNotification } from "../context/NotificationContext";
+import NotificationBell from "./NotificationBell";
 
 
 function Header() {
   const { user, isLoggedIn, logout } = useAuth();
   const location = useLocation();
-  const { unreadCount } = useNotification();
   const isMainPage = location.pathname === '/';
   const handleLogout = () => {
     logout("성공적으로 로그아웃 하였습니다.", "success");
@@ -29,42 +28,26 @@ function Header() {
           {isLoggedIn ? (
             <>
               {/* 로그아웃 아이콘 */}
-              <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 `}
+              <li className={`relative p-2 rounded-full hover:bg-gray-100 cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 `}
                 onClick={handleLogout}>
                 <LogOut />
               </li>
               {/* 찾기 아이콘 */}
-              <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 `}>
+              <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 relative p-2 rounded-full hover:bg-gray-100`}>
                 <Link to={"/find"}>
                   <Search />
                 </Link>
               </li>
               {/* 채팅 아이콘 */}
-              <li className={`hover:text-red-400 ${isMainPage ? "text-white" : 'text-neutral-500'} transition duration-150 cursor-pointer text-sm sm:text-base hidden sm:block`}>
+              <li className={`hover:text-red-400 ${isMainPage ? "text-white" : 'text-neutral-500'} transition duration-150 cursor-pointer text-sm sm:text-base hidden sm:block relative p-2 rounded-full hover:bg-gray-100`}>
                 <Link to="/chat">
                   <MessageCircleCode />
                 </Link>
               </li>
 
               {/* 알림 아이콘 */}
-              <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150`}>
-                <Link to="/notifications">
-                  <Bell />
-                  {/* 🔴 안 읽은 알림이 있을 때만 뱃지 표시 */}
-                  {unreadCount > 0 && (
-                    <span
-                      className="
-                      absolute -top-1 -right-1
-                      flex items-center justify-center
-                      min-w-[16px] h-[16px]
-                      rounded-full bg-red-500 text-white
-                      text-[10px] leading-none px-[3px]
-                      "
-                    >
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </Link>
+              <li className={`${isMainPage ? "text-white" : 'text-neutral-500'} transition duration-150`}>
+                <NotificationBell />
               </li>
 
               {/* 내이름 (프로필) 영역 */}
@@ -76,7 +59,7 @@ function Header() {
                     alt="프로필 이미지"
                   />
                   <span className={`ml-2 ${isMainPage ? 'text-white' : 'text-neutral-500'} group-hover:text-red-400 font-medium text-sm sm:text-base hidden md:inline`}>
-                    {user?.nickname}
+                    {user?.nickname || "사용자"}
                   </span>
                 </Link>
               </li>

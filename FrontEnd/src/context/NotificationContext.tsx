@@ -2,15 +2,17 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { Notification, NotificationContextType } from "../type";
 import { getHeaders } from "./AxiosConfig";
+import { useAuth } from "./AuthContext";
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
 export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-
+  const { isLoggedIn } = useAuth();
   // 🔹 1) 처음 진입 시 백엔드에서 알림 불러오기
   useEffect(() => {
+    if (!isLoggedIn) return;
     const fetchInitial = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/notifications`, getHeaders());
@@ -21,7 +23,7 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
       }
     };
     fetchInitial();
-  }, []);
+  }, [isLoggedIn]);
 
   // 🔹 2) 웹소켓으로 받은 새 알림 추가할 때 사용
   const addNotification = (n: Notification) => {
@@ -34,9 +36,9 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   // 🔹 3) 개별 읽음 처리
   const markAsRead = async (id: number) => {
     try {
-      await axios.put(`/api/notifications/${id}/read`);
+      await axios.put(`${import.meta.env.VITE_BASE_URL}/notifications/${id}`, null, getHeaders());
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
       setUnreadCount((prev) => Math.max(prev - 1, 0));
     } catch (e) {
@@ -47,11 +49,34 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   // 🔹 4) 전체 읽음 처리
   const markAllAsRead = async () => {
     try {
-      await axios.put(`/api/notifications/read-all`);
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      await axios.put(`${import.meta.env.VITE_BASE_URL}/notifications`, null, getHeaders());
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (e) {
       console.error("알림 전체 읽음 처리 실패", e);
+    }
+  };
+
+  // 5. 알람 삭제
+  const removeNotification = async (id: number) => {
+    try {
+      await axios.delete(
+        `${import.meta.env.VITE_BASE_URL}/notifications/${id}`,
+        getHeaders()
+      );
+
+      setNotifications((prev) => {
+        const target = prev.find((n) => n.id === id);
+        const next = prev.filter((n) => n.id !== id);
+
+        if (target && !target.isRead) {
+          setUnreadCount((prevCount) => Math.max(prevCount - 1, 0));
+        }
+
+        return next;
+      });
+    } catch (e) {
+      console.error("알림 삭제 실패", e);
     }
   };
 
@@ -63,6 +88,7 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
         addNotification,
         markAsRead,
         markAllAsRead,
+        removeNotification
       }}
     >
       {children}
