@@ -34,14 +34,14 @@ public class StudyParticipantService {
 
     public void createParticipant(Long studyId, Principal principal) {
         Study study = studyRepository.findById(studyId)
-                .orElseThrow(()-> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
         User sender = userRepository.findByEmail(principal.getName())
-                .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
         // 기본 대기중 상태
-        if(studyParticipantRepository.existsByStudyAndUser(study, sender))
+        if (studyParticipantRepository.existsByStudyAndUser(study, sender))
             throw new ParticipantExistsException("이미 참여한 스터디입니다.");
         StudyParticipant studyParticipant = new StudyParticipant(study, sender);
-        Notification notification = new Notification(study, study.getLeader(), sender, sender.getNickname()+"님이 가입 요청을 보냈습니다. ["+study.getTitle()+"]", NotificationType.JOIN_REQUEST);
+        Notification notification = new Notification(study, study.getLeader(), sender, sender.getNickname() + "님이 가입 요청을 보냈습니다. [" + study.getTitle() + "]", NotificationType.JOIN_REQUEST);
         studyParticipantRepository.save(studyParticipant);
         notificationRepository.save(notification);
 
@@ -53,14 +53,14 @@ public class StudyParticipantService {
     @Transactional
     public void participantStatusChange(Long studyId, StudyParticipantRequest request) {
         StudyParticipant studyParticipant = studyParticipantRepository.findByStudy_IdAndUser_UserId(studyId, request.userId())
-                .orElseThrow(()-> new ResourceNotFoundException("해당 신청을 찾을 수 없습니다."));
-        if(request.status().equals(ParticipantStatus.ACCEPTED)){
+                .orElseThrow(() -> new ResourceNotFoundException("해당 신청을 찾을 수 없습니다."));
+        if (request.status().equals(ParticipantStatus.ACCEPTED)) {
             Study study = studyParticipant.getStudy();
-            if(study.getMemberCount() < study.getMaxMembers()) {
+            if (study.getMemberCount() < study.getMaxMembers()) {
                 study.addMemberCount();
                 User receiver = userRepository.findById(request.userId())
-                                .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
-                Notification notification = new Notification(study,receiver, study.getLeader(), String.format(
+                        .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+                Notification notification = new Notification(study, receiver, study.getLeader(), String.format(
                         "[%s] 스터디 가입 요청이 수락되었습니다.",
                         study.getTitle()
                 ), NotificationType.REQUEST_ACCEPTED);
@@ -68,8 +68,19 @@ public class StudyParticipantService {
                 messagingTemplate.convertAndSend(
                         "/sub/notification/" + receiver.getUserId(),
                         NotificationResponse.from(notification));
-            }
-            else throw new MemberMaxException("이미 가득 찬 스터디입니다.");
+            } else throw new MemberMaxException("이미 가득 찬 스터디입니다.");
+        } else if (request.status().equals(ParticipantStatus.REJECTED)) {
+            Study study = studyParticipant.getStudy();
+            User receiver = userRepository.findById(request.userId())
+                    .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+            Notification notification = new Notification(study, receiver, study.getLeader(), String.format(
+                    "[%s] 스터디 가입 요청이 거절되었습니다.",
+                    study.getTitle()
+            ), NotificationType.REQUEST_REJECTED);
+            notificationRepository.save(notification);
+            messagingTemplate.convertAndSend(
+                    "/sub/notification/" + receiver.getUserId(),
+                    NotificationResponse.from(notification));
         }
         studyParticipant.setStatus(request.status());
     }
