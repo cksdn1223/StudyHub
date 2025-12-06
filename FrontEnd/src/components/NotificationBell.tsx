@@ -24,22 +24,24 @@ function NotificationBell() {
   const { myStudyList, setSelectStudy } = useMyStudy();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
   const onClickNotification = (n: Notification) => {
-    if (n.type === "MESSAGE" && location.pathname !== "/chat") {
-      navigate("/chat");
-      setSelectStudy(myStudyList.find(study => study.studyId === n.studyId) || myStudyList[0])
+    if (n.type === "MESSAGE") {
+      const targetStudy =
+        myStudyList.find((s) => s.studyId === n.studyId) ?? myStudyList[0];
+      setSelectStudy(targetStudy);
+      if (location.pathname !== "/chat") navigate("/chat");
     }
     if (!n.isRead) markAsRead(n.id);
   };
   const handleAccept = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
     participantStatusChange(n.studyId, n.senderId, "ACCEPTED")
-    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5)+'...' : n.studyTitle} 가입을 수락하셨습니다.`, "info")
+    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 수락하셨습니다.`, "info")
     removeNotification(n.id);
   };
   const handleReject = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
     participantStatusChange(n.studyId, n.senderId, "REJECTED")
-    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5)+'...' : n.studyTitle} 가입을 거절하셨습니다.`, "info")
+    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 거절하셨습니다.`, "info")
     removeNotification(n.id);
   };
   const handleDelete = (e: React.MouseEvent, n: Notification) => {
@@ -144,8 +146,8 @@ function NotificationBell() {
                 <div
                   key={n.id}
                   onClick={() => onClickNotification?.(n)}
-                  className={`w-full text-left px-4 py-3 flex gap-3 rounded-xl hover:bg-gray-50 transition ${!n.isRead ? "bg-indigo-50/60" : ""
-                    }`}
+                  className={`w-full text-left px-4 py-3 flex gap-3 rounded-xl hover:bg-gray-50 transition hover:cursor-pointer
+                    ${!n.isRead ? "bg-indigo-50/60" : ""}`}
                 >
 
                   {/* 왼쪽 점/타입 */}

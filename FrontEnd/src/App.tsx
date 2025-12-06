@@ -5,7 +5,7 @@ import FindStudy from './components/find-study/FindStudy';
 import CreateStudy from './components/create-study/CreateStudy';
 import AuthPage from './components/auth/AuthPage';
 import StudyDetail from './components/study-detail/StudyDetail';
-import StudyInfo from './components/study/StudyInfo';
+import Study from './components/study-info/Study';
 import NotificationSocketListener from './components/NotificationSocketListener';
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
         />
         <Route
           path="/chat"
-          element={<LayoutWrapper><StudyInfo /></LayoutWrapper>}
+          element={<LayoutWrapper><Study /></LayoutWrapper>}
         />
         <Route
           path="/create"

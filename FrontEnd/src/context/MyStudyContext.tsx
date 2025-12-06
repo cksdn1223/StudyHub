@@ -1,7 +1,7 @@
 // src/context/MyStudyContext.tsx
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { MyStudyList } from "../type"; // 경로 맞게 수정
+import type { ChatMessage, MyStudyList } from "../type"; // 경로 맞게 수정
 import axios from "axios";
 import { getHeaders } from "./AxiosConfig";
 
@@ -9,6 +9,9 @@ type MyStudyContextValue = {
   myStudyList: MyStudyList[];
   isLoading: boolean;
   error: unknown;
+  chatList: ChatMessage[];
+  chatListLoading: boolean;
+  chatListError: unknown;
   selectStudy: MyStudyList | null;
   setSelectStudy: (study: MyStudyList | null) => void;
 };
@@ -17,6 +20,10 @@ const MyStudyContext = createContext<MyStudyContextValue | null>(null);
 
 const getData = async () => {
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
+  return response.data;
+}
+const getChatData = async (studyId: number) => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/${studyId}/messages`, getHeaders());
   return response.data;
 }
 
@@ -32,6 +39,24 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
     queryFn: getData,
     refetchOnWindowFocus: false,
   });
+  useEffect(() => {
+    if (!data.length) return;
+    if (!selectStudy) {
+      setSelectStudy(data[0]);
+    }
+  }, [data, selectStudy]);
+  const selectedStudyId = selectStudy?.studyId;
+  const { data: chatList = [], isLoading: chatListLoading, error: chatListError } = useQuery<ChatMessage[]>({
+      queryKey: ['chatList', selectedStudyId],
+      queryFn: () => {
+        if (!selectedStudyId) {
+          throw new Error('studyId가 없습니다.');
+        }
+        return getChatData(selectedStudyId);
+      },
+      enabled: !!selectedStudyId,
+      refetchOnWindowFocus: false,
+    })
 
   return (
     <MyStudyContext.Provider
@@ -39,6 +64,9 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
         myStudyList: data,
         isLoading,
         error,
+        chatList,
+        chatListLoading,
+        chatListError,
         selectStudy,
         setSelectStudy,
       }}
