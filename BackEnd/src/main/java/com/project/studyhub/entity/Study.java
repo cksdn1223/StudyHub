@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.locationtech.jts.geom.Point;
 
 import java.time.LocalDateTime;
@@ -33,8 +34,10 @@ public class Study {
     @Column(nullable = false)
     private Integer maxMembers;
 
-    @Column(nullable = false)
+    @Formula("(select count(sp.user_id) + 1 from study_participant sp " +
+            "where sp.study_id = id and sp.status = 'ACCEPTED')")
     private Integer memberCount;
+
     @Column(nullable = false)
     private String frequency;
     @Column(nullable = false)
@@ -63,11 +66,10 @@ public class Study {
     @OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudyParticipant> participants = new ArrayList<>();
 
-    public Study(String title, String description, Integer maxMembers, Integer memberCount, String frequency, String duration, String address, String detailAddress, String detailLocation, Point geom, User leader) {
+    public Study(String title, String description, Integer maxMembers, String frequency, String duration, String address, String detailAddress, String detailLocation, Point geom, User leader) {
         this.title = title;
         this.description = description;
         this.maxMembers = maxMembers;
-        this.memberCount = memberCount;
         this.frequency = frequency;
         this.duration = duration;
         this.address = address;
@@ -82,12 +84,5 @@ public class Study {
     public void addStudyTag(Tag tag) {
         StudyTag studyTag = StudyTag.createStudyTag(this, tag);
         this.studyTags.add(studyTag);
-    }
-
-    public void addMemberCount() {
-        if(this.memberCount < this.maxMembers) this.memberCount++;
-    }
-    public void reduceMemberCount() {
-        if(this.memberCount > 0) this.memberCount--;
     }
 }

@@ -3,16 +3,47 @@ import Card from '../Card';
 import { useState } from 'react';
 import { useMyStudy } from '../../context/MyStudyContext';
 import { useAuth } from '../../context/AuthContext';
+import { participantStatusChange } from '../NotificationBell';
+import { Member, MyStudyList } from '../../type';
+import { useToast } from '../../context/ToastContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 function StudyInfo() {
   const [openMemberId, setOpenMemberId] = useState<number | null>(null);
   const { selectStudy } = useMyStudy();
+  const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { showToast } = useToast();
   if (!user || !selectStudy) return;
   const isLeader = selectStudy?.members.find(member => member.leader)?.userId === user.id;
 
-  const handleKick = (studyId, userId) => {
-    console.log(studyId, userId)
+  const handleKick = async (study: MyStudyList, sender: Member) => {
+    // queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
+    queryClient.setQueryData<MyStudyList[]>(["myStudyList"], (old) =>
+      old
+        ? old.map((s) =>
+          s.studyId === study.studyId
+            ? {
+              ...s,
+              members: s.members.filter((m) => m.userId !== sender.userId),
+              memberCount: s.memberCount - 1,
+            }
+            : s
+        )
+        : old
+    );
+    try {
+      await participantStatusChange(study.studyId, sender.userId, "BAN");
+      showToast(
+        `${sender.nickname}님을 ${study.title.length > 5 ? study.title.substring(0, 5) + "..." : study.title
+        }에서 강퇴하셨습니다.`,
+        "info"
+      );
+      queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
+    } catch (e) {
+      showToast("강퇴 처리 중 문제가 발생했습니다.", "error");
+      queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
+    }
   }
   return (
     <>
@@ -77,7 +108,7 @@ function StudyInfo() {
                     <button
                       type="button"
                       className="w-full px-3 py-2 text-sm text-red-500 rounded-xl font-semibold text-center bg-white hover:bg-red-50 z-20"
-                    onClick={() => handleKick(selectStudy.studyId, member.userId)}
+                      onClick={() => handleKick(selectStudy, member)}
                     >
                       강퇴하기
                     </button>

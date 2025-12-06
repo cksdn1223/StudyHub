@@ -20,7 +20,12 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
                     s.title,
                     s.description,
                     s.max_members AS maxMembers,
-                    s.member_count AS memberCount,
+                    (
+                       SELECT COUNT(sp.user_id) + 1
+                       FROM study_participant sp
+                       WHERE sp.study_id = s.id
+                         AND sp.status = 'ACCEPTED'
+                    ) AS memberCount,
                     s.frequency,
                     s.duration,
                     s.address,

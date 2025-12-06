@@ -62,6 +62,14 @@ export type StudyList = {
   formattedCreatedAt: string;
 }
 
+export type Member = {
+  email: string;
+  leader: boolean;
+  nickname: string;
+  status: string | null;
+  userId: number;
+}
+
 export type MyStudyList = {
   address: string;
   description: string;
@@ -70,20 +78,11 @@ export type MyStudyList = {
   duration: string;
   frequency: string;
   maxMembers: string;
-  memberCount: string;
-  members: [
-    member:{
-      email: string;
-      leader: boolean;
-      nickname: string;
-      status: string | null;
-      userId: number
-    }
-  ]
+  memberCount: number;
+  members: Member[];
   status: string;
   studyId: number;
   title: string;
-
 }
 
 export type UserInfo = {
@@ -105,7 +104,7 @@ export type Notification = {
   id: number,
   message: string,
   isRead: boolean,
-  type: "JOIN_REQUEST" | "REQUEST_ACCEPTED" | "REQUEST_REJECTED" | "MESSAGE",
+  type: "JOIN_REQUEST" | "REQUEST_ACCEPTED" | "REQUEST_REJECTED" | "MESSAGE" | "BAN",
   studyId: number,
   studyTitle: string,
   senderId: number,
@@ -122,10 +121,18 @@ export type NotificationContextType = {
   removeNotification: (id: number) => void | Promise<void>
 };
 
-export type ParticipantStatus = "PENDING" | "ACCEPTED" | "REJECTED"
+export type ParticipantStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "BAN"
 
 
 export type ParticipantRequest = {
   userId: number,
   status: ParticipantStatus
 }
+
+export type User = {
+  id: number;
+  email: string;
+  nickname: string;
+  role: string;
+}
+

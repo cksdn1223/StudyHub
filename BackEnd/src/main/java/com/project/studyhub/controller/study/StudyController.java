@@ -1,9 +1,8 @@
-package com.project.studyhub.controller;
+package com.project.studyhub.controller.study;
 
 import com.project.studyhub.dto.study.MyStudyResponse;
 import com.project.studyhub.dto.study.StudyCreateRequest;
 import com.project.studyhub.dto.study.StudyDistanceResponse;
-import com.project.studyhub.dto.study.StudyResponse;
 import com.project.studyhub.service.study.StudyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

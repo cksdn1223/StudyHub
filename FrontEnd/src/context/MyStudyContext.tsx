@@ -1,5 +1,5 @@
 // src/context/MyStudyContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ChatMessage, MyStudyList } from "../type"; // 경로 맞게 수정
 import axios from "axios";
@@ -28,7 +28,7 @@ const getChatData = async (studyId: number) => {
 }
 
 export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
-  const [selectStudy, setSelectStudy] = useState<MyStudyList | null>(null);
+  const [selectedStudyId, setSelectedStudyId] = useState<number | null>(null);
 
   const {
     data = [],
@@ -41,22 +41,26 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
   });
   useEffect(() => {
     if (!data.length) return;
-    if (!selectStudy) {
-      setSelectStudy(data[0]);
+    const exists = data.some((s) => s.studyId === selectedStudyId);
+    if (selectedStudyId == null || !exists) {
+      setSelectedStudyId(data[0].studyId);
     }
-  }, [data, selectStudy]);
-  const selectedStudyId = selectStudy?.studyId;
+  }, [data, selectedStudyId]);
+  const selectStudy = useMemo(
+    () => data.find((s) => s.studyId === selectedStudyId) ?? null,
+    [data, selectedStudyId]
+  );
   const { data: chatList = [], isLoading: chatListLoading, error: chatListError } = useQuery<ChatMessage[]>({
-      queryKey: ['chatList', selectedStudyId],
-      queryFn: () => {
-        if (!selectedStudyId) {
-          throw new Error('studyId가 없습니다.');
-        }
-        return getChatData(selectedStudyId);
-      },
-      enabled: !!selectedStudyId,
-      refetchOnWindowFocus: false,
-    })
+    queryKey: ['chatList', selectedStudyId],
+    queryFn: () => {
+      if (!selectedStudyId) {
+        throw new Error('studyId가 없습니다.');
+      }
+      return getChatData(selectedStudyId);
+    },
+    enabled: !!selectedStudyId,
+    refetchOnWindowFocus: false,
+  })
 
   return (
     <MyStudyContext.Provider
@@ -68,7 +72,8 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
         chatListLoading,
         chatListError,
         selectStudy,
-        setSelectStudy,
+        setSelectStudy: (study: MyStudyList | null) =>
+          setSelectedStudyId(study ? study.studyId : null),
       }}
     >
       {children}

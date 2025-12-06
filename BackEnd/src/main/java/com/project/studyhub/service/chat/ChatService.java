@@ -5,6 +5,7 @@ import com.project.studyhub.dto.chat.ChatMessageResponse;
 import com.project.studyhub.dto.notification.NotificationResponse;
 import com.project.studyhub.entity.*;
 import com.project.studyhub.enums.NotificationType;
+import com.project.studyhub.enums.ParticipantStatus;
 import com.project.studyhub.exception.ResourceNotFoundException;
 import com.project.studyhub.repository.ChatMessageRepository;
 import com.project.studyhub.repository.NotificationRepository;
@@ -41,6 +42,7 @@ public class ChatService {
         ChatMessageResponse send = ChatMessageResponse.from(chatMessage);
 
         study.getParticipants().stream()
+                .filter(sp -> sp.getStatus() == ParticipantStatus.ACCEPTED) // 승인된 멤버만
                 .map(StudyParticipant::getUser)
                 .filter(receiver -> !receiver.getUserId().equals(sender.getUserId())) // 본인 제외
                 .filter(receiver -> !chatPresenceService.isInRoom(studyId, receiver.getUserId())) // 방 안 제외

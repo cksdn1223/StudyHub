@@ -17,7 +17,7 @@ function Study() {
   const [stompClient, setStompClient] = useState<Client | null>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { isLoading, error, selectStudy } = useMyStudy();
+  const { isLoading, error, selectStudy, myStudyList } = useMyStudy();
   const selectedStudyId = selectStudy?.studyId;
   // 웹소켓 연결용 useEffect
   useEffect(() => {
@@ -49,7 +49,12 @@ function Study() {
   if (!user) return;
   if (isLoading) return <div>로딩중...</div>
   if (error) return <div>문제가 발생했습니다.. 관리자에게 문의해주세요.</div>
-  if (!selectStudy) return <div>스터디 정보를 불러오는 중입니다...</div>
+  if (!myStudyList.length) {
+    return <div>참여 중인 스터디가 없습니다.</div>;
+  }
+  if (!selectStudy) {
+    return <div>스터디를 선택되지 않았습니다. 새로고침 해주세요.</div>;
+  }
   return (
     <div className="bg-gray-50">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

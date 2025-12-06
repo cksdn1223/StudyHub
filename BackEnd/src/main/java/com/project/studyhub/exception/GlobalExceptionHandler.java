@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 "UnAuthorized",
-                "자격 증명에 실패하였습니다. (이메일 또는 비밀번호 불일치)",
+                "아이디 또는 비밀번호가 일치하지 않습니다.",
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.UNAUTHORIZED);
@@ -129,13 +129,23 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 "CONFLICT",
-                "스터디가 가득 찼습니다.",
+                ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
     }
 
-
+    @ExceptionHandler(MemberMinException.class)
+    public ResponseEntity<ErrorResponseRecord> handleRegisterException(MemberMinException ex, WebRequest request) {
+        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "BAD_REQUEST",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponseRecord, HttpStatus.BAD_REQUEST);
+    }
 
 
 

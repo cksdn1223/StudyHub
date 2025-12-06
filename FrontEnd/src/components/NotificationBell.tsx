@@ -7,8 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import axios from "axios";
 import { getHeaders } from "../context/AxiosConfig";
+import { useQueryClient } from "@tanstack/react-query";
 
-const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {
+export const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {
   await axios.put(`${import.meta.env.VITE_BASE_URL}/participant/${studyId}`, {
     userId: senderId,
     status: status
@@ -18,6 +19,7 @@ const participantStatusChange = async (studyId: number, senderId: number, status
 function NotificationBell() {
   const { notifications, markAsRead, markAllAsRead, removeNotification } = useNotification();
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
   const { showToast } = useToast();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
@@ -32,11 +34,16 @@ function NotificationBell() {
     }
     if (!n.isRead) markAsRead(n.id);
   };
-  const handleAccept = (e: React.MouseEvent, n: Notification) => {
+  const handleAccept = async (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
-    participantStatusChange(n.studyId, n.senderId, "ACCEPTED")
-    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 수락하셨습니다.`, "info")
-    removeNotification(n.id);
+    try{
+      await participantStatusChange(n.studyId, n.senderId, "ACCEPTED")
+      await queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
+      showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 수락하셨습니다.`, "info")
+      removeNotification(n.id);
+    } catch(err) {
+      showToast("가입 수락 처리중 문제가 발생했습니다.", "error");
+    }
   };
   const handleReject = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
@@ -77,6 +84,8 @@ function NotificationBell() {
         return "가입 거절";
       case "MESSAGE":
         return "메시지";
+      case "BAN":
+        return "강퇴";
       default:
         return type;
     }

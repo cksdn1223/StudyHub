@@ -16,7 +16,8 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
     const fetchInitial = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/notifications`, getHeaders());
-        setNotifications(res.data);
+        const noti = res.data.sort((a:Notification,b:Notification)=> new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setNotifications(noti);
         setUnreadCount(res.data.filter((noti: Notification) => !noti.isRead).length);
       } catch (e) {
         console.error("알림 초기 로딩 실패", e);

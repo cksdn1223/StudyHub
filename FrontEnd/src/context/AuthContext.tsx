@@ -2,13 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import { jwtDecode } from 'jwt-decode';
 import { useToast } from './ToastContext';
 import { useNavigate } from 'react-router-dom';
-
-type User = {
-  id: number;
-  email: string;
-  nickname: string;
-  role: string;
-}
+import { User } from '../type';
 
 type AuthContextType = {
   user: User | null;

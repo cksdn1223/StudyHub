@@ -98,7 +98,7 @@ public class StudyService {
 
         // 2. ACCEPTED 멤버들만 필터링 (리더는 participants에 포함 안 된다고 가정)
         List<StudyMemberDto> acceptedMemberDtos = study.getParticipants().stream()
-                .filter(sp -> sp.getStatus() == ParticipantStatus.ACCEPTED) // ✅ ACCEPTED만
+                .filter(sp -> sp.getStatus() == ParticipantStatus.ACCEPTED)
                 .map(sp -> {
                     User u = sp.getUser();
                     return StudyMemberDto.builder()
@@ -106,7 +106,7 @@ public class StudyService {
                             .nickname(u.getNickname())
                             .email(u.getEmail())
                             .leader(false)
-                            .status(sp.getStatus()) // 여기서는 항상 ACCEPTED
+                            .status(sp.getStatus())
                             .build();
                 })
                 .collect(Collectors.toList());
