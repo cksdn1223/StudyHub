@@ -2,6 +2,7 @@ package com.project.studyhub.service.studyParticipant;
 
 import com.project.studyhub.dto.notification.NotificationResponse;
 import com.project.studyhub.dto.participant.StudyParticipantRequest;
+import com.project.studyhub.dto.pushSubscription.WebPushPayload;
 import com.project.studyhub.entity.Notification;
 import com.project.studyhub.entity.Study;
 import com.project.studyhub.entity.StudyParticipant;
@@ -16,6 +17,7 @@ import com.project.studyhub.repository.NotificationRepository;
 import com.project.studyhub.repository.StudyParticipantRepository;
 import com.project.studyhub.repository.StudyRepository;
 import com.project.studyhub.repository.UserRepository;
+import com.project.studyhub.service.push.WebPushService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,6 +34,7 @@ public class StudyParticipantService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final WebPushService webPushService;
 
     public void createParticipant(Long studyId, Principal principal) {
         Study study = studyRepository.findById(studyId)
@@ -75,18 +78,45 @@ public class StudyParticipantService {
                             "[%s] 스터디 가입 요청이 수락되었습니다.",
                             study.getTitle()
                     ), NotificationType.REQUEST_ACCEPTED);
+                    // WebPush 부분
+                    webPushService.sendToUser(
+                            receiver,
+                            new WebPushPayload(
+                                    "[%s] 스터디 가입 승인".formatted(study.getTitle()),
+                                    "가입 요청이 수락되었습니다.",
+                                    "/chat"
+                            )
+                    );
                 } else throw new MemberMaxException("이미 가득 찬 스터디입니다.");
             }
-            case REJECTED -> notification = new Notification(study, receiver, study.getLeader(), String.format(
-                    "[%s] 스터디 가입 요청이 거절되었습니다.",
-                    study.getTitle()
-            ), NotificationType.REQUEST_REJECTED);
+            case REJECTED -> {
+                notification = new Notification(study, receiver, study.getLeader(), String.format(
+                        "[%s] 스터디 가입 요청이 거절되었습니다.",
+                        study.getTitle()
+                ), NotificationType.REQUEST_REJECTED);
+                webPushService.sendToUser(
+                        receiver,
+                        new WebPushPayload(
+                                "[%s] 스터디 거절".formatted(study.getTitle()),
+                                "가입 요청이 거절되었습니다.",
+                                "/"
+                        )
+                );
+            }
             case BAN -> {
                 if (study.getMemberCount() > 1) {
                     notification = new Notification(study, receiver, study.getLeader(), String.format(
                             "[%s] 스터디에서 강퇴되었습니다.",
                             study.getTitle()
                     ), NotificationType.BAN);
+                    webPushService.sendToUser(
+                            receiver,
+                            new WebPushPayload(
+                                    "[%s] 스터디 강퇴".formatted(study.getTitle()),
+                                    "스터디에서 강퇴되었습니다.",
+                                    "/"
+                            )
+                    );
                 } else throw new MemberMinException("마지막 남은 멤버는 강퇴할 수 없습니다.");
             }
             case PENDING -> throw new IllegalArgumentException("PENDING 상태로 변경할 수 없습니다.");

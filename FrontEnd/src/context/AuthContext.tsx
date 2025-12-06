@@ -3,6 +3,9 @@ import { jwtDecode } from 'jwt-decode';
 import { useToast } from './ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { User } from '../type';
+import { getHeaders } from './AxiosConfig';
+import { registerPush } from '../utils/pushSubscription';
+import axios from 'axios';
 
 type AuthContextType = {
   user: User | null;
@@ -73,6 +76,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem(TOKEN_KEY, token);
     checkTokenExpiration(token);
   };
+
+  // 로그인시 web push 구독
+  useEffect(() => {
+    const setupPush = async () => {
+      if (!user) return; // 로그인된 유저만
+      const sub = await registerPush();
+      if (!sub) return;
+
+      await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/push/subscribe`,
+        {
+          endpoint: sub.endpoint,
+          keys: sub.toJSON().keys, // { p256dh, auth }
+        },
+        getHeaders()
+      );
+    };
+
+    setupPush();
+  }, [user]);
+
   return (
     <AuthContext.Provider value={{ user, isLoggedIn, login, logout }}>
       {children}

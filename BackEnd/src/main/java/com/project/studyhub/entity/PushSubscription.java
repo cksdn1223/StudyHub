@@ -20,8 +20,8 @@ public class PushSubscription {
     @Column(name = "subscription_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", unique = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Column(length = 512, nullable = false)
@@ -36,4 +36,17 @@ public class PushSubscription {
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
+    public PushSubscription(User user, String endpoint, String p256dh, String auth) {
+        this.user = user;
+        this.endpoint = endpoint;
+        this.p256dh = p256dh;
+        this.auth = auth;
+    }
+
+    public void update(String endpoint, String p256dh, String auth) {
+        this.endpoint = endpoint;
+        this.p256dh = p256dh;
+        this.auth = auth;
+    }
 }

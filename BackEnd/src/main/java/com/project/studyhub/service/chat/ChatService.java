@@ -3,6 +3,7 @@ package com.project.studyhub.service.chat;
 import com.project.studyhub.dto.chat.ChatMessageRequest;
 import com.project.studyhub.dto.chat.ChatMessageResponse;
 import com.project.studyhub.dto.notification.NotificationResponse;
+import com.project.studyhub.dto.pushSubscription.WebPushPayload;
 import com.project.studyhub.entity.*;
 import com.project.studyhub.enums.NotificationType;
 import com.project.studyhub.enums.ParticipantStatus;
@@ -11,6 +12,7 @@ import com.project.studyhub.repository.ChatMessageRepository;
 import com.project.studyhub.repository.NotificationRepository;
 import com.project.studyhub.repository.StudyRepository;
 import com.project.studyhub.repository.UserRepository;
+import com.project.studyhub.service.push.WebPushService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,6 +33,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
     private final ChatPresenceService chatPresenceService;
+    private final WebPushService webPushService;
 
     @Transactional
     public void handleChatMessage(Long studyId, ChatMessageRequest request) {
@@ -64,6 +67,15 @@ public class ChatService {
                     messagingTemplate.convertAndSend(
                             "/sub/notification/" + receiver.getUserId(),
                             NotificationResponse.from(notification));
+                    // WebPush 부분
+                    webPushService.sendToUser(
+                            receiver,
+                            new WebPushPayload(
+                                    "새 채팅 알림",
+                                    message,
+                                    "/chat"
+                            )
+                    );
                 });
 
         messagingTemplate.convertAndSend("/sub/message/" + studyId, send);
