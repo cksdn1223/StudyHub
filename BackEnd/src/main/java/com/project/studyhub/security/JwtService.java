@@ -42,17 +42,19 @@ public class JwtService {
                 .compact();
     }
 
-    public String getAuthUser(HttpServletRequest request) {
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (token != null) {
-            // 토큰 파싱 및 서명 검증
+    public String getAuthUser(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+        try {
             return Jwts.parser()
-                    .verifyWith(getSigningKey()) // 서명 검증을 위해 동일한 키를 사용
+                    .verifyWith(getSigningKey())
                     .build()
-                    .parseSignedClaims(token.replace("Bearer", "").trim()) // 'Bearer ' 접두사와 앞뒤 공백 제거
+                    .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
+        } catch (Exception e) {
+            return null;
         }
-        return null;
     }
 }

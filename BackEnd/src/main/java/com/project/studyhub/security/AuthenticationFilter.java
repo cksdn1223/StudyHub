@@ -31,20 +31,32 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return;
         }
         // 요청 헤더에서 Authorization 값을 가져옵니다. (JWT 토큰)
-        String jws = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (jws != null) {
-            // JWT 토큰에서 사용자 이름을 추출합니다.
-            String user = jwtService.getAuthUser(request);
-            if (user != null) {
-                // 사용자 이름으로 DB에서 전체 사용자 정보를 조회합니다. (권한 포함)
-                UserDetails userDetails = userDetailsService.loadUserByUsername(user);
-                // 인증 객체를 생성하여 SecurityContext에 저장합니다.
-                // 이 시점부터 해당 요청은 인증된 사용자의 요청으로 간주됩니다.
-                Authentication authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
         }
+        String token = authHeader.substring(7).trim();
+
+        // 토큰이 비어있으면 역시 비로그인 요청으로 처리
+        if (token.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // JWT 토큰에서 사용자 이름을 추출합니다.
+        String username = jwtService.getAuthUser(token);
+        if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         // 다음 필터로 요청과 응답을 전달합니다.
         filterChain.doFilter(request, response);
     }

@@ -37,17 +37,28 @@ public class StudyParticipantService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
         User sender = userRepository.findByEmail(principal.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
-        // 기본 대기중 상태
-        if (studyParticipantRepository.existsByStudyAndUser(study, sender))
-            throw new ParticipantExistsException("이미 참여한 스터디입니다.");
-        StudyParticipant studyParticipant = new StudyParticipant(study, sender);
-        Notification notification = new Notification(study, study.getLeader(), sender, sender.getNickname() + "님이 가입 요청을 보냈습니다. [" + study.getTitle() + "]", NotificationType.JOIN_REQUEST);
-        studyParticipantRepository.save(studyParticipant);
-        notificationRepository.save(notification);
 
-        messagingTemplate.convertAndSend(
-                "/sub/notification/" + study.getLeader().getUserId(),
-                NotificationResponse.from(notification));
+        if (studyParticipantRepository.existsByStudyAndUser(study, sender)) {
+            // 데이터베이스에 요청이 이미 존재하니 그에 해당하는 에러 처리
+            StudyParticipant studyParticipant = studyParticipantRepository.findByStudy_IdAndUser_UserId(study.getId(), sender.getUserId())
+                    .orElseThrow(()-> new ResourceNotFoundException("해당 참여요청을 찾을 수 없습니다."));
+            switch(studyParticipant.getStatus()) {
+                case PENDING -> throw new ParticipantExistsException("참여 대기중인 스터디입니다.");
+                case ACCEPTED -> throw new ParticipantExistsException("참여중인 스터디입니다.");
+                case REJECTED -> throw new ParticipantExistsException("참여 요청이 거절된 스터디입니다.");
+                default -> {
+                }
+            }
+        }
+        else { // 데이터베이스에 참가 요청이 없다면 가입요청
+            StudyParticipant studyParticipant = new StudyParticipant(study, sender);
+            Notification notification = new Notification(study, study.getLeader(), sender, sender.getNickname() + "님이 가입 요청을 보냈습니다. [" + study.getTitle() + "]", NotificationType.JOIN_REQUEST);
+            studyParticipantRepository.save(studyParticipant);
+            notificationRepository.save(notification);
+            messagingTemplate.convertAndSend(
+                    "/sub/notification/" + study.getLeader().getUserId(),
+                    NotificationResponse.from(notification));
+        }
     }
 
     @Transactional

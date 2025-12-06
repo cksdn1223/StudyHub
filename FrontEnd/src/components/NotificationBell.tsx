@@ -141,7 +141,7 @@ function NotificationBell() {
               </div>
             ) : (
               notifications.map((n) => (
-                <button
+                <div
                   key={n.id}
                   onClick={() => onClickNotification?.(n)}
                   className={`w-full text-left px-4 py-3 flex gap-3 rounded-xl hover:bg-gray-50 transition ${!n.isRead ? "bg-indigo-50/60" : ""
@@ -208,7 +208,7 @@ function NotificationBell() {
                       </div>
                     )}
                   </div>
-                </button>
+                </div>
               ))
             )}
           </div>
