@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -41,9 +43,15 @@ public class ChatService {
         chatMessageRepository.save(chatMessage);
         ChatMessageResponse send = ChatMessageResponse.from(chatMessage);
 
-        study.getParticipants().stream()
-                .filter(sp -> sp.getStatus() == ParticipantStatus.ACCEPTED) // 승인된 멤버만
-                .map(StudyParticipant::getUser)
+        Stream.concat(
+                        // 1) 리더
+                        Stream.of(study.getLeader()),
+                        // 2) ACCEPTED 멤버들
+                        study.getParticipants().stream()
+                                .filter(sp -> sp.getStatus() == ParticipantStatus.ACCEPTED)
+                                .map(StudyParticipant::getUser)
+                )
+                .distinct()
                 .filter(receiver -> !receiver.getUserId().equals(sender.getUserId())) // 본인 제외
                 .filter(receiver -> !chatPresenceService.isInRoom(studyId, receiver.getUserId())) // 방 안 제외
                 .filter(receiver -> shouldNotify(receiver, study)) // 3분 쿨타임

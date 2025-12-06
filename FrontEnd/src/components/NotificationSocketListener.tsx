@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { useNotification } from "../context/NotificationContext";
@@ -9,8 +9,11 @@ const NotificationSocketListener = () => {
   const { addNotification } = useNotification();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const msgSoundRef = useRef<HTMLAudioElement | null>(null);
+  const otherSoundRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
-    if(!user) return;
+    if (!user) return;
     const client = new Client({
       webSocketFactory: () => new SockJS("/ws-stomp"),
       reconnectDelay: 5000,
@@ -21,7 +24,17 @@ const NotificationSocketListener = () => {
           if (notification.type === "BAN" || notification.type === "REQUEST_ACCEPTED") {
             queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
           }
+          const targetRef =
+            notification.type === "MESSAGE" ? msgSoundRef : otherSoundRef;
 
+          if (targetRef.current) {
+            targetRef.current.currentTime = 0;
+            targetRef.current
+              .play()
+              .catch(() => {
+                // 자동재생 막힐 수 있으니 에러는 무시
+              });
+          }
         });
       }
     });
@@ -29,9 +42,22 @@ const NotificationSocketListener = () => {
     return () => {
       client.deactivate();
     };
-  }, [addNotification, user]);
+  }, [addNotification, user, queryClient]);
 
-  return null;
+  return (
+    <>
+      <audio
+        ref={msgSoundRef}
+        src="/sounds/message.mp3"
+        preload="auto"
+      />
+      <audio
+        ref={otherSoundRef}
+        src="/sounds/other.mp3"
+        preload="auto"
+      />
+    </>
+  );
 };
 
 export default NotificationSocketListener;
