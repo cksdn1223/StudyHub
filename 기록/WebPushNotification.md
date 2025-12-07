@@ -1,7 +1,3 @@
-
-다음할거
-- 프로필이미지
-
 # Web Push
 ## 브라우저에서 권한 허용
 - Notification.requestPermission()
