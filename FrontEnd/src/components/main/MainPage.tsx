@@ -1,4 +1,4 @@
-import Header from "../Header";
+import Header from "../public/Header";
 import mainBg from "../../assets/main-background.jpg"
 import { useEffect, useRef, useState } from "react";
 import FeatureSection from "./FeatureSection";

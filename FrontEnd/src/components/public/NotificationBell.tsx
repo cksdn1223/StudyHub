@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
-import type { Notification, ParticipantStatus } from "../type";
-import { useNotification } from "../context/NotificationContext";
-import { useMyStudy } from "../context/MyStudyContext";
+import type { Notification, ParticipantStatus } from "../../type";
+import { useNotification } from "../../context/NotificationContext";
+import { useMyStudy } from "../../context/MyStudyContext";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../../context/ToastContext";
 import axios from "axios";
-import { getHeaders } from "../context/AxiosConfig";
+import { getHeaders } from "../../context/AxiosConfig";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {

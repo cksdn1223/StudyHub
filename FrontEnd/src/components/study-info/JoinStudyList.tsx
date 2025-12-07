@@ -1,4 +1,4 @@
-import Card from '../Card';
+import Card from '../public/Card';
 import { useMyStudy } from '../../context/MyStudyContext';
 
 function JoinStudyList() {

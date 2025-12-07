@@ -1,6 +1,6 @@
 import { BookOpenText, LogOut, MessageCircleCode, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "./NotificationBell";
 
 
@@ -28,7 +28,7 @@ function Header() {
           {isLoggedIn ? (
             <>
               {/* 로그아웃 아이콘 */}
-              <li className={`relative p-2 rounded-full hover:bg-gray-100 cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 `}
+              <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 relative p-2 rounded-full hover:bg-gray-100`}
                 onClick={handleLogout}>
                 <LogOut />
               </li>
@@ -39,7 +39,7 @@ function Header() {
                 </Link>
               </li>
               {/* 채팅 아이콘 */}
-              <li className={`hover:text-red-400 ${isMainPage ? "text-white" : 'text-neutral-500'} transition duration-150 cursor-pointer text-sm sm:text-base hidden sm:block relative p-2 rounded-full hover:bg-gray-100`}>
+              <li className={`cursor-pointer ${isMainPage ? "text-white" : 'text-neutral-500'} hover:text-red-400 transition duration-150 relative p-2 rounded-full hover:bg-gray-100`}>
                 <Link to="/chat">
                   <MessageCircleCode />
                 </Link>

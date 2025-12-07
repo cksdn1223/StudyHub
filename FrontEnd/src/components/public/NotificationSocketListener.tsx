@@ -1,19 +1,23 @@
 import { useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useNotification } from "../context/NotificationContext";
-import { useAuth } from "../context/AuthContext";
+import { useNotification } from "../../context/NotificationContext";
+import { useAuth } from "../../context/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 
 const NotificationSocketListener = () => {
   const { addNotification } = useNotification();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const isConnectedRef = useRef(false);
+  
   const msgSoundRef = useRef<HTMLAudioElement | null>(null);
   const otherSoundRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (user.email.length===0) return;
+    if (isConnectedRef.current) return; // dev에서 중복 실행 방지
+    isConnectedRef.current = true;
     const client = new Client({
       webSocketFactory: () => new SockJS("/ws-stomp"),
       reconnectDelay: 5000,
@@ -28,6 +32,7 @@ const NotificationSocketListener = () => {
             notification.type === "MESSAGE" ? msgSoundRef : otherSoundRef;
 
           if (targetRef.current) {
+            targetRef.current.volume = 0.5;
             targetRef.current.currentTime = 0;
             targetRef.current
               .play()
@@ -41,6 +46,7 @@ const NotificationSocketListener = () => {
     client.activate();
     return () => {
       client.deactivate();
+      isConnectedRef.current = false;
     };
   }, [addNotification, user, queryClient]);
 

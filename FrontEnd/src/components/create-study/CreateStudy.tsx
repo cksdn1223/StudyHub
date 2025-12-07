@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import Card from '../Card';
-import InputField from '../InputField';
-import SelectField from '../SelectField';
+import Card from '../public/Card';
+import InputField from '../public/InputField';
+import SelectField from '../public/SelectField';
 import StudyPreview from './StudyPreview';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import { StudyData } from '../../type';

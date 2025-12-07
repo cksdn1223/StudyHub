@@ -133,6 +133,13 @@ export type User = {
   id: number;
   email: string;
   nickname: string;
+  address: string;
+  description: string;
   role: string;
 }
 
+export type JwtPayload = {
+  exp: number;
+  userId: number;
+  role: string;
+};

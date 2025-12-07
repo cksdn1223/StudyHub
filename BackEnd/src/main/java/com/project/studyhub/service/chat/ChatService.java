@@ -73,7 +73,7 @@ public class ChatService {
                             new WebPushPayload(
                                     "새 채팅 알림",
                                     message,
-                                    "/chat"
+                                    "/"
                             )
                     );
                 });

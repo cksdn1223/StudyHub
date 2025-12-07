@@ -84,7 +84,7 @@ public class StudyParticipantService {
                             new WebPushPayload(
                                     "[%s] 스터디 가입 승인".formatted(study.getTitle()),
                                     "가입 요청이 수락되었습니다.",
-                                    "/chat"
+                                    "/"
                             )
                     );
                 } else throw new MemberMaxException("이미 가득 찬 스터디입니다.");

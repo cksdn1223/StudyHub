@@ -17,8 +17,17 @@ self.addEventListener("push", (event) => {
     },
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      const anyVisible = clientList.some(
+        (client) => client.visibilityState === "visible"
+      );
+      if (anyVisible) return;
+      return self.registration.showNotification(title, options);
+    })
+  );
 });
+
 
 // 알림 클릭 시 특정 페이지로 이동
 self.addEventListener("notificationclick", (event) => {

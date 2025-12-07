@@ -20,7 +20,6 @@ export const registerPush = async () => {
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    console.warn("알림 권한이 허용되지 않았습니다.");
     return null;
   }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useToast } from '../context/ToastContext';
+import { useToast } from '../../context/ToastContext';
 import { Zap, X, Info } from 'lucide-react';
 
 // 💡 Tailwind CSS를 사용하여 스타일링 (이전 디자인과 유사하게)

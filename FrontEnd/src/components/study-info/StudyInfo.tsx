@@ -1,9 +1,9 @@
 import { EllipsisVertical } from 'lucide-react';
-import Card from '../Card';
+import Card from '../public/Card';
 import { useState } from 'react';
 import { useMyStudy } from '../../context/MyStudyContext';
 import { useAuth } from '../../context/AuthContext';
-import { participantStatusChange } from '../NotificationBell';
+import { participantStatusChange } from '../public/NotificationBell';
 import { Member, MyStudyList } from '../../type';
 import { useToast } from '../../context/ToastContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,7 +14,7 @@ function StudyInfo() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { showToast } = useToast();
-  if (!user || !selectStudy) return;
+  if (!selectStudy) return;
   const isLeader = selectStudy?.members.find(member => member.leader)?.userId === user.id;
 
   const handleKick = async (study: MyStudyList, sender: Member) => {

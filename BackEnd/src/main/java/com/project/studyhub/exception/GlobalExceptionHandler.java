@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 "UnAuthorized",
-                "아이디 또는 비밀번호가 일치하지 않습니다.",
+                ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(errorResponseRecord, HttpStatus.UNAUTHORIZED);

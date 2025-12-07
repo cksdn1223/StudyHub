@@ -1,17 +1,19 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { useContext, useState, useEffect, ReactNode, useCallback, createContext } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { useToast } from './ToastContext';
 import { useNavigate } from 'react-router-dom';
-import { User } from '../type';
+import { JwtPayload, User } from '../type';
 import { getHeaders } from './AxiosConfig';
 import { registerPush } from '../utils/pushSubscription';
 import axios from 'axios';
 
 type AuthContextType = {
-  user: User | null;
+  user: User;
+  setUser: React.Dispatch<React.SetStateAction<User>>;
   isLoggedIn: boolean;
   login: (accessToken: string) => void;
   logout: (message: string, type: 'success' | 'error' | 'info') => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,67 +22,88 @@ const TOKEN_KEY = 'studyhub_jwt';
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { showToast } = useToast();
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const isLoggedIn = !!user;
+  const [user, setUser] = useState<User>({
+    id: 0,
+    email: '',
+    nickname: '',
+    address: '',
+    description: '',
+    role: '',
+  });
+  const isLoggedIn = user.email.length !== 0
 
   const logout = useCallback((message: string, type: 'success' | 'error' | 'info') => {
     navigate("/")
     localStorage.removeItem(TOKEN_KEY);
-    setUser(null);
+    setUser({
+      id: 0,
+      email: '',
+      nickname: '',
+      address: '',
+      description: '',
+      role: '',
+    });
     showToast(message, type);
   }, [showToast, navigate]);
 
-  const checkTokenExpiration = useCallback((token: string) => {
+  const getDecoded = useCallback((token: string): JwtPayload | null => {
     try {
-      const decoded: { exp: number, userId: number, email: string, nickname: string, role: string } = jwtDecode(token);
-      const currentTime = Date.now() / 1000;
-
-      if (decoded.exp < currentTime) {
-        logout("세션이 만료되었습니다. 다시 로그인해주세요.", 'info');
-        return false;
-      }
-
-      const userData: User = {
-        id: decoded.userId,
-        email: decoded.email,
-        nickname: decoded.nickname,
-        role: decoded.role
-      };
-      setUser(userData);
-      return true;
-
+      return jwtDecode<JwtPayload>(token);
     } catch (e) {
       logout("토큰이 유효하지 않습니다. 다시 로그인해주세요.", 'error');
-      return false;
+      return null;
     }
   }, [logout]);
 
+  const fetchMyProfile = async (): Promise<User> => {
+    const res = await axios.get(
+      `${import.meta.env.VITE_BASE_URL}/user/me`,
+      getHeaders()
+    );
+    return res.data; // { email, nickname, address, description, role } 형태 
+  };
+
+  const refreshUser = useCallback(async () => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) return;
+    const decoded = getDecoded(token);
+    if (!decoded) return;
+    const currentTime = Date.now() / 1000;
+    if (decoded.exp < currentTime) {
+      logout("세션이 만료되었습니다. 다시 로그인해주세요.", "info");
+      return;
+    }
+    // 서버에서 프로필 조회
+    const profile = await fetchMyProfile();
+    setUser(profile);
+  }, [logout, getDecoded])
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      checkTokenExpiration(token);
-    }
+    if (token) refreshUser();
 
     const interval = setInterval(() => {
       const currentToken = localStorage.getItem(TOKEN_KEY);
       if (currentToken) {
-        checkTokenExpiration(currentToken);
+        const decoded = getDecoded(currentToken);
+        if (!decoded) return;
+        const now = Date.now() / 1000;
+        if (decoded.exp < now) logout("세션이 만료되었습니다. 다시 로그인해주세요.", "info");
       }
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [checkTokenExpiration]);
+  }, [refreshUser, logout, getDecoded])
 
   const login = (token: string) => {
     localStorage.setItem(TOKEN_KEY, token);
-    checkTokenExpiration(token);
+    refreshUser();
   };
 
   // 로그인시 web push 구독
   useEffect(() => {
     const setupPush = async () => {
-      if (!user) return; // 로그인된 유저만
+      if(user.email.length===0) return;
       const sub = await registerPush();
       if (!sub) return;
 
@@ -98,7 +121,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, isLoggedIn, login, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,10 +1,7 @@
 
-알림소리 나게 하는거 ok
-- 웹 꺼도 알람 > ok > 테스트 한번 더
-
 다음할거
+- 알림 소리 조정 > const { volume } = useNotificationSettings(); 만들기
 - 프로필이미지
-
 
 # Web Push
 ## 브라우저에서 권한 허용

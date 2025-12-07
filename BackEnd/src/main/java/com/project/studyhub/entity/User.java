@@ -5,9 +5,13 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +33,6 @@ public class User implements UserDetails {
     private String email;
     @Column(nullable = false)
     private String password;
-
     private String nickname;
     private String address;
     private String description;
@@ -62,7 +65,25 @@ public class User implements UserDetails {
         this.geom = geom;
         this.role = Role.USER;
     }
+    // User 정보 수정 메서드
+    public void changeInfo(String nickname, String description) {
+        if(nickname != null && !nickname.isBlank()) this.nickname = nickname;
+        if(description != null) this.description = description;
+    }
+    public void changePassword(String encodedPassword) {
+        if (encodedPassword == null || encodedPassword.isBlank()) {
+            throw new IllegalArgumentException("비밀번호는 비어 있을 수 없습니다.");
+        }
+        this.password = encodedPassword;
+    }
+    public void changeAddress(String address, Double longitude, Double latitude) {
+        this.address = address;
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        Coordinate coordinate = new Coordinate(longitude, latitude);
+        this.geom = geometryFactory.createPoint(coordinate);
+    }
 
+    // UserDetails
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

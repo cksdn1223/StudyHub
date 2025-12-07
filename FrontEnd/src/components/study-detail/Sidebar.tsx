@@ -87,7 +87,6 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
     .sort((a, b) => b.sameTagCount - a.sameTagCount)
     .slice(0, 5);
 
-  if (!user) return null;
   const isLeader = leader?.email === user.email;
   const buttonClasses = isLeader ?
     'w-full bg-gray-500 text-white text-center font-bold py-3 rounded-lg transition duration-150 shadow-md cursor-not-allowed' :

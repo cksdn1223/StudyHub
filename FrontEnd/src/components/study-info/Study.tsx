@@ -46,7 +46,6 @@ function Study() {
   // 메시지 전송용 함수
 
 
-  if (!user) return;
   if (isLoading) return <div>로딩중...</div>
   if (error) return <div>문제가 발생했습니다.. 관리자에게 문의해주세요.</div>
   if (!myStudyList.length) {

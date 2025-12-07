@@ -1,4 +1,4 @@
-import Card from '../Card'; // Card 컴포넌트 import
+import Card from '../public/Card'; // Card 컴포넌트 import
 
 const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, duration, detailLocation }: React.PropsWithChildren<{
   title: string;
