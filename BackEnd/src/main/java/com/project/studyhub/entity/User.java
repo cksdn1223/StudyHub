@@ -36,7 +36,7 @@ public class User implements UserDetails {
     private String nickname;
     private String address;
     private String description;
-
+    private String profileImageUrl;
     @Column(columnDefinition = "GEOMETRY(Point, 4326)")
     // double longitude / double latitude 경도,위도 순서대로 저장
     private Point geom;
@@ -65,6 +65,7 @@ public class User implements UserDetails {
         this.geom = geom;
         this.role = Role.USER;
         this.description = "";
+        this.profileImageUrl = "defaultUrl";
     }
     // User 정보 수정 메서드
     public void changeInfo(String nickname, String description) {
@@ -83,6 +84,7 @@ public class User implements UserDetails {
         Coordinate coordinate = new Coordinate(longitude, latitude);
         this.geom = geometryFactory.createPoint(coordinate);
     }
+    public void changeUrl(String profileImageUrl) {this.profileImageUrl = profileImageUrl;}
 
     // UserDetails
     @Override

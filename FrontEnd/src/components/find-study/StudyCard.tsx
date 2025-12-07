@@ -1,8 +1,12 @@
+import { useAuth } from "../../context/AuthContext";
 import { StudyList } from "../../type";
 import { useNavigate } from "react-router-dom";
+import defaultAvatar from "../../assets/image/defaultImage.webp"
 
 function StudyCard(study: StudyList) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const StudyStatusBadge = () => {
     switch (study.status) {
       case 'RECRUITING':
@@ -34,7 +38,7 @@ function StudyCard(study: StudyList) {
       tabIndex={0}
       className="flex justify-between border-b border-gray-200 py-6 hover:bg-gray-50 transition duration-150 focus:outline-none"
     >
-      <div className="flex-grow pr-4 ">
+      <div className="flex-grow pr-4">
         <div className="flex items-center text-sm mb-1 text-gray-500">
           <StudyStatusBadge />
           <span className="text-green-600 font-semibold mr-3">{Math.ceil(study.distanceKm * 10) / 10} Km</span>
@@ -67,10 +71,14 @@ function StudyCard(study: StudyList) {
         </div>
       </div>
 
-      {/* 아바타 (임시) */}
-      <div className="w-14 h-14 rounded-full bg-gray-300 flex-shrink-0 self-start">
-        {/*  */}
-      </div>
+      {/* 아바타 */}
+      <img
+        className="w-24 h-24 rounded-full"
+        src={user.profileImageUrl !== "defaultUrl" ? user.profileImageUrl : defaultAvatar}
+        alt="프로필 이미지"
+      />
+
+
     </div>
   );
 }

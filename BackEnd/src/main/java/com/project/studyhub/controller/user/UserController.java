@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -53,6 +54,15 @@ public class UserController {
             @RequestBody @Valid UserPasswordChangeRequest request
     ) {
         userService.changePassword(principal, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/profile-image")
+    public ResponseEntity<Void> changeProfileImage(
+            Principal principal,
+            @RequestParam("file") MultipartFile file
+    ){
+        userService.changeProfileImage(principal, file);
         return ResponseEntity.noContent().build();
     }
 }

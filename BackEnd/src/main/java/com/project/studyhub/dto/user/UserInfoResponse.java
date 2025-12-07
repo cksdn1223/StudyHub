@@ -8,7 +8,8 @@ public record UserInfoResponse(
         String nickname,
         String address,
         String description,
-        String role
+        String role,
+        String profileImageUrl
 ) {
     public static UserInfoResponse from(User user) {
         return new UserInfoResponse(
@@ -17,7 +18,8 @@ public record UserInfoResponse(
                 user.getNickname(),
                 user.getAddress(),
                 user.getDescription(),
-                user.getRole().name()
+                user.getRole().name(),
+                user.getProfileImageUrl()
         );
     }
 }

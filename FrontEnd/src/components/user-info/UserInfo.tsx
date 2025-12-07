@@ -1,10 +1,12 @@
-import { ChevronLeft, User } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import UserAddressSection from "./UserAddressSection";
 import UserInfoSection from "./UserInfoSection";
 import UserPasswordSection from "./UserPasswordSection";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
+import ProfileImageUploader from "./ProfileImageUploader";
+import ProfileImageCropModal from "./ProfileImageCropModal";
 
 function UserInfo() {
   const navigate = useNavigate();
@@ -49,10 +51,8 @@ function UserInfo() {
             프로필 미리보기
           </h2>
 
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-              <User size={24} className="text-gray-500" />
-            </div>
+          <div className="flex items-center gap-2 mb-4">
+            <ProfileImageUploader />
             <div>
               <p className="text-sm text-gray-500">닉네임</p>
               <p className="font-semibold text-gray-900">

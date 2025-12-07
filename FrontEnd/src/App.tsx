@@ -6,13 +6,11 @@ import CreateStudy from './components/create-study/CreateStudy';
 import AuthPage from './components/auth/AuthPage';
 import StudyDetail from './components/study-detail/StudyDetail';
 import Study from './components/study-info/Study';
-import NotificationSocketListener from './components/public/NotificationSocketListener';
 import UserInfo from './components/user-info/UserInfo';
 
 function App() {
   return (
     <div>
-      <NotificationSocketListener />
       <Routes>
         <Route
           path="/"

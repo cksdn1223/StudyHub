@@ -29,6 +29,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     address: '',
     description: '',
     role: '',
+    profileImageUrl: 'defaultUrl',
   });
   const isLoggedIn = user.email.length !== 0
 
@@ -42,6 +43,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       address: '',
       description: '',
       role: '',
+      profileImageUrl: 'defaultUrl',
     });
     showToast(message, type);
   }, [showToast, navigate]);

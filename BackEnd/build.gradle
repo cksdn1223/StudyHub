@@ -57,7 +57,8 @@ dependencies {
 	// N.B. VAPID 인증 및 메시지 암호화/전송을 위한 적절한 라이브러리 선택
     implementation 'nl.martijndwars:web-push:5.1.1'      // 버전은 최신으로 맞춰도 됨
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70' // ECDSA 암호화용
-
+    // GCS 의존성
+    implementation 'com.google.cloud:google-cloud-storage:2.40.0'
 }
 
 tasks.named('test') {

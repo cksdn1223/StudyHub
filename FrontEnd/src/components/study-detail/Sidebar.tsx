@@ -1,11 +1,12 @@
 import axios from "axios";
-import { ChevronRight, MapPin, User } from "lucide-react";
+import { ChevronRight, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getHeaders } from "../../context/AxiosConfig";
 import { axiosErrorType, StudyList, UserInfo } from "../../type";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
+import defaultAvatar from "../../assets/image/defaultImage.webp"
 
 const tagLink = [
   // 프론트엔드 (Frontend)
@@ -96,13 +97,13 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
     : '🔥 스터디 참여 신청하기';
   const handleApply = async () => {
     if (!isLeader) {
-      try{
+      try {
         await axios.post(`${import.meta.env.VITE_BASE_URL}/participant/${data.id}`, null, getHeaders());
         showToast('스터디 참여 신청이 완료되었습니다.', 'success')
       } catch (error) {
         showToast((error as axiosErrorType).response.data.message, 'error');
       }
-      
+
     }
   };
   if (!leader) return <div>유저정보를 불러올 수 없습니다.</div>
@@ -122,13 +123,15 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
 
       {/* --- 스터디장 정보 섹션 --- */}
       <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 mb-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">스터디장 정보</h2>
-        <div className="flex items-center mb-4">
-          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-3">
-            <User size={24} className="text-gray-500" />
-          </div>
+        <h2 className="text-lg font-bold text-gray-800 mb-2">스터디장 정보</h2>
+        <div className="flex items-center mb-2">
+          <img
+            className="w-16 h-16 rounded-full"
+            src={user.profileImageUrl !== "defaultUrl" ? user.profileImageUrl : defaultAvatar}
+            alt="프로필 이미지"
+          />
           <div>
-            <p className="font-semibold text-gray-800">{leader.nickname}</p>
+            <p className="ml-4 font-semibold text-gray-800">{leader.nickname}</p>
           </div>
         </div>
         <div className="text-sm text-gray-600">

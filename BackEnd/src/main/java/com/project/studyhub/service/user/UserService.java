@@ -5,6 +5,7 @@ import com.project.studyhub.entity.User;
 import com.project.studyhub.exception.AccessDeniedException;
 import com.project.studyhub.exception.EmailExistsException;
 import com.project.studyhub.repository.UserRepository;
+import com.project.studyhub.service.gcs.ProfileImageService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 
@@ -25,6 +27,7 @@ import java.security.Principal;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProfileImageService profileImageService;
 
     public ResponseEntity<?> signUp(UserSignUpRequest dto) {
         if(userRepository.existsByEmail(dto.email())) throw new EmailExistsException("이미 존재하는 Email 입니다.");
@@ -61,6 +64,13 @@ public class UserService {
         }
         String encoded = passwordEncoder.encode(request.newPassword());
         user.changePassword(encoded);
+    }
+    @Transactional
+    public void changeProfileImage(Principal principal, MultipartFile file) {
+        User user = findUserByPrincipal(principal);
+        String newUrl = profileImageService.uploadProfileImage(user.getUserId(), file);
+        // 필요하면 기존 이미지 삭제 로직도 추가 (oldUrl 파싱 → GCS 삭제)
+        user.changeUrl(newUrl);
     }
 
     // 헬퍼메세ㅓ드

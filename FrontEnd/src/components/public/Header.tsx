@@ -2,7 +2,7 @@ import { BookOpenText, LogOut, MessageCircleCode, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "./NotificationBell";
-
+import defaultAvatar from "../../assets/image/defaultImage.webp";
 
 function Header() {
   const { user, isLoggedIn, logout } = useAuth();
@@ -55,7 +55,8 @@ function Header() {
                 {/* 💡 프로필 클릭 시 이동 */}
                 <Link to="/profile" className="flex items-center">
                   <img
-                    className="w-8 h-8 rounded-full object-cover border-2 border-red-400"
+                    className="w-12 h-12 rounded-full object-cover border-2 group-hover:border-red-400"
+                    src={user.profileImageUrl!=="defaultUrl" ? user.profileImageUrl : defaultAvatar}
                     alt="프로필 이미지"
                   />
                   <span className={`ml-2 ${isMainPage ? 'text-white' : 'text-neutral-500'} group-hover:text-red-400 font-medium text-sm sm:text-base hidden md:inline`}>

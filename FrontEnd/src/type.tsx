@@ -68,6 +68,7 @@ export type Member = {
   nickname: string;
   status: string | null;
   userId: number;
+  profileImageUrl?: string;
 }
 
 export type MyStudyList = {
@@ -91,6 +92,7 @@ export type UserInfo = {
   role: string;
   description: string;
   address: string;
+  profileImageUrl: string;
 }
 
 export type ChatMessage = {
@@ -136,6 +138,7 @@ export type User = {
   address: string;
   description: string;
   role: string;
+  profileImageUrl: string;
 }
 
 export type JwtPayload = {
