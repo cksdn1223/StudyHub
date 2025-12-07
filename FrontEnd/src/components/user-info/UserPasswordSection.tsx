@@ -14,7 +14,7 @@ function UserPasswordSection() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="px-3 py-1.5 text-sm rounded-lg border border-gray-300"
+          className="px-3 py-1.5 text-sm rounded-lg border text-white font-medium bg-red-500 hover:bg-red-600"
         >
           비밀번호 변경
         </button>

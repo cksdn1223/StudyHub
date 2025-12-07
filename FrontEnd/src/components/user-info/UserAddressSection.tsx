@@ -60,14 +60,6 @@ function UserAddressSection() {
               {user.address || "등록된 주소가 없습니다."}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={handleAddress}
-            disabled={loading}
-            className="px-3 py-1.5 text-sm rounded-lg bg-red-500 text-white disabled:opacity-60"
-          >
-            {loading ? "변경 중..." : "주소 변경"}
-          </button>
         </div>
 
         {/* 필요하다면 입력 필드도 그대로 유지 가능 (읽기 전용) */}
@@ -87,9 +79,9 @@ function UserAddressSection() {
           <button
             type="button"
             onClick={handleAddress}
-            className="flex-shrink-0 px-4 py-3 bg-gray-700 text-white text-sm font-medium rounded-lg hover:bg-gray-900"
+            className="flex-shrink-0 px-4 py-3 bg-red-500 text-white text-sm font-medium rounded-lg hover:bg-red-600"
           >
-            주소 찾기
+            {loading ? "변경 중..." : "주소 변경"}
           </button>
         </div>
       </div>

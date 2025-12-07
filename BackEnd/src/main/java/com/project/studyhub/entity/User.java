@@ -64,6 +64,7 @@ public class User implements UserDetails {
         this.address = address;
         this.geom = geom;
         this.role = Role.USER;
+        this.description = "";
     }
     // User 정보 수정 메서드
     public void changeInfo(String nickname, String description) {

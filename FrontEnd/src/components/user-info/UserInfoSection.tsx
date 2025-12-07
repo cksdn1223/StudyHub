@@ -72,7 +72,7 @@ function UserInfoSection(
             type="text"
             value={nick}
             onChange={handleNickChange}
-            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
           />
         </div>
         <div>
@@ -86,7 +86,7 @@ function UserInfoSection(
             type="text"
             value={des}
             onChange={handleDesChange}
-            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="간단한 한 줄 소개를 적어보세요."
           />
         </div>
@@ -94,7 +94,7 @@ function UserInfoSection(
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium disabled:opacity-60"
+            className="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-medium disabled:opacity-60 hover:bg-red-600"
           >
             {loading ? "저장 중..." : "변경"}
           </button>

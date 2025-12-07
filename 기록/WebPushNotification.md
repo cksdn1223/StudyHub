@@ -1,6 +1,5 @@
 
 다음할거
-- 알림 소리 조정 > const { volume } = useNotificationSettings(); 만들기
 - 프로필이미지
 
 # Web Push

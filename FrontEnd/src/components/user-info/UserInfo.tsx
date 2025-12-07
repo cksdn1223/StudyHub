@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 
-
 function UserInfo() {
   const navigate = useNavigate();
   const { user: leader } = useAuth();
@@ -19,7 +18,6 @@ function UserInfo() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
-      {/* 상단 헤더 */}
       <div className="flex items-center gap-3 mb-8">
         <button
           type="button"

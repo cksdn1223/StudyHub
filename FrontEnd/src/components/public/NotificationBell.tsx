@@ -8,6 +8,7 @@ import { useToast } from "../../context/ToastContext";
 import axios from "axios";
 import { getHeaders } from "../../context/AxiosConfig";
 import { useQueryClient } from "@tanstack/react-query";
+import { useNotificationSettings } from "../../context/NotificationSettingsContext";
 
 export const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {
   await axios.put(`${import.meta.env.VITE_BASE_URL}/participant/${studyId}`, {
@@ -25,6 +26,8 @@ function NotificationBell() {
   const navigate = useNavigate();
   const { myStudyList, setSelectStudy } = useMyStudy();
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const { volume, setVolume } = useNotificationSettings();
+
   const onClickNotification = (n: Notification) => {
     if (n.type === "MESSAGE") {
       const targetStudy =
@@ -36,12 +39,12 @@ function NotificationBell() {
   };
   const handleAccept = async (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
-    try{
+    try {
       await participantStatusChange(n.studyId, n.senderId, "ACCEPTED")
       await queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
       showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 수락하셨습니다.`, "info")
       removeNotification(n.id);
-    } catch(err) {
+    } catch (err) {
       showToast("가입 수락 처리중 문제가 발생했습니다.", "error");
     }
   };
@@ -119,32 +122,54 @@ function NotificationBell() {
       {/* 드롭다운 */}
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg z-50">
-          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
-            <span className="font-semibold text-sm text-gray-800">
-              알림
-              {unreadCount > 0 && (
-                <span className="pl-2 text-xs text-gray-400">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3 justify-between">
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm text-gray-800">
+                알림
+              </span>
+              {/* {unreadCount > 0 && (
+                <span className="text-xs text-gray-400">
                   읽지 않은 알림 {unreadCount}개
                 </span>
-              )}
-            </span>
+              )} */}
+            </div>
+            {/* 볼륨 슬라이더 */}
+            <div className="flex items-center gap-2 text-[12px] text-gray-500">
+              <span className="whitespace-nowrap">소리</span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={Math.round(volume * 100)}
+                onChange={(e) => setVolume(Number(e.target.value) / 100)}
+                className="flex-1 w-20 accent-red-400"
+              />
+              <span className="w-8 text-[11px] text-right text-gray-400">
+                {Math.round(volume * 100)}%
+              </span>
+            </div>
+
+            {/* 모두 읽기 버튼 */}
             <button
               type="button"
               disabled={unreadCount === 0}
               onClick={markAllAsRead}
               className={`
-              inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium
-              transition
-              ${unreadCount === 0
+                inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-medium
+                transition
+                ${unreadCount === 0
                   ? "border-gray-200 text-gray-300 bg-gray-50 cursor-default"
                   : "border-indigo-100 text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-200"
                 }
-            `}
+              `}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
               모두 읽기
             </button>
           </div>
+
+          {/* 밑 알림 리스트 구역 */}
           <div className="max-h-80 overflow-y-auto py-0">
             {notifications.length === 0 ? (
               <div className="px-4 py-6 text-center text-sm text-gray-400">
@@ -183,7 +208,7 @@ function NotificationBell() {
                         {n.type !== "JOIN_REQUEST" && <button
                           type="button"
                           onClick={(e) => handleDelete(e, n)}
-                          className=" text-gray-300 w-4 h-4 hover:text-red-500"
+                          className=" text-gray-500 font-bold w-4 h-4 hover:text-red-500"
                         >
                           ✕
                         </button>}
