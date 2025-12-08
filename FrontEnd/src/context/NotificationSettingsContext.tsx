@@ -10,7 +10,7 @@ const NotificationSettingsContext = createContext<NotificationSettings | undefin
 const STORAGE_KEY = "studyhub_notification_volume";
 
 export const NotificationSettingsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [volume, setVolumeState] = useState(0.3); // 기본 30%
+  const [volume, setVolumeState] = useState(0.2); // 기본 20%
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);

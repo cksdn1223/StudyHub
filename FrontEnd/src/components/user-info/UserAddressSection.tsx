@@ -25,8 +25,10 @@ function UserAddressSection() {
           params: { address: addr },
         }
       );
-      const x = Number(response.data.response.result.point.x);
-      const y = Number(response.data.response.result.point.y);
+      const result = response.data.results[0];
+      const location = result.geometry.location;
+      const x = Number(location.lng);
+      const y = Number(location.lat);
       await axios.patch(
         `${import.meta.env.VITE_BASE_URL}/user/address`,
         {

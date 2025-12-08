@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState } from "react";
 import ProfileImageUploader from "./ProfileImageUploader";
-import ProfileImageCropModal from "./ProfileImageCropModal";
 
 function UserInfo() {
   const navigate = useNavigate();

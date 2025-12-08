@@ -4,7 +4,6 @@ import { ChatMessage } from '../../type';
 import { useEffect, useState } from 'react';
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useAuth } from '../../context/AuthContext';
 import { useMyStudy } from '../../context/MyStudyContext';
 import JoinStudyList from './JoinStudyList';
 import Chat from './Chat';
@@ -15,7 +14,6 @@ import StudyInfo from './StudyInfo';
 
 function Study() {
   const [stompClient, setStompClient] = useState<Client | null>(null);
-  const { user } = useAuth();
   const queryClient = useQueryClient();
   const { isLoading, error, selectStudy, myStudyList } = useMyStudy();
   const selectedStudyId = selectStudy?.studyId;

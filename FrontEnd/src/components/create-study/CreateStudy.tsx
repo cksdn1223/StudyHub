@@ -109,11 +109,13 @@ function CreateStudy() {
         address: data.address,
       },
     })
+    const result = response.data.results[0];
+    const location = result.geometry.location;
     setStudyData(prev => ({
       ...prev,
       address: data.address,
-      longitude: response.data.response.result.point.x,
-      latitude: response.data.response.result.point.y,
+      latitude: location.lat,   // 위도
+      longitude: location.lng,  // 경도
     }));
   };
 
@@ -121,7 +123,7 @@ function CreateStudy() {
     open({ onComplete: handleComplete });
   };
 
-  const handleCreate = async() => {
+  const handleCreate = async () => {
     if (!studyData.title) {
       showToast('스터디 제목을 입력해주세요.', 'error');
       return;
@@ -158,7 +160,7 @@ function CreateStudy() {
     } catch (error) {
       showToast('스터디 생성에 실패했습니다.', 'error');
     }
-    
+
   }
   return (
     <div className="min-h-screen p-6 md:p-10">

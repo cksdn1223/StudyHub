@@ -155,11 +155,13 @@ function Register() {
         address: data.address,
       }
     })
+    const result = response.data.results[0];
+    const location = result.geometry.location;
     setUser(prev => ({
       ...prev,
       address: data.address,
-      longitude: response.data.response.result.point.x,
-      latitude: response.data.response.result.point.y,
+      latitude: location.lat,   // 위도
+      longitude: location.lng,  // 경도
     }));
   };
 
