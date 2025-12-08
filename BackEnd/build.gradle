@@ -22,6 +22,7 @@ configurations {
 
 repositories {
 	mavenCentral()
+    maven { url 'https://maven.google.com' }
 }
 
 dependencies {
@@ -36,9 +37,6 @@ dependencies {
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
-
-	// Database
-	runtimeOnly 'org.postgresql:postgresql'
 
 	// JWT
 	implementation 'io.jsonwebtoken:jjwt-api:0.13.0'
@@ -59,6 +57,9 @@ dependencies {
     implementation 'org.bouncycastle:bcprov-jdk15on:1.70' // ECDSA 암호화용
     // GCS 의존성
     implementation 'com.google.cloud:google-cloud-storage:2.40.0'
+    // Cloud SQL Connector, DataBAse
+    implementation 'com.google.cloud.sql:postgres-socket-factory:1.15.0'
+    implementation 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {

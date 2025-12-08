@@ -19,14 +19,15 @@ const NotificationSocketListener = () => {
   useEffect(() => {
     volumeRef.current = volume;
   }, [volume]);
-
+  const WS_BASE_URL = import.meta.env.DEV
+    ? "" // dev일 땐 "" + "/ws-stomp" => "/ws-stomp" (=> proxy 사용)
+    : import.meta.env.VITE_BASE_URL; // prod일 땐 Cloud Run 주소
   const clientRef = useRef<Client | null>(null);
   useEffect(() => {
     if (user.email.length === 0) return;
     if (clientRef.current) return;
-    
     const client = new Client({
-      webSocketFactory: () => new SockJS("/ws-stomp"),
+      webSocketFactory: () => new SockJS(`${WS_BASE_URL}/ws-stomp`),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/sub/notification/${user.id}`, (message) => {
@@ -41,7 +42,7 @@ const NotificationSocketListener = () => {
           if (targetRef.current) {
             targetRef.current.volume = volumeRef.current;
             targetRef.current.currentTime = 0;
-            targetRef.current.play().catch(() => {});
+            targetRef.current.play().catch(() => { });
           }
         });
       }

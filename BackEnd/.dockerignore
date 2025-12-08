@@ -1,0 +1,20 @@
+# Git
+.git
+.gitignore
+
+# Gradle / 빌드 캐시
+.gradle
+out
+bin
+
+# IDE 설정
+.idea
+.vscode
+*.iml
+
+# OS 잡파일
+**/.DS_Store
+**/Thumbs.db
+
+# 로그 파일
+*.log

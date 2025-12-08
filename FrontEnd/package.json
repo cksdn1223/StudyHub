@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:prod": "vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "dev:css": "tailwindcss -i ./src/index.css -o ./src/output.css --watch"
+    
   },
   "dependencies": {
     "@stomp/stompjs": "^7.2.1",

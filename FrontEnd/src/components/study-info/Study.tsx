@@ -17,11 +17,14 @@ function Study() {
   const queryClient = useQueryClient();
   const { isLoading, error, selectStudy, myStudyList } = useMyStudy();
   const selectedStudyId = selectStudy?.studyId;
+  const WS_BASE_URL = import.meta.env.DEV
+    ? "" // dev일 땐 "" + "/ws-stomp" => "/ws-stomp" (=> proxy 사용)
+    : import.meta.env.VITE_BASE_URL; // prod일 땐 Cloud Run 주소
   // 웹소켓 연결용 useEffect
   useEffect(() => {
     if (!selectedStudyId) return;
     const client = new Client({
-      webSocketFactory: () => new SockJS("/ws-stomp"),
+      webSocketFactory: () => new SockJS(`${WS_BASE_URL}/ws-stomp`),
       reconnectDelay: 5000,
       onConnect: () => {
         client.subscribe(`/sub/message/${selectedStudyId}`, (message) => {

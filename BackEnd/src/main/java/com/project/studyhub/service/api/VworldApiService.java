@@ -19,13 +19,8 @@ public class VworldApiService {
     public Mono<JsonNode> fetchVworldApiData(String address) {
         return vworldApiWebClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .queryParam("service", "address")
-                        .queryParam("request", "getcoord")
-                        .queryParam("simple", "true")
-                        .queryParam("format", "json")
-                        .queryParam("type", "road")
-                        .queryParam("key", vworldApiKey)
                         .queryParam("address", address)
+                        .queryParam("key", vworldApiKey)
                         .build())
                 .retrieve()
                 .bodyToMono(JsonNode.class);

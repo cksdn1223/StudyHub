@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     /**
-     * 공강정보오픈플랫폼 api
+     * geocoe api
      */
     @Value("${api.url.vworld}")
     private String vworldApiBaseUrl;
