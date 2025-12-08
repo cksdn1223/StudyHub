@@ -1,10 +1,10 @@
-name: Deploy FRONTEND to Firebase Hosting
+name: 프론트 엔드 Firebase Hosting 배포
 
 on:
   push:
     branches: [ "main" ]
     paths:
-      - "FRONTEND/**"
+      - "FrontEnd/**"
       - ".github/workflows/frontend.yml"
 
 jobs:
@@ -24,15 +24,15 @@ jobs:
         env:
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
-          mkdir -p FRONTEND
-          printf '%s\n' "$FRONTEND_ENV" > FRONTEND/.env
+          mkdir -p FrontEnd
+          printf '%s\n' "$FrontEnd_ENV" > FrontEnd/.env
 
       - name: 의존성 설치
-        working-directory: FRONTEND
+        working-directory: FrontEnd
         run: npm ci
 
       - name: 프론트엔드 빌드
-        working-directory: FRONTEND
+        working-directory: FrontEnd
         run: npm run build
 
       - name: Firebase Hosting 에 배포
@@ -42,4 +42,4 @@ jobs:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
           channelId: live
-          entryPoint: FRONTEND   # firebase.json 이 FRONTEND/ 안에 있을 때
+          entryPoint: FrontEnd   # firebase.json 이 FrontEnd/ 안에 있을 때

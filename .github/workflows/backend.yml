@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "BACKEND/**"
+      - "BackEnd/**"
       - ".github/workflows/backend.yml"
 
 jobs:
@@ -31,15 +31,15 @@ jobs:
         env:
           APP_PROPERTIES: ${{ secrets.APP_PROPERTIES }}
         run: |
-          mkdir -p BACKEND/src/main/resources
-          printf '%s\n' "$APP_PROPERTIES" > BACKEND/src/main/resources/application.properties
+          mkdir -p BackEnd/src/main/resources
+          printf '%s\n' "$APP_PROPERTIES" > BackEnd/src/main/resources/application.properties
 
       - name: gradlew 실행권한 부여
-        working-directory: BACKEND
+        working-directory: BackEnd
         run: chmod +x ./gradlew
 
       - name: Spring Boot 빌드
-        working-directory: BACKEND
+        working-directory: BackEnd
         run: ./gradlew clean build -x test
 
       - name: GCP 인증
@@ -52,11 +52,11 @@ jobs:
         with:
           project_id: ${{ env.PROJECT_ID }}
 
-      # BACKEND 폴더에 있는 Dockerfile 기준으로 Cloud Build 실행
+      # BackEnd 폴더에 있는 Dockerfile 기준으로 Cloud Build 실행
       - name: Artifact Registry 에 빌드하고 푸쉬
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
-          gcloud builds submit BACKEND --tag "$IMAGE"
+          gcloud builds submit BackEnd --tag "$IMAGE"
 
       - name: Cloud Run 에 배포
         run: |
