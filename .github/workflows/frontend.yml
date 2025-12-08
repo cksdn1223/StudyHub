@@ -25,7 +25,7 @@ jobs:
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
           mkdir -p FrontEnd
-          printf '%s\n' "$FrontEnd_ENV" > FrontEnd/.env
+          printf '%s\n' "$FRONTEND_ENV" > FrontEnd/.env
 
       - name: 의존성 설치
         working-directory: FrontEnd
