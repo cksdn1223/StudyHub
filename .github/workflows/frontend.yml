@@ -25,7 +25,8 @@ jobs:
         env:
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
-          printf '%s\n' "$FRONTEND_ENV" > .env
+          mkdir -p FRONTEND
+          printf '%s\n' "$FRONTEND_ENV" > FRONTEND/.env
 
       - name: 의존성 설치
         working-directory: FRONTEND

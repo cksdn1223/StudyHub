@@ -32,12 +32,13 @@ jobs:
         env:
           APP_PROPERTIES: ${{ secrets.APP_PROPERTIES }}
         run: |
-          printf '%s\n' "$APP_PROPERTIES" > application.properties
+          mkdir -p BACKEND/src/main/resources
+          printf '%s\n' "$APP_PROPERTIES" > BACKEND/src/main/resources/application.properties
 
       - name: gradlew 실행권한 부여
         working-directory: BACKEND
         run: chmod +x ./gradlew
-        
+
       - name: Spring Boot 빌드
         working-directory: BACKEND
         run: ./gradlew clean build -x test
