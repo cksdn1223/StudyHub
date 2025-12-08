@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p BackEnd/src/main/resources
           printf '%s\n' "$APP_PROPERTIES" > BackEnd/src/main/resources/application.properties
-          
+
       - name: GCP 인증
         uses: google-github-actions/auth@v2
         with:
@@ -56,4 +56,6 @@ jobs:
             --region "${REGION}" \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars SPRING_DATASOURCE_URL=$DB_URL,SPRING_DATASOURCE_USERNAME=$DB_USERNAME,SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD
+            --set-env-vars "SPRING_DATASOURCE_URL=${DB_URL}" \
+            --set-env-vars "SPRING_DATASOURCE_USERNAME=${DB_USERNAME}" \
+            --set-env-vars "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}"
