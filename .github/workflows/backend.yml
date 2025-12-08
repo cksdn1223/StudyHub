@@ -50,6 +50,10 @@ jobs:
           gcloud builds submit BackEnd --tag "$IMAGE"
 
       - name: Cloud Run 에 배포
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
           gcloud run deploy "${SERVICE}" \
@@ -57,3 +61,4 @@ jobs:
             --region "${REGION}" \
             --platform managed \
             --allow-unauthenticated
+            --set-env-vars SPRING_DATASOURCE_URL=$DB_URL,SPRING_DATASOURCE_USERNAME=$DB_USERNAME,SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD
