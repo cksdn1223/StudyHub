@@ -28,7 +28,6 @@ jobs:
           java-version: "17"
 
       - name: application.properties 를 secret 에서 받아와 만들기
-        working-directory: BACKEND/src/main/resources
         env:
           APP_PROPERTIES: ${{ secrets.APP_PROPERTIES }}
         run: |

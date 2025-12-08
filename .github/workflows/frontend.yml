@@ -21,7 +21,6 @@ jobs:
           node-version: "20"
 
       - name: .env 를 secret 에서받아와 만들기
-        working-directory: FRONTEND
         env:
           FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
         run: |
