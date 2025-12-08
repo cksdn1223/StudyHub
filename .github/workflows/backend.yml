@@ -28,6 +28,11 @@ jobs:
           mkdir -p BackEnd/src/main/resources
           printf '%s\n' "$APP_PROPERTIES" > BackEnd/src/main/resources/application.properties
 
+          echo "=== DEBUG: application.properties 내용 ==="
+          ls -R
+          echo "-------------------------------"
+          cat BackEnd/src/main/resources/application.properties
+          echo "-------------------------------"
       - name: GCP 인증
         uses: google-github-actions/auth@v2
         with:
