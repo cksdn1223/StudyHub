@@ -51,11 +51,16 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
+
+          cat > env.yaml <<EOF
+          SPRING_DATASOURCE_URL: "${DB_URL}"
+          SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
+          SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
+          EOF
+
           gcloud run deploy "${SERVICE}" \
             --image "$IMAGE" \
             --region "${REGION}" \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "SPRING_DATASOURCE_URL=${DB_URL}" \
-            --set-env-vars "SPRING_DATASOURCE_USERNAME=${DB_USERNAME}" \
-            --set-env-vars "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}"
+            --env-vars-file=env.yaml
