@@ -47,7 +47,7 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
     }
   }, [data, selectedStudyId]);
   const selectStudy = useMemo(
-    () => data.find((s) => s.studyId === selectedStudyId) ?? null,
+    () => data?.find((s) => s.studyId === selectedStudyId) ?? null,
     [data, selectedStudyId]
   );
   const { data: chatList = [], isLoading: chatListLoading, error: chatListError } = useQuery<ChatMessage[]>({
