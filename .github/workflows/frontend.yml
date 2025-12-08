@@ -1,0 +1,45 @@
+name: Deploy FRONTEND to Firebase Hosting
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "FRONTEND/**"
+      - ".github/workflows/frontend.yml"
+
+jobs:
+  deploy-frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node 셋업
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: .env 를 secret 에서받아와 만들기
+        working-directory: FRONTEND
+        env:
+          FRONTEND_ENV: ${{ secrets.FRONTEND_ENV }}
+        run: |
+          printf '%s\n' "$FRONTEND_ENV" > .env
+
+      - name: 의존성 설치
+        working-directory: FRONTEND
+        run: npm ci
+
+      - name: 프론트엔드 빌드
+        working-directory: FRONTEND
+        run: npm run build
+
+      - name: Firebase Hosting 에 배포
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          channelId: live
+          entryPoint: FRONTEND   # firebase.json 이 FRONTEND/ 안에 있을 때
