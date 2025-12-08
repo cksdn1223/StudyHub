@@ -20,14 +20,7 @@ jobs:
     steps:
       - name: 리포지토리 체크아웃
         uses: actions/checkout@v4
-
-      - name: application.properties 를 secret 에서 받아와 만들기
-        env:
-          APP_PROPERTIES: ${{ secrets.APP_PROPERTIES }}
-        run: |
-          mkdir -p BackEnd/src/main/resources
-          printf '%s\n' "$APP_PROPERTIES" > BackEnd/src/main/resources/application.properties
-
+        
       - name: GCP 인증
         uses: google-github-actions/auth@v2
         with:
@@ -45,22 +38,10 @@ jobs:
           gcloud builds submit BackEnd --tag "$IMAGE"
 
       - name: Cloud Run 에 배포
-        env:
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
           IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
-
-          cat > env.yaml <<EOF
-          SPRING_DATASOURCE_URL: "${DB_URL}"
-          SPRING_DATASOURCE_USERNAME: "${DB_USERNAME}"
-          SPRING_DATASOURCE_PASSWORD: "${DB_PASSWORD}"
-          EOF
-
           gcloud run deploy "${SERVICE}" \
             --image "$IMAGE" \
             --region "${REGION}" \
             --platform managed \
-            --allow-unauthenticated \
-            --env-vars-file=env.yaml
+            --allow-unauthenticated
