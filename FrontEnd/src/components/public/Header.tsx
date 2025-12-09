@@ -12,7 +12,6 @@ function Header() {
     logout("성공적으로 로그아웃 하였습니다.", "success");
   };
 
-
   return (
     <header className="flex justify-between items-center h-16 px-4 sm:px-6 md:px-8">
       <Link to="/" className="text-xl sm:text-3xl font-bold text-red-400 flex items-center">
@@ -24,7 +23,7 @@ function Header() {
         {/* 네비게이션 아이템들을 가로로 배치 */}
         <ul className="flex items-center space-x-4 sm:space-x-6">
 
-          {/* 💡 로그인 상태에 따른 조건부 렌더링 */}
+          {/* 로그인 상태에 따른 조건부 렌더링 */}
           {isLoggedIn ? (
             <>
               {/* 로그아웃 아이콘 */}

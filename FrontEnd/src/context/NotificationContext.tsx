@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Notification, NotificationContextType } from "../type";
 import { getHeaders } from "./AxiosConfig";
@@ -27,12 +27,12 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   }, [isLoggedIn]);
 
   // 🔹 2) 웹소켓으로 받은 새 알림 추가할 때 사용
-  const addNotification = (n: Notification) => {
+  const addNotification = useCallback((n: Notification) => {
     setNotifications((prev) => [n, ...prev]);
     if (!n.isRead) {
       setUnreadCount((prev) => prev + 1);
     }
-  };
+  }, []);
 
   // 🔹 3) 개별 읽음 처리
   const markAsRead = async (id: number) => {

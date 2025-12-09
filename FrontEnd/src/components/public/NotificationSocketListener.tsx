@@ -37,7 +37,7 @@ const NotificationSocketListener = () => {
             queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
           }
           const targetRef =
-            notification.type === "MESSAGE" ? msgSoundRef : otherSoundRef;
+            notification.type === "MESSAGE" ? otherSoundRef : msgSoundRef;
 
           if (targetRef.current) {
             targetRef.current.volume = volumeRef.current;
@@ -55,7 +55,7 @@ const NotificationSocketListener = () => {
       client.deactivate();
       clientRef.current = null;
     };
-  }, [addNotification, user, queryClient]);
+  }, [addNotification, user, queryClient, WS_BASE_URL]);
 
   return (
     <>

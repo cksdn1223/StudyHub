@@ -14,6 +14,12 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(
+        name = "push_subscription",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"user_id", "endpoint"})
+        }
+)
 public class PushSubscription {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

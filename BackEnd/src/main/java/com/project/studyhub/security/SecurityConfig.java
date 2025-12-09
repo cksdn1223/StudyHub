@@ -74,6 +74,8 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
+                "https://studyhub.kro.kr",
+                "http://studyhub.kro.kr",
                 "https://studyhub-frontend-66f63.web.app",
                 "http://localhost:5173" // 로컬 개발용   
         ));

@@ -19,6 +19,7 @@ type MyStudyContextValue = {
 const MyStudyContext = createContext<MyStudyContextValue | null>(null);
 
 const getData = async () => {
+  if(localStorage.getItem('studyhub_jwt')===null) return([]);
   const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
   return response.data;
 }
