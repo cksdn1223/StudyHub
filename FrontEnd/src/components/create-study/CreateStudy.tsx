@@ -36,6 +36,7 @@ const tagList = [
 ];
 
 function CreateStudy() {
+  const [isAddressLoading, setIsAddressLoading] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [studyData, setStudyData] = useState<StudyData>({
@@ -104,19 +105,32 @@ function CreateStudy() {
 
   const open = useDaumPostcodePopup('https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js');
   const handleComplete = async (data: { address: string }) => {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/vworld`, {
-      params: {
+    try {
+      setIsAddressLoading(true);
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/vworld`,
+        {
+          params: {
+            address: data.address,
+          },
+        }
+      );
+
+      const result = response.data.results[0];
+      const location = result.geometry.location;
+
+      setStudyData((prev) => ({
+        ...prev,
         address: data.address,
-      },
-    })
-    const result = response.data.results[0];
-    const location = result.geometry.location;
-    setStudyData(prev => ({
-      ...prev,
-      address: data.address,
-      latitude: location.lat,   // 위도
-      longitude: location.lng,  // 경도
-    }));
+        latitude: location.lat, // 위도
+        longitude: location.lng, // 경도
+      }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsAddressLoading(false);
+    }
   };
 
   const handleAddress = () => {
@@ -329,10 +343,24 @@ function CreateStudy() {
                   placeholder="주소 입력"
                   value={studyData.address}
                   disabled
-                  required />
-                <button className="flex-shrink-0 px-4 py-3 text-sm font-medium bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 h-11" onClick={handleAddress}>
-                  <span className="mr-1">📍</span>
-                  <span>주소 찾기</span>
+                  required
+                />
+                <button
+                  className={`flex-shrink-0 h-11 rounded-lg px-4 py-3 text-sm font-medium text-white transition
+                            ${isAddressLoading ? "bg-gray-300 cursor-wait" : "bg-red-400 hover:bg-red-500"}`}
+                  onClick={handleAddress}
+                  disabled={isAddressLoading}
+                >
+                  {isAddressLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent" />
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1">
+                      <span>📍</span>
+                      <span>주소 찾기</span>
+                    </span>
+                  )}
                 </button>
               </div>
 

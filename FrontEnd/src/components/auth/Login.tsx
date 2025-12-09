@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { EMAIL_REGEX, PASSWORD_REGEX, UserLogin } from "../../type";
 import { useAuthApi } from "../../hooks/useAuthApi";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 
 
@@ -9,16 +8,18 @@ import { useToast } from "../../context/ToastContext";
 function Login() {
   const { handleLogin } = useAuthApi();
   const { showToast } = useToast();
-  const navigate = useNavigate();
   const [user, setUser] = useState<UserLogin>({
     email: '',
     password: ''
   })
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
   const [isEmailInvalid, setIsEmailInvalid] = useState(false);
   const [isPasswordInvalid, setIsPasswordInvalid] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isLoginLoading) return;
 
     const isEmailValidOnSubmit = EMAIL_REGEX.test(user.email.trim());
     const isPasswordValidOnSubmit = PASSWORD_REGEX.test(user.password.trim());
@@ -33,11 +34,13 @@ function Login() {
       setIsPasswordInvalid(true);
       return;
     }
-
-    const loginSuccess = await handleLogin(user);
-    if (loginSuccess) {
-      navigate("/");
+    setIsLoginLoading(true);
+    try {
+      await handleLogin(user);
+    } finally {
+      setIsLoginLoading(false);
     }
+
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -146,9 +149,20 @@ function Login() {
       {/* 로그인 버튼 */}
       <button
         type="submit"
-        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-400 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150"
+        disabled={isLoginLoading}
+        className={`
+                    w-full flex items-center justify-center gap-2
+                    py-3 px-4 border border-transparent rounded-lg shadow-sm
+                    text-sm font-medium text-white bg-red-400 hover:bg-red-500
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500
+                    transition duration-150
+                    ${isLoginLoading ? "opacity-60 cursor-not-allowed hover:bg-red-400" : ""}
+                  `}
       >
-        로그인
+        {isLoginLoading && (
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-100 border-t-transparent" />
+        )}
+        {isLoginLoading ? "로그인 중..." : "로그인"}
       </button>
 
       {/* 구분선 */}

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import defaultAvatar from "../../assets/image/defaultImage.webp"
+import { useStudyList } from "../../hooks/useStudyList";
 
 const tagLink = [
   // 프론트엔드 (Frontend)
@@ -61,8 +62,9 @@ const tagLink = [
   { tag: 'Git', link: 'https://git-scm.com/doc' },
 ];
 
-function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] }) {
+function Sidebar({ data }: { data: StudyList }) {
   const navigate = useNavigate();
+  const { data: studyList } = useStudyList();
   const { showToast } = useToast();
   const { user } = useAuth();
 
@@ -74,6 +76,7 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
     }
     getLeaderData();
   }, [data.leaderId])
+  if(studyList===undefined) return;
   const similarStudies = studyList
     .filter((study) => study.id !== data.id)
     .map((study) => {
@@ -127,7 +130,7 @@ function Sidebar({ data, studyList }: { data: StudyList, studyList: StudyList[] 
         <div className="flex items-center mb-2">
           <img
             className="w-16 h-16 rounded-full"
-            src={user.profileImageUrl !== "defaultUrl" ? user.profileImageUrl : defaultAvatar}
+            src={data.profileImageUrl !== "defaultUrl" ? data.profileImageUrl : defaultAvatar}
             alt="프로필 이미지"
           />
           <div>

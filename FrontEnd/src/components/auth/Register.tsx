@@ -12,7 +12,8 @@ function Register() {
   const { handleRegister } = useAuthApi();
   const { showToast } = useToast();
   const navigate = useNavigate();
-
+  const [isAddressLoading, setIsAddressLoading] = useState(false);
+  const [isRegisterLoading, setIsRegisterLoading] = useState(false);
   const [user, setUser] = useState<UserRegister>({
     nickname: '',
     email: '',
@@ -29,6 +30,8 @@ function Register() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isRegisterLoading) return;
 
     const originalNickname = user.nickname;
     const trimmedNickname = originalNickname.trim();
@@ -64,8 +67,12 @@ function Register() {
       showToast("옳바른 주소가 입력되지 않았습니다.", "error");
       return;
     }
-
-    if (await handleRegister(user)) navigate("/auth/login");
+    setIsRegisterLoading(true);
+    try {
+      if (await handleRegister(user)) navigate("/auth/login");
+    } finally {
+      setIsRegisterLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,19 +157,32 @@ function Register() {
   // 주소검색관련
   const open = useDaumPostcodePopup('https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js');
   const handleComplete = async (data: { address: string }) => {
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/vworld`, {
-      params: {
+    try {
+      setIsAddressLoading(true);
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/vworld`,
+        {
+          params: {
+            address: data.address,
+          },
+        }
+      );
+
+      const result = response.data.results[0];
+      const location = result.geometry.location;
+
+      setUser(prev => ({
+        ...prev,
         address: data.address,
-      }
-    })
-    const result = response.data.results[0];
-    const location = result.geometry.location;
-    setUser(prev => ({
-      ...prev,
-      address: data.address,
-      latitude: location.lat,   // 위도
-      longitude: location.lng,  // 경도
-    }));
+        latitude: location.lat,   // 위도
+        longitude: location.lng,  // 경도
+      }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsAddressLoading(false);
+    }
   };
 
   const handleAddress = () => {
@@ -279,20 +299,43 @@ function Register() {
           <button
             type="button"
             onClick={handleAddress}
-            className="flex-shrink-0 px-4 py-3 bg-gray-700 text-white text-sm font-medium rounded-lg hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+            className={`flex-shrink-0 px-4 py-3 text-white text-sm font-medium rounded-lg  focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
+              ${isAddressLoading
+                ? "bg-gray-300 cursor-wait"
+                : "bg-gray-700"
+              }`}
+            disabled={isAddressLoading}
           >
-            주소 찾기
+            {isAddressLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-500 border-t-transparent" />
+              </span>
+            ) : (
+              <span className="flex items-center gap-1">
+                <span>주소 찾기</span>
+              </span>
+            )}
           </button>
         </div>
 
         {/* 회원가입 버튼 */}
         <button
           type="submit"
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-red-400 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mt-8"
+          disabled={isRegisterLoading}
+          className={`
+                      w-full flex items-center justify-center gap-2
+                      py-3 px-4 border border-transparent rounded-lg shadow-sm
+                      text-sm font-medium text-white bg-red-400 hover:bg-red-500
+                      focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 mt-8
+                      ${isRegisterLoading ? "opacity-60 cursor-not-allowed hover:bg-red-400" : ""}
+                    `}
         >
-          회원가입
+          {isRegisterLoading && (
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-100 border-t-transparent" />
+          )}
+          {isRegisterLoading ? "회원가입 중..." : "회원가입"}
         </button>
-      </form>
+      </form >
     </>
   );
 }

@@ -1,11 +1,9 @@
-import { useAuth } from "../../context/AuthContext";
 import { StudyList } from "../../type";
 import { useNavigate } from "react-router-dom";
 import defaultAvatar from "../../assets/image/defaultImage.webp"
 
 function StudyCard(study: StudyList) {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const StudyStatusBadge = () => {
     switch (study.status) {
@@ -74,7 +72,7 @@ function StudyCard(study: StudyList) {
       {/* 아바타 */}
       <img
         className="w-24 h-24 rounded-full"
-        src={user.profileImageUrl !== "defaultUrl" ? user.profileImageUrl : defaultAvatar}
+        src={study.profileImageUrl !== "defaultUrl" ? study.profileImageUrl : defaultAvatar}
         alt="프로필 이미지"
       />
 

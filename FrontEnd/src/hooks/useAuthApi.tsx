@@ -2,10 +2,12 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext'; 
 import { axiosErrorType, UserLogin, UserRegister } from '../type';
+import { useNavigate } from 'react-router-dom';
 
 export const useAuthApi = () => {
   const { login } = useAuth();
   const { showToast } = useToast();
+  const navigate = useNavigate();
 
   // --- 로그인 처리 함수 ---
   const handleLogin = async (user: UserLogin) => {
@@ -13,6 +15,7 @@ export const useAuthApi = () => {
       const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, user);
       login(response.headers.authorization);
       showToast('로그인에 성공했습니다.', 'success');
+      navigate("/");
       return true;
     } catch (error) {
       showToast((error as axiosErrorType).response.data.message, 'error');

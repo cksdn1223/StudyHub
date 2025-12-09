@@ -6,6 +6,7 @@ import java.util.List;
 public record StudyDistanceResponse(
         Long id,
         Long leaderId,
+        String profileImageUrl,
         String title,
         String description,
         Integer maxMembers,

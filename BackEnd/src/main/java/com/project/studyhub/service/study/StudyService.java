@@ -53,6 +53,7 @@ public class StudyService {
                             return new StudyDistanceResponse(
                                     projection.getId(),
                                     projection.getLeaderId(),
+                                    user.getProfileImageUrl(),
                                     projection.getTitle(),
                                     projection.getDescription(),
                                     projection.getMaxMembers(),
