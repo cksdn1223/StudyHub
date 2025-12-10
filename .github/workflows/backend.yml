@@ -1,0 +1,47 @@
+name: 백엔드 CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "BackEnd/**"
+      - ".github/workflows/backend.yml"
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_ID: project-66f63d9c-9565-466e-b38
+      REGION: asia-northeast3
+      SERVICE: studyhub-backend
+      REPO: studyhub-backend-repo
+
+    steps:
+      - name: 리포지토리 체크아웃
+        uses: actions/checkout@v4
+        
+      - name: GCP 인증
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: gcloud 세팅
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+
+      # BackEnd 폴더에 있는 Dockerfile 기준으로 Cloud Build 실행
+      - name: Artifact Registry 에 빌드하고 푸쉬
+        run: |
+          IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
+          gcloud builds submit BackEnd --tag "$IMAGE"
+
+      - name: Cloud Run 에 배포
+        run: |
+          IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${SERVICE}"
+          gcloud run deploy "${SERVICE}" \
+            --image "$IMAGE" \
+            --region "${REGION}" \
+            --platform managed \
+            --allow-unauthenticated

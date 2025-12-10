@@ -131,7 +131,7 @@ function Sidebar({ data }: { data: StudyList }) {
           <img
             className="w-16 h-16 rounded-full"
             src={data.profileImageUrl !== "defaultUrl" ? data.profileImageUrl : defaultAvatar}
-            alt="프로필 이미지"
+            alt="프로필 이미지 "
           />
           <div>
             <p className="ml-4 font-semibold text-gray-800">{leader.nickname}</p>
