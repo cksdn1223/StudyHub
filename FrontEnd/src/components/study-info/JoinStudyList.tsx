@@ -29,7 +29,7 @@ function JoinStudyList() {
                   {study.title.slice(0, 1)}
                 </div> :
                 <img
-                  className="w-24 h-24 rounded-full"
+                  className="w-10 h-10 rounded-lg"
                   src={study.studyImageUrl}
                   alt="프로필 이미지"
                 />

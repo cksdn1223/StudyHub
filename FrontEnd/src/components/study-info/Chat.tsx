@@ -2,10 +2,13 @@ import Card from '../public/Card';
 import { useMyStudy } from '../../context/MyStudyContext';
 import { useAuth } from '../../context/AuthContext';
 import { useEffect, useRef, useState } from 'react';
-import { Send } from 'lucide-react';
+import { Camera, Send } from 'lucide-react';
 import { Client } from '@stomp/stompjs';
 import defaultAvatar from '../../assets/image/defaultImage.webp';
-import StudyImageUploader from './StudyImageUploader';
+import axios from 'axios';
+import { getHeaders } from '../../context/AxiosConfig';
+import { useImageCropUpload } from '../../hooks/useImageCropUpload';
+import ProfileImageCropModal from '../user-info/ProfileImageCropModal';
 
 function Chat({ stompClient }: { stompClient: Client | null }) {
   const [inputMessage, setInputMessage] = useState('');
@@ -14,6 +17,30 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
   const { chatList, chatListLoading, chatListError, selectStudy } = useMyStudy();
   const { user } = useAuth();
   const selectedStudyId = selectStudy?.studyId;
+  const {
+    uploading,
+    showCropModal,
+    cropImageUrl,
+    fileInputRef,
+    handleClick,
+    handleFileChange,
+    handleCropConfirm,
+    handleCropCancel,
+  } = useImageCropUpload({
+    uploadCallback: async (formData) => {
+      await axios.patch(
+        `${import.meta.env.VITE_BASE_URL}/study/${selectStudy?.studyId}/study-image`,
+        formData,
+        {
+          ...getHeaders(),
+          headers: {
+            ...getHeaders().headers,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    },
+  });
   useEffect(() => {
     if (!messagesContainerRef.current) return;
     const el = messagesContainerRef.current;
@@ -38,7 +65,49 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
         <Card className="flex flex-col min-h-[80vh] max-h-[85vh] overflow-hidden">
           <div className="flex items-start justify-between pb-4 border-b border-gray-100 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <StudyImageUploader studyId={selectStudy.studyId} studyTitle={selectStudy.title}/>
+
+              <div className="relative inline-block">
+                <div className="w-24 h-24 rounded-lg overflow-hidden text-4xl bg-gray-300 flex items-center justify-center">
+                  {selectStudy.studyImageUrl === null ? (
+                    <>{selectStudy.title.slice(0, 1)}</>
+                  ) : (
+                    <img
+                      className="w-full h-full object-cover"
+                      src={selectStudy.studyImageUrl}
+                      alt="스터디 이미지"
+                    />)}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleClick}
+                  disabled={uploading}
+                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full 
+                  bg-indigo-600 text-white flex items-center justify-center
+                  shadow-sm hover:bg-indigo-700
+                  disabled:opacity-60"
+                >
+                  <Camera size={14} />
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
+
+              {showCropModal && cropImageUrl && (
+                <ProfileImageCropModal
+                  rect={true}
+                  imageUrl={cropImageUrl}
+                  onCancel={handleCropCancel}
+                  onConfirm={handleCropConfirm}
+                />
+              )}
+
               <div>
                 <p className="text-lg font-bold text-gray-800">{selectStudy.title}</p>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
