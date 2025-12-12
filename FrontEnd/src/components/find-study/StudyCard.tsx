@@ -1,6 +1,5 @@
 import { StudyList } from "../../type";
 import { useNavigate } from "react-router-dom";
-import defaultAvatar from "../../assets/image/defaultImage.webp"
 
 function StudyCard(study: StudyList) {
   const navigate = useNavigate();
