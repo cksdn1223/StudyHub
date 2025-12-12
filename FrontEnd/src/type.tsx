@@ -46,6 +46,7 @@ export type StudyData = {
 export type StudyList = {
   id: number;
   leaderId: number;
+  studyImageUrl: string | null;
   profileImageUrl: string;
   title: string;
   description: string;
@@ -73,18 +74,19 @@ export type Member = {
 }
 
 export type MyStudyList = {
-  address: string;
-  description: string;
-  detailAddress: string;
-  detailLocation: string;
-  duration: string;
-  frequency: string;
-  maxMembers: string;
-  memberCount: number;
-  members: Member[];
-  status: string;
   studyId: number;
   title: string;
+  description: string;
+  studyImageUrl: string;
+  maxMembers: string;
+  memberCount: number;
+  frequency: string;
+  duration: string;
+  address: string;
+  detailAddress: string;
+  detailLocation: string;
+  status: string;
+  members: Member[];
 }
 
 export type UserInfo = {
@@ -99,6 +101,7 @@ export type UserInfo = {
 export type ChatMessage = {
   senderId: number;
   senderNickname: string;
+  senderImageUrl: string;
   content: string;
   sentAt: string;
 }

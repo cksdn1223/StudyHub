@@ -7,6 +7,7 @@ import { participantStatusChange } from '../public/NotificationBell';
 import { Member, MyStudyList } from '../../type';
 import { useToast } from '../../context/ToastContext';
 import { useQueryClient } from '@tanstack/react-query';
+import defaultAvatar from "../../assets/image/defaultImage.webp";
 
 function StudyInfo() {
   const [openMemberId, setOpenMemberId] = useState<number | null>(null);
@@ -75,9 +76,7 @@ function StudyInfo() {
                 className={`flex items-center justify-between ${openMemberId === member.userId ? "relative z-10" : ""}`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-full ${member.leader ? 'bg-red-100 text-red-500' : 'bg-gray-100 text-gray-500'} flex items-center justify-center font-semibold`}>
-                    {member.nickname[0]}
-                  </div>
+                  <img src={member.profileImageUrl === "defaultUrl" ? defaultAvatar : member.profileImageUrl} alt="프로필 이미지" className={`w-10 h-10 rounded-full`} />
                   <div>
                     <p className={`text-sm font-semibold ${member.leader ? 'text-gray-900' : 'text-gray-800'}`}>{member.nickname}</p>
                     <p className="text-xs text-gray-500">{member.leader ? '리더' : '멤버'}</p>

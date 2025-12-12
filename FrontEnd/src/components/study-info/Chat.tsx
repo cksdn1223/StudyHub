@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useEffect, useRef, useState } from 'react';
 import { Send } from 'lucide-react';
 import { Client } from '@stomp/stompjs';
+import defaultAvatar from '../../assets/image/defaultImage.webp';
+import StudyImageUploader from './StudyImageUploader';
 
 function Chat({ stompClient }: { stompClient: Client | null }) {
   const [inputMessage, setInputMessage] = useState('');
@@ -36,9 +38,7 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
         <Card className="flex flex-col min-h-[80vh] max-h-[85vh] overflow-hidden">
           <div className="flex items-start justify-between pb-4 border-b border-gray-100 flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-red-500 text-white flex items-center justify-center font-semibold">
-                {selectStudy.title?.[0] ?? "?"}
-              </div>
+              <StudyImageUploader studyId={selectStudy.studyId} studyTitle={selectStudy.title}/>
               <div>
                 <p className="text-lg font-bold text-gray-800">{selectStudy.title}</p>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
@@ -78,9 +78,8 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
                       {/* 상대방일 때: 아바타 */}
                       {!isMine && (
                         <div className="mr-2">
-                          <div className="w-10 h-10 rounded-2xl bg-blue-200 flex items-center justify-center text-white font-semibold text-sm">
-                            {message.senderNickname?.[0] ?? "?"}
-                          </div>
+                          <img
+                            src={message.senderImageUrl === "defaultUrl" ? defaultAvatar : message.senderImageUrl} alt="유저 프로필 이미지" className='w-10 h-10 rounded-2xl' />
                         </div>
                       )}
 

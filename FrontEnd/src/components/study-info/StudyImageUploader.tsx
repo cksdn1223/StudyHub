@@ -1,20 +1,17 @@
-import { Camera } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
-import defaultAvatar from "../../assets/image/defaultImage.webp"
-import ProfileImageCropModal from "./ProfileImageCropModal";
-import { useImageCropUpload } from "../../hooks/useImageCropUpload";
 import axios from "axios";
 import { getHeaders } from "../../context/AxiosConfig";
+import { useImageCropUpload } from "../../hooks/useImageCropUpload";
+import ProfileImageCropModal from "../user-info/ProfileImageCropModal";
+import { Camera } from "lucide-react";
 
+interface StudyImageUploaderProps {
+  studyId: number;
+  studyTitle: string;
+  studyImageUrl?: string | null;
+  onUpdated?: (newUrl?: string) => void;
+}
 
-function ProfileImageUploader() {
-  const { user: leader, refreshUser } = useAuth();
-
-  const initialProfileUrl =
-    leader?.profileImageUrl && leader.profileImageUrl !== "defaultUrl"
-      ? leader.profileImageUrl
-      : null;
-
+function StudyImageUploader({ studyId, studyTitle, studyImageUrl, onUpdated }: StudyImageUploaderProps) {
   const {
     uploading,
     displayUrl,
@@ -26,11 +23,11 @@ function ProfileImageUploader() {
     handleCropConfirm,
     handleCropCancel,
   } = useImageCropUpload({
-    initialUrl: initialProfileUrl,
-    defaultImage: defaultAvatar,
+    initialUrl: studyImageUrl ?? null,
+    defaultImage: "default",
     uploadCallback: async (formData) => {
-      await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/user/profile-image`,
+      const res = await axios.patch(
+        `${import.meta.env.VITE_BASE_URL}/study/${studyId}/study-image`,
         formData,
         {
           ...getHeaders(),
@@ -40,21 +37,23 @@ function ProfileImageUploader() {
           },
         }
       );
-      await refreshUser();
+      // 필요하다면 부모에게 새 URL 전달
+      onUpdated?.(res.data?.imageUrl);
     },
   });
-
-  if (!leader || !leader.email) return null;
 
   return (
     <>
       <div className="relative inline-block">
-        <div className="w-14 h-14 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-          <img
-            className="w-full h-full object-cover"
-            src={displayUrl ?? defaultAvatar}
-            alt="프로필 이미지"
-          />
+        <div className="w-24 h-24 rounded-lg overflow-hidden text-4xl bg-gray-300 flex items-center justify-center">
+          {displayUrl === "default" ? (
+            <>{studyTitle.slice(0, 1)}</>
+          ) : (
+            <img
+              className="w-full h-full object-cover"
+              src={displayUrl}
+              alt="스터디 이미지"
+            />)}
         </div>
 
         <button
@@ -63,7 +62,7 @@ function ProfileImageUploader() {
           disabled={uploading}
           className="absolute bottom-0 right-0 w-7 h-7 rounded-full 
                   bg-indigo-600 text-white flex items-center justify-center
-                  border-2 border-white shadow-sm hover:bg-indigo-700
+                  shadow-sm hover:bg-indigo-700
                   disabled:opacity-60"
         >
           <Camera size={14} />
@@ -80,6 +79,7 @@ function ProfileImageUploader() {
 
       {showCropModal && cropImageUrl && (
         <ProfileImageCropModal
+          rect={true}
           imageUrl={cropImageUrl}
           onCancel={handleCropCancel}
           onConfirm={handleCropConfirm}
@@ -89,4 +89,4 @@ function ProfileImageUploader() {
   );
 }
 
-export default ProfileImageUploader;
+export default StudyImageUploader;

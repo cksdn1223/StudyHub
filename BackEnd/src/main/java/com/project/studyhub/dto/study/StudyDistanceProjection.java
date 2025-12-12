@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public interface StudyDistanceProjection {
     Long getId();
     Long getLeaderId();
+    String getStudyImageUrl();
     String getTitle();
     String getDescription();
     Integer getMaxMembers();

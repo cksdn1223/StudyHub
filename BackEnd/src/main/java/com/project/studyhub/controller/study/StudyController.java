@@ -7,6 +7,7 @@ import com.project.studyhub.service.study.StudyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -31,5 +32,14 @@ public class StudyController {
     @GetMapping("/me")
     public ResponseEntity<List<MyStudyResponse>> getJoinStudy(Principal principal) {
         return ResponseEntity.ok(studyService.getJoinStudy(principal));
+    }
+
+    @PatchMapping("/{studyId}/study-image")
+    public ResponseEntity<Void> changeStudyImage(
+            @PathVariable Long studyId,
+            @RequestParam("file") MultipartFile file
+    ){
+        studyService.changeStudyImage(studyId, file);
+        return ResponseEntity.noContent().build();
     }
 }

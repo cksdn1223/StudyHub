@@ -11,6 +11,7 @@ import java.util.List;
 public class MyStudyResponse {
     private Long studyId;
     private String title;
+    private String studyImageUrl;
     private String description;
     private Integer maxMembers;
     private Integer memberCount;

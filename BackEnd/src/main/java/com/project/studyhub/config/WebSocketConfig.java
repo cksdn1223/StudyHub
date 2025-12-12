@@ -25,8 +25,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-stomp")
                 .setAllowedOriginPatterns(
-                    "https://studyhub-frontend-66f63.web.app",
-                    "http://localhost:5173"
+                        "https://studyhub.kro.kr",
+                        "http://studyhub.kro.kr",
+                        "https://studyhub-frontend-66f63.web.app",
+                        "http://localhost:5173" // 로컬 개발용
                 )
                 .withSockJS();
     }

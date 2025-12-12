@@ -4,12 +4,14 @@ import { getCroppedImage } from "../../utils/getCroppedImage";
 
 type ProfileImageCropModalProps = {
   imageUrl: string;
+  rect?: boolean;
   onCancel: () => void;
   onConfirm: (blob: Blob) => void;
 };
 
 const ProfileImageCropModal = ({
   imageUrl,
+  rect,
   onCancel,
   onConfirm,
 }: ProfileImageCropModalProps) => {
@@ -50,7 +52,7 @@ const ProfileImageCropModal = ({
             crop={crop}
             zoom={zoom}
             aspect={1}
-            cropShape="round" // 원형 가이드
+            cropShape={rect ? "rect" : "round"}
             showGrid={false}
             onCropChange={setCrop}
             onZoomChange={setZoom}

@@ -2,11 +2,9 @@ package com.project.studyhub.service.user;
 
 import com.project.studyhub.dto.user.*;
 import com.project.studyhub.entity.User;
-import com.project.studyhub.exception.AccessDeniedException;
 import com.project.studyhub.exception.EmailExistsException;
 import com.project.studyhub.repository.UserRepository;
 import com.project.studyhub.service.gcs.ProfileImageService;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -18,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;

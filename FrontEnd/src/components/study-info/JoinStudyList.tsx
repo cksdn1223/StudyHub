@@ -24,9 +24,16 @@ function JoinStudyList() {
               onClick={() => setSelectStudy(study)}
               className={`flex items-center gap-3 p-3 rounded-xl border ${selectStudy === study ? 'border-red-400' : 'border-gray-100'} bg-white hover:border-red-400 hover:shadow-sm transition hover:cursor-pointer`}
             >
-              <div className={`w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center text-white font-semibold`}>
-                {study.title.slice(0, 1)}
-              </div>
+              {study.studyImageUrl === null ?
+                <div className="w-10 h-10 rounded-lg bg-red-500 flex items-center justify-center text-white font-semibold">
+                  {study.title.slice(0, 1)}
+                </div> :
+                <img
+                  className="w-24 h-24 rounded-full"
+                  src={study.studyImageUrl}
+                  alt="프로필 이미지"
+                />
+              }
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-semibold text-gray-800 truncate">{study.title}</p>

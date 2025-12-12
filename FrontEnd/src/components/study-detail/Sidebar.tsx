@@ -62,7 +62,7 @@ const tagLink = [
   { tag: 'Git', link: 'https://git-scm.com/doc' },
 ];
 
-function Sidebar({ data }: { data: StudyList }) {
+function Sidebar({ selectedContent }: { selectedContent: StudyList }) {
   const navigate = useNavigate();
   const { data: studyList } = useStudyList();
   const { showToast } = useToast();
@@ -71,16 +71,16 @@ function Sidebar({ data }: { data: StudyList }) {
   const [leader, setLeader] = useState<UserInfo>();
   useEffect(() => {
     const getLeaderData = async () => {
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/${data.leaderId}`, getHeaders());
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/${selectedContent.leaderId}`, getHeaders());
       setLeader(response.data);
     }
     getLeaderData();
-  }, [data.leaderId])
+  }, [selectedContent.leaderId])
   if(studyList===undefined) return;
   const similarStudies = studyList
-    .filter((study) => study.id !== data.id)
+    .filter((study) => study.id !== selectedContent.id)
     .map((study) => {
-      const sameTags = study.tags.filter((tag: string) => data.tags.includes(tag));
+      const sameTags = study.tags.filter((tag: string) => selectedContent.tags.includes(tag));
       return {
         study,
         sameTags,
@@ -101,7 +101,7 @@ function Sidebar({ data }: { data: StudyList }) {
   const handleApply = async () => {
     if (!isLeader) {
       try {
-        await axios.post(`${import.meta.env.VITE_BASE_URL}/participant/${data.id}`, null, getHeaders());
+        await axios.post(`${import.meta.env.VITE_BASE_URL}/participant/${selectedContent.id}`, null, getHeaders());
         showToast('스터디 참여 신청이 완료되었습니다.', 'success')
       } catch (error) {
         showToast((error as axiosErrorType).response.data.message, 'error');
@@ -130,7 +130,7 @@ function Sidebar({ data }: { data: StudyList }) {
         <div className="flex items-center mb-2">
           <img
             className="w-16 h-16 rounded-full"
-            src={data.profileImageUrl !== "defaultUrl" ? data.profileImageUrl : defaultAvatar}
+            src={selectedContent.profileImageUrl !== "defaultUrl" ? selectedContent.profileImageUrl : defaultAvatar}
             alt="프로필 이미지 "
           />
           <div>
@@ -147,7 +147,7 @@ function Sidebar({ data }: { data: StudyList }) {
       <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 mb-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">📍 추천 학습 자료</h2>
         <ul className="space-y-3 text-sm">
-          {data.tags.filter(tag => tagLink.find(list => list.tag === tag)?.link !== undefined).map(tag => (
+          {selectedContent.tags.filter(tag => tagLink.find(list => list.tag === tag)?.link !== undefined).map(tag => (
             <li key={tag}>
               <a
                 className="text-blue-600 hover:underline cursor-pointer"

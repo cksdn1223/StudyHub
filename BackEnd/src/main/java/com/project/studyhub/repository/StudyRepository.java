@@ -1,7 +1,6 @@
 package com.project.studyhub.repository;
 
 import com.project.studyhub.dto.study.StudyDistanceProjection;
-import com.project.studyhub.dto.study.StudyDistanceResponse;
 import com.project.studyhub.entity.Study;
 import com.project.studyhub.entity.User;
 import com.project.studyhub.enums.ParticipantStatus;
@@ -18,6 +17,7 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
                     s.id,
                     s.leader_id AS leaderId,
                     s.title,
+                    s.study_image_url As studyImageUrl,
                     s.description,
                     s.max_members AS maxMembers,
                     (

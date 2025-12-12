@@ -36,7 +36,7 @@ function StudyCard(study: StudyList) {
       tabIndex={0}
       className="flex justify-between border-b border-gray-200 py-6 hover:bg-gray-50 transition duration-150 focus:outline-none"
     >
-      <div className="flex-grow pr-4">
+      <div className="flex-1 pr-4">
         <div className="flex items-center text-sm mb-1 text-gray-500">
           <StudyStatusBadge />
           <span className="text-green-600 font-semibold mr-3">{Math.ceil(study.distanceKm * 10) / 10} Km</span>
@@ -70,11 +70,16 @@ function StudyCard(study: StudyList) {
       </div>
 
       {/* 아바타 */}
-      <img
-        className="w-24 h-24 rounded-full"
-        src={study.profileImageUrl !== "defaultUrl" ? study.profileImageUrl : defaultAvatar}
-        alt="프로필 이미지"
-      />
+      {study.studyImageUrl === null ?
+        <div className="w-24 h-24 rounded-full bg-red-200 flex items-center justify-center text-white font-semibold text-4xl">
+          {study.title?.[0] ?? "?"}
+        </div> :
+        <img
+          className="w-24 h-24 rounded-full"
+          src={study.studyImageUrl}
+          alt="프로필 이미지"
+        />
+      }
 
 
     </div>

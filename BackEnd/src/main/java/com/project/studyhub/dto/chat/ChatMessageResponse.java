@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 public record ChatMessageResponse(
         Long senderId,
         String senderNickname,
+        String senderImageUrl,
         String content,
         LocalDateTime sentAt
 ) {
@@ -14,6 +15,7 @@ public record ChatMessageResponse(
         return new ChatMessageResponse(
                 m.getSender().getUserId(),
                 m.getSender().getNickname(),
+                m.getSender().getProfileImageUrl(),
                 m.getContent(),
                 m.getSentAt()
         );

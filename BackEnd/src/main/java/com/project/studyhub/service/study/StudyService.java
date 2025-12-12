@@ -2,18 +2,20 @@ package com.project.studyhub.service.study;
 
 import com.project.studyhub.dto.study.*;
 import com.project.studyhub.entity.Study;
-import com.project.studyhub.entity.StudyParticipant;
 import com.project.studyhub.entity.Tag;
 import com.project.studyhub.entity.User;
 import com.project.studyhub.enums.ParticipantStatus;
+import com.project.studyhub.exception.ResourceNotFoundException;
 import com.project.studyhub.repository.StudyRepository;
 import com.project.studyhub.repository.TagRepository;
 import com.project.studyhub.repository.UserRepository;
+import com.project.studyhub.service.gcs.ProfileImageService;
+import com.project.studyhub.service.gcs.StudyImageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -25,6 +27,7 @@ public class StudyService {
     private final StudyRepository studyRepository;
     private final UserRepository userRepository;
     private final TagRepository tagRepository;
+    private final StudyImageService studyImageService;
 
     @Transactional
     public void createStudy(StudyCreateRequest studyCreateRequest, Principal principal) {
@@ -53,6 +56,7 @@ public class StudyService {
                             return new StudyDistanceResponse(
                                     projection.getId(),
                                     projection.getLeaderId(),
+                                    projection.getStudyImageUrl(),
                                     user.getProfileImageUrl(),
                                     projection.getTitle(),
                                     projection.getDescription(),
@@ -82,7 +86,17 @@ public class StudyService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void changeStudyImage(Long studyId, MultipartFile file) {
+        Study study = studyRepository.findById(studyId)
+                .orElseThrow(()-> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
+        String newUrl = studyImageService.uploadProfileImage(study, file);
+        // 필요하면 기존 이미지 삭제 로직도 추가 (oldUrl 파싱 → GCS 삭제)
+        study.changeUrl(newUrl);
+    }
 
+
+//    helper
     private MyStudyResponse toMyStudyResponseDto(Study study) {
 
         User leader = study.getLeader();
@@ -92,6 +106,7 @@ public class StudyService {
         StudyMemberDto leaderDto = StudyMemberDto.builder()
                 .userId(leaderId)
                 .nickname(leader.getNickname())
+                .profileImageUrl(leader.getProfileImageUrl())
                 .email(leader.getEmail())
                 .leader(true)
                 .status(null) // 리더는 status 개념 X
@@ -105,6 +120,7 @@ public class StudyService {
                     return StudyMemberDto.builder()
                             .userId(u.getUserId())
                             .nickname(u.getNickname())
+                            .profileImageUrl(u.getProfileImageUrl())
                             .email(u.getEmail())
                             .leader(false)
                             .status(sp.getStatus())
@@ -119,6 +135,7 @@ public class StudyService {
                 .studyId(study.getId())
                 .title(study.getTitle())
                 .description(study.getDescription())
+                .studyImageUrl(study.getStudyImageUrl())
                 .maxMembers(study.getMaxMembers())
                 .memberCount(study.getMemberCount())
                 .frequency(study.getFrequency())

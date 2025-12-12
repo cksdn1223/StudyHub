@@ -28,6 +28,8 @@ public class Study {
     @Column(length = 100, nullable = false)
     private String title;
 
+    private String studyImageUrl;
+
     @Column(columnDefinition = "TEXT", nullable = true)
     private String description;
 
@@ -85,4 +87,7 @@ public class Study {
         StudyTag studyTag = StudyTag.createStudyTag(this, tag);
         this.studyTags.add(studyTag);
     }
+
+    public void changeUrl(String studyImageUrl) {this.studyImageUrl = studyImageUrl;}
+
 }
