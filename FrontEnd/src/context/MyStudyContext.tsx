@@ -2,8 +2,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { ChatMessage, MyStudyList } from "../type"; // 경로 맞게 수정
-import axios from "axios";
-import { getHeaders } from "./AxiosConfig";
+import { getData, getChatData } from "../api/api";
 
 type MyStudyContextValue = {
   myStudyList: MyStudyList[];
@@ -17,16 +16,6 @@ type MyStudyContextValue = {
 };
 
 const MyStudyContext = createContext<MyStudyContextValue | null>(null);
-
-const getData = async () => {
-  if(localStorage.getItem('studyhub_jwt')===null) return([]);
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
-  return response.data;
-}
-const getChatData = async (studyId: number) => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/${studyId}/messages`, getHeaders());
-  return response.data;
-}
 
 export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
   const [selectedStudyId, setSelectedStudyId] = useState<number | null>(null);

@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import defaultAvatar from "../../assets/image/defaultImage.webp"
 import { useStudyList } from "../../hooks/useStudyList";
+import { joinStudy } from "../../api/api";
 
 const tagLink = [
   // 프론트엔드 (Frontend)
@@ -101,7 +102,7 @@ function Sidebar({ selectedContent }: { selectedContent: StudyList }) {
   const handleApply = async () => {
     if (!isLeader) {
       try {
-        await axios.post(`${import.meta.env.VITE_BASE_URL}/participant/${selectedContent.id}`, null, getHeaders());
+        await joinStudy(selectedContent.id);
         showToast('스터디 참여 신청이 완료되었습니다.', 'success')
       } catch (error) {
         showToast((error as axiosErrorType).response.data.message, 'error');

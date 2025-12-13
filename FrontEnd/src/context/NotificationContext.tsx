@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { Notification, NotificationContextType } from "../type";
-import { getHeaders } from "./AxiosConfig";
 import { useAuth } from "./AuthContext";
+import { deleteNotification, getNotification, readAllNotification, readNotification } from "../api/api";
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
@@ -15,7 +14,7 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
     if (!isLoggedIn) return;
     const fetchInitial = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BASE_URL}/notifications`, getHeaders());
+        const res = await getNotification();
         const noti = res.data.sort((a:Notification,b:Notification)=> new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setNotifications(noti);
         setUnreadCount(res.data.filter((noti: Notification) => !noti.isRead).length);
@@ -37,7 +36,7 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   // 🔹 3) 개별 읽음 처리
   const markAsRead = async (id: number) => {
     try {
-      await axios.put(`${import.meta.env.VITE_BASE_URL}/notifications/${id}`, null, getHeaders());
+      await readNotification(id);
       setNotifications((prev) =>
         prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
       );
@@ -50,7 +49,7 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   // 🔹 4) 전체 읽음 처리
   const markAllAsRead = async () => {
     try {
-      await axios.put(`${import.meta.env.VITE_BASE_URL}/notifications`, null, getHeaders());
+      await readAllNotification();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (e) {
@@ -61,10 +60,7 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
   // 5. 알람 삭제
   const removeNotification = async (id: number) => {
     try {
-      await axios.delete(
-        `${import.meta.env.VITE_BASE_URL}/notifications/${id}`,
-        getHeaders()
-      );
+      await deleteNotification(id);
 
       setNotifications((prev) => {
         const target = prev.find((n) => n.id === id);

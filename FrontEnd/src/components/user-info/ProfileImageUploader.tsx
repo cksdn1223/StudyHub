@@ -3,8 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import defaultAvatar from "../../assets/image/defaultImage.webp"
 import ProfileImageCropModal from "./ProfileImageCropModal";
 import { useImageCropUpload } from "../../hooks/useImageCropUpload";
-import axios from "axios";
-import { getHeaders } from "../../context/AxiosConfig";
+import { changeProfileImg } from "../../api/api";
 
 
 function ProfileImageUploader() {
@@ -29,17 +28,7 @@ function ProfileImageUploader() {
     initialUrl: initialProfileUrl,
     defaultImage: defaultAvatar,
     uploadCallback: async (formData) => {
-      await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/user/profile-image`,
-        formData,
-        {
-          ...getHeaders(),
-          headers: {
-            ...getHeaders().headers,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await changeProfileImg(formData);
       await refreshUser();
     },
   });

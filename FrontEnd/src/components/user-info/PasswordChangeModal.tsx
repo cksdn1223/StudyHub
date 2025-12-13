@@ -1,8 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
-import { getHeaders } from "../../context/AxiosConfig";
 import { useToast } from "../../context/ToastContext";
 import { axiosErrorType, PASSWORD_REGEX } from "../../type";
+import { changePassword } from "../../api/api";
 
 type PasswordChangeModalProps = {
   onClose: () => void;
@@ -65,15 +65,7 @@ const PasswordChangeModal = ({ onClose }: PasswordChangeModalProps) => {
 
     try {
       setLoading(true);
-      await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/user/password`,
-        {
-          currentPassword,
-          newPassword,
-        },
-        getHeaders()
-      );
-
+      await changePassword(currentPassword, newPassword);
       showToast("비밀번호가 성공적으로 변경되었습니다.", "success");
       resetState();
       onClose();

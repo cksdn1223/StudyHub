@@ -1,14 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { getHeaders } from '../context/AxiosConfig';
 import { StudyList } from '../type';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { fetchStudyList } from '../api/api';
 
-const fetchStudyList = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study`, getHeaders());
-  return response.data;
-};
+
 
 /**
  * 스터디 목록 데이터를 가져오는 커스텀 훅

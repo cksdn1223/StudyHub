@@ -3,9 +3,8 @@ import { jwtDecode } from 'jwt-decode';
 import { useToast } from './ToastContext';
 import { useNavigate } from 'react-router-dom';
 import { JwtPayload, User } from '../type';
-import { getHeaders } from './AxiosConfig';
 import { registerPush } from '../utils/pushSubscription';
-import axios from 'axios';
+import { getUserInfo, pushSubscribe } from '../api/api';
 
 type AuthContextType = {
   user: User;
@@ -58,10 +57,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [logout]);
 
   const fetchMyProfile = async (): Promise<User> => {
-    const res = await axios.get(
-      `${import.meta.env.VITE_BASE_URL}/user/me`,
-      getHeaders()
-    );
+    const res = await getUserInfo();
     return res.data; // { email, nickname, address, description, role } 형태 
   };
 
@@ -109,14 +105,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const sub = await registerPush();
       if (!sub) return;
 
-      await axios.post(
-        `${import.meta.env.VITE_BASE_URL}/push/subscribe`,
-        {
-          endpoint: sub.endpoint,
-          keys: sub.toJSON().keys, // { p256dh, auth }
-        },
-        getHeaders()
-      );
+      await pushSubscribe(sub);
     };
 
     setupPush();

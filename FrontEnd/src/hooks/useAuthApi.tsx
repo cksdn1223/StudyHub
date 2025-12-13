@@ -1,8 +1,8 @@
-import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext'; 
 import { axiosErrorType, UserLogin, UserRegister } from '../type';
 import { useNavigate } from 'react-router-dom';
+import { getData, postLogin, postRegister } from '../api/api';
 
 export const useAuthApi = () => {
   const { login } = useAuth();
@@ -12,9 +12,10 @@ export const useAuthApi = () => {
   // --- 로그인 처리 함수 ---
   const handleLogin = async (user: UserLogin) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, user);
+      const response = await postLogin(user);
       login(response.headers.authorization);
       showToast('로그인에 성공했습니다.', 'success');
+      getData();
       navigate("/");
       return true;
     } catch (error) {
@@ -26,7 +27,7 @@ export const useAuthApi = () => {
   // --- 회원가입 처리 함수 ---
   const handleRegister = async (user: UserRegister) => {
     try {
-      await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/register`, user);
+      await postRegister(user);
       showToast('회원가입이 완료되었습니다! 로그인해 주세요.', 'success');
       return true;
     } catch (error) {

@@ -3,11 +3,11 @@ import Card from '../public/Card';
 import { useState } from 'react';
 import { useMyStudy } from '../../context/MyStudyContext';
 import { useAuth } from '../../context/AuthContext';
-import { participantStatusChange } from '../public/NotificationBell';
 import { Member, MyStudyList } from '../../type';
 import { useToast } from '../../context/ToastContext';
 import { useQueryClient } from '@tanstack/react-query';
 import defaultAvatar from "../../assets/image/defaultImage.webp";
+import { participantStatusChange } from '../../api/api';
 
 function StudyInfo() {
   const [openMemberId, setOpenMemberId] = useState<number | null>(null);

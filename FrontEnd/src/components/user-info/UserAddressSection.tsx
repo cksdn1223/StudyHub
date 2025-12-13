@@ -1,10 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
 import Card from "../public/Card";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
-import { getHeaders } from "../../context/AxiosConfig";
 import { useDaumPostcodePopup } from "react-daum-postcode";
+import { changeLocation, getLocation } from "../../api/api";
 
 function UserAddressSection() {
   const { user, refreshUser } = useAuth();
@@ -18,27 +17,8 @@ function UserAddressSection() {
   const handleComplete = async (data: { address: string }) => {
     try {
       setLoading(true);
-      const addr = data.address;
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/vworld`,
-        {
-          params: { address: addr },
-        }
-      );
-      const result = response.data.results[0];
-      const location = result.geometry.location;
-      const x = Number(location.lng);
-      const y = Number(location.lat);
-      await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/user/address`,
-        {
-          address: addr,
-          longitude: x,
-          latitude: y,
-        },
-        getHeaders()
-      );
-
+      const location = await getLocation(data)
+      await changeLocation(data, location);
       await refreshUser();
       showToast("주소가 변경되었습니다.", "success");
     } catch (err) {

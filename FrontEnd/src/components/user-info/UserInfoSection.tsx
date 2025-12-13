@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useToast } from "../../context/ToastContext";
-import axios from "axios";
-import { getHeaders } from "../../context/AxiosConfig";
 import Card from "../public/Card";
 import { useAuth } from "../../context/AuthContext";
+import { changeUserInfo } from "../../api/api";
 
 const MAX_NICKNAME_LENGTH = 15;
 const MAX_DESCRIPTION_LENGTH = 80;
@@ -43,11 +42,7 @@ function UserInfoSection(
 
     try {
       setLoading(true);
-      await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/user/info`,
-        { nickname: nick, description: des },
-        getHeaders()
-      );
+      await changeUserInfo(nick, des);
       await refreshUser();
       showToast("프로필 정보가 수정되었습니다.", "success");
     } catch (err) {

@@ -1,21 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
-import type { Notification, ParticipantStatus } from "../../type";
+import type { Notification } from "../../type";
 import { useNotification } from "../../context/NotificationContext";
 import { useMyStudy } from "../../context/MyStudyContext";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
-import axios from "axios";
-import { getHeaders } from "../../context/AxiosConfig";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotificationSettings } from "../../context/NotificationSettingsContext";
-
-export const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {
-  await axios.put(`${import.meta.env.VITE_BASE_URL}/participant/${studyId}`, {
-    userId: senderId,
-    status: status
-  }, getHeaders())
-}
+import { participantStatusChange } from "../../api/api";
 
 function NotificationBell() {
   const { notifications, markAsRead, markAllAsRead, removeNotification } = useNotification();

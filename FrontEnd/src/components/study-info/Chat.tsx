@@ -5,10 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, Send } from 'lucide-react';
 import { Client } from '@stomp/stompjs';
 import defaultAvatar from '../../assets/image/defaultImage.webp';
-import axios from 'axios';
-import { getHeaders } from '../../context/AxiosConfig';
 import { useImageCropUpload } from '../../hooks/useImageCropUpload';
 import ProfileImageCropModal from '../user-info/ProfileImageCropModal';
+import { changeStudyImg } from '../../api/api';
 
 function Chat({ stompClient }: { stompClient: Client | null }) {
   const [inputMessage, setInputMessage] = useState('');
@@ -28,17 +27,7 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
     handleCropCancel,
   } = useImageCropUpload({
     uploadCallback: async (formData) => {
-      await axios.patch(
-        `${import.meta.env.VITE_BASE_URL}/study/${selectStudy?.studyId}/study-image`,
-        formData,
-        {
-          ...getHeaders(),
-          headers: {
-            ...getHeaders().headers,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await changeStudyImg(formData, selectStudy?.studyId)
     },
   });
   useEffect(() => {

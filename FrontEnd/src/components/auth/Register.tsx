@@ -4,7 +4,7 @@ import { useAuthApi } from "../../hooks/useAuthApi";
 import { useToast } from "../../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import { useDaumPostcodePopup } from 'react-daum-postcode';
-import axios from "axios";
+import { getLocation } from "../../api/api";
 
 const NICKNAME_MIN_LENGTH = 2;
 
@@ -160,17 +160,7 @@ function Register() {
     try {
       setIsAddressLoading(true);
 
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/vworld`,
-        {
-          params: {
-            address: data.address,
-          },
-        }
-      );
-
-      const result = response.data.results[0];
-      const location = result.geometry.location;
+      const location = await getLocation(data);
 
       setUser(prev => ({
         ...prev,

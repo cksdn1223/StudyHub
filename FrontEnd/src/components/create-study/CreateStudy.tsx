@@ -8,8 +8,8 @@ import { useDaumPostcodePopup } from 'react-daum-postcode';
 import { StudyData } from '../../type';
 import { useToast } from '../../context/ToastContext';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { getHeaders } from '../../context/AxiosConfig';
+import { createStudy, getLocation } from '../../api/api';
+
 const tagList = [
   // 프론트엔드 (Frontend)
   'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
@@ -108,17 +108,7 @@ function CreateStudy() {
     try {
       setIsAddressLoading(true);
 
-      const response = await axios.get(
-        `${import.meta.env.VITE_BASE_URL}/vworld`,
-        {
-          params: {
-            address: data.address,
-          },
-        }
-      );
-
-      const result = response.data.results[0];
-      const location = result.geometry.location;
+      const location = await getLocation(data);
 
       setStudyData((prev) => ({
         ...prev,
@@ -168,7 +158,7 @@ function CreateStudy() {
     }
 
     try {
-      await axios.post(`${import.meta.env.VITE_BASE_URL}/study`, studyData, getHeaders());
+      createStudy(studyData);
       showToast('스터디가 성공적으로 생성되었습니다.', 'success');
       navigate('/find');
     } catch (error) {
