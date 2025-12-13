@@ -15,6 +15,11 @@ public class NotificationEventListener {
     @Async // 알림 발송을 비동기로 처리하여 기본 트랜잭션에 영향을 주지 않음
     @EventListener
     public void handleParticipantStatusChangeEvent(ParticipantStatusChangeEvent event) {
-        notificationService.sendNotification(event.getStudy(), event.getReceiver(), event.getStudy().getLeader(), event.getNotificationType());
+        notificationService.sendNotification(
+                event.study(),
+                event.receiver(),
+                event.sender(),
+                event.notificationType()
+        );
     }
 }

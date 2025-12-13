@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useToast } from "../context/ToastContext";
+import { axiosErrorType } from "../type";
 
 interface UseImageCropUploadOptions {
   // 서버에 업로드하는 실제 API 호출 함수 (각 컴포넌트에서 주입)
@@ -70,8 +71,7 @@ export function useImageCropUpload({
       await uploadCallback(formData);
       showToast("이미지가 변경되었습니다.", "success");
     } catch (error) {
-      console.error(error);
-      showToast("이미지 업로드 중 오류가 발생했습니다.", "error");
+      showToast((error as axiosErrorType).response.data.message, "error");
       setLocalPreview(null);
     } finally {
       setUploading(false);

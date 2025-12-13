@@ -47,7 +47,7 @@ public class StudyImageService {
             return String.format("https://storage.googleapis.com/%s/%s", bucketName, objectName);
 
         } catch (Exception e) {
-            throw new RuntimeException("프로필 이미지 업로드 중 오류 발생", e);
+            throw new RuntimeException("프로필 이미지 업로드 중 오류 발생");
         }
     }
 
