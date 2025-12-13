@@ -28,22 +28,21 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final ProfileImageService profileImageService;
 
-    public ResponseEntity<?> signUp(UserSignUpRequest dto) {
+    public void signUp(UserSignUpRequest dto) {
         if(userRepository.existsByEmail(dto.email())) throw new EmailExistsException("이미 존재하는 Email 입니다.");
         GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
         Coordinate coordinate = new Coordinate(dto.longitude(), dto.latitude());
         Point point = geometryFactory.createPoint(coordinate);
         userRepository.save(new User(dto.email(), passwordEncoder.encode(dto.password()), dto.nickname(), dto.address(), point));
-        return ResponseEntity.ok().build();
     }
 
-    public ResponseEntity<UserInfoResponse> getUserInfoByUserId(Long userId) {
+    public UserInfoResponse getUserInfoByUserId(Long userId) {
         User user = findUserById(userId);
-        return ResponseEntity.ok(UserInfoResponse.from(user));
+        return UserInfoResponse.from(user);
     }
-    public ResponseEntity<UserInfoResponse> getMyInfo(Principal principal) {
+    public UserInfoResponse getMyInfo(Principal principal) {
         User user = findUserByPrincipal(principal);
-        return ResponseEntity.ok(UserInfoResponse.from(user));
+        return UserInfoResponse.from(user);
     }
     @Transactional
     public void updateProfile(Principal principal, @Valid UserProfileUpdateRequest request) {

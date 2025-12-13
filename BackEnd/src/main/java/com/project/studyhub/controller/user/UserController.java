@@ -23,11 +23,11 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserInfoResponse> getUserInfoByUserId(@PathVariable Long userId) {
-        return userService.getUserInfoByUserId(userId);
+        return ResponseEntity.ok(userService.getUserInfoByUserId(userId));
     }
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getMyInfo(Principal principal) {
-        return userService.getMyInfo(principal);
+        return ResponseEntity.ok(userService.getMyInfo(principal));
     }
 
     @PatchMapping("/info")

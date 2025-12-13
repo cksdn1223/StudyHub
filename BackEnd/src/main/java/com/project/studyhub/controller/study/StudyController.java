@@ -37,9 +37,10 @@ public class StudyController {
     @PatchMapping("/{studyId}/study-image")
     public ResponseEntity<Void> changeStudyImage(
             @PathVariable Long studyId,
-            @RequestParam("file") MultipartFile file
+            @RequestParam("file") MultipartFile file,
+            Principal principal
     ){
-        studyService.changeStudyImage(studyId, file);
+        studyService.changeStudyImage(studyId, file, principal);
         return ResponseEntity.noContent().build();
     }
 }

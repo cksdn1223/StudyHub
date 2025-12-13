@@ -47,6 +47,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> signUp(@RequestBody UserSignUpRequest dto) {
-        return userService.signUp(dto);
+        userService.signUp(dto);
+        return ResponseEntity.ok().build();
     }
 }

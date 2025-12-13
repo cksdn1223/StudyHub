@@ -5,6 +5,7 @@ import com.project.studyhub.entity.Study;
 import com.project.studyhub.entity.Tag;
 import com.project.studyhub.entity.User;
 import com.project.studyhub.enums.ParticipantStatus;
+import com.project.studyhub.exception.AccessDeniedException;
 import com.project.studyhub.exception.ResourceNotFoundException;
 import com.project.studyhub.repository.StudyRepository;
 import com.project.studyhub.repository.TagRepository;
@@ -87,9 +88,12 @@ public class StudyService {
     }
 
     @Transactional
-    public void changeStudyImage(Long studyId, MultipartFile file) {
+    public void changeStudyImage(Long studyId, MultipartFile file, Principal principal) {
         Study study = studyRepository.findById(studyId)
                 .orElseThrow(()-> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
+        if(!study.getLeader().getEmail().equals(principal.getName())) {
+            throw new AccessDeniedException("해당 스터디의 관리자가 아닙니다.");
+        }
         String newUrl = studyImageService.uploadProfileImage(study, file);
         // 필요하면 기존 이미지 삭제 로직도 추가 (oldUrl 파싱 → GCS 삭제)
         study.changeUrl(newUrl);
