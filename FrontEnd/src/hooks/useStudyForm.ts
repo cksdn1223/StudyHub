@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
-import { studySchema, StudyFormValues } from "./studySchema";
-import { defaultValues } from "../../type";
+import { studySchema, StudyFormValues } from "../schema/studySchema";
+import { defaultValues } from "../type";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 export function useStudyForm() {

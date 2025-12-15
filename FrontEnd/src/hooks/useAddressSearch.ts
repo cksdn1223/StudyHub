@@ -1,8 +1,8 @@
 import { useState, useCallback } from "react";
 import { useDaumPostcodePopup } from "react-daum-postcode";
 import { UseFormSetValue } from "react-hook-form";
-import { StudyFormValues } from "./studySchema";
-import { getLocation } from "../../api/api";
+import { StudyFormValues } from "../schema/studySchema";
+import { getLocation } from "../api/api";
 
 export function useAddressSearch(setValue: UseFormSetValue<StudyFormValues>) {
   const [isAddressLoading, setIsAddressLoading] = useState(false);

@@ -14,10 +14,10 @@ export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
     if (!isLoggedIn) return;
     const fetchInitial = async () => {
       try {
-        const res = await getNotification();
-        const noti = res.data.sort((a:Notification,b:Notification)=> new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        const notifications = await getNotification();
+        const noti = notifications.sort((a:Notification,b:Notification)=> new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         setNotifications(noti);
-        setUnreadCount(res.data.filter((noti: Notification) => !noti.isRead).length);
+        setUnreadCount(notifications.filter((noti: Notification) => !noti.isRead).length);
       } catch (e) {
         console.error("알림 초기 로딩 실패", e);
       }

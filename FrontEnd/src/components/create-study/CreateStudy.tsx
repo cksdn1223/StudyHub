@@ -7,13 +7,12 @@ import { useNavigate } from "react-router-dom";
 import { Controller } from "react-hook-form";
 import { createStudy } from "../../api/api";
 import { useToast } from "../../context/ToastContext";
-import { useStudyForm } from "./useStudyForm";
-import { useAddressSearch } from "./useAddressSearch";
-import { useTagSelector } from "./useTagSelector";
+import { useStudyForm } from "../../hooks/useStudyForm";
+import { useAddressSearch } from "../../hooks/useAddressSearch";
+import { useTagSelector } from "../../hooks/useTagSelector";
 import { TagSection } from "./TagSection";
 import { AddressSection } from "./AddressSection";
-import { StudyFormValues } from "./studySchema";
-
+import { StudyFormValues } from "../../schema/studySchema";
 
 const tagList = [
   // 프론트엔드 (Frontend)
@@ -189,7 +188,7 @@ function CreateStudy() {
                     <SelectField
                       id="detailLocation"
                       label="진행 방식"
-                      defaultValue="오프라인"
+                      defaultValue="선택해주세요"
                       options={["온라인", "오프라인", "온/오프라인 병행"]}
                       required
                       {...field}

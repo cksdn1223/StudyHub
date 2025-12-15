@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { UseFormSetValue, UseFormWatch } from "react-hook-form";
-import { StudyFormValues } from "./studySchema";
+import { StudyFormValues } from "../schema/studySchema";
 
 export function useTagSelector(
   tagList: string[],

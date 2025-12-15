@@ -58,8 +58,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [logout]);
 
   const fetchMyProfile = async (): Promise<User> => {
-    const res = await getUserInfo();
-    return res.data; // { email, nickname, address, description, role } 형태 
+    const userInfo = await getUserInfo();
+    return userInfo;
   };
 
   const refreshUser = useCallback(async () => {

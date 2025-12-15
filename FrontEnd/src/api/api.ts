@@ -1,4 +1,4 @@
-import { StudyFormValues } from "../components/create-study/studySchema";
+import { StudyFormValues } from "../schema/studySchema";
 import { ParticipantStatus, UserLogin, UserRegister } from "../type";
 import api from "./client";
 
@@ -97,7 +97,7 @@ export const getUserInfo = async () => {
   const response = await api.get(
     `/user/me`
   );
-  return response;
+  return response.data;
 }
 
 export const pushSubscribe = async (sub: PushSubscription) => {
@@ -112,7 +112,7 @@ export const pushSubscribe = async (sub: PushSubscription) => {
 
 export const getNotification = async () => {
   const response = await api.get(`/notifications`);
-  return response;
+  return response.data;
 }
 
 export const readNotification = async (id: number) => {
