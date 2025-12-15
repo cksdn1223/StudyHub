@@ -53,13 +53,12 @@ public class StudyService {
                         projection -> {
 
                             List<String> tags = tagRepository.findTagNamesByStudyId(projection.getId());
-
                             return new StudyDistanceResponse(
                                     projection.getId(),
                                     projection.getLeaderId(),
-                                    projection.getStudyImageUrl(),
-                                    user.getProfileImageUrl(),
+                                    projection.getLeaderProfileImageUrl(),
                                     projection.getTitle(),
+                                    projection.getStudyImageUrl(),
                                     projection.getDescription(),
                                     projection.getMaxMembers(),
                                     projection.getMemberCount(),

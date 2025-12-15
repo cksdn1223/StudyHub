@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 const TOKEN_KEY = "studyhub_jwt";
 
@@ -10,6 +10,14 @@ export const setAuthHandlers = (handlers: AuthHandlers) => {
   Object.assign(authHandlers, handlers);
 };
 
+type ApiRequestConfig = AxiosRequestConfig & {
+  skipAuthLogout?: boolean;
+};
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    skipAuthLogout?: boolean;
+  }
+}
 const api = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL,
   withCredentials: true,
@@ -21,7 +29,7 @@ api.interceptors.request.use((config) => {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `${token.startsWith("Bearer ") ? "" : "Bearer "}${token}`;
   }
-  // JSON 기본 헤더 (FormData일 때는 설정하지 않음)
+
   if (!(config.data instanceof FormData)) {
     config.headers = config.headers ?? {};
     config.headers["Content-Type"] = config.headers["Content-Type"] ?? "application/json";
@@ -33,7 +41,11 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     const status = error.response?.status ?? 0;
-    if (status === 401 && authHandlers.onUnauthorized) {
+
+    const config = error.config as ApiRequestConfig;
+    const skip = config?.skipAuthLogout === true;
+
+    if (status === 401 && !skip && authHandlers.onUnauthorized) {
       authHandlers.onUnauthorized();
     }
     return Promise.reject(error);

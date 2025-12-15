@@ -49,6 +49,9 @@ function Login() {
       [id]: value,
     }));
   };
+  const handleSocialLogin = (provider: "google" | "github") => {
+    window.location.href = `${import.meta.env.VITE_BASE_URL}/oauth2/authorization/${provider}`;
+  };
   useEffect(() => {
     // ID 검증 로직
     const currentEmail = user.email.trim();
@@ -59,7 +62,6 @@ function Login() {
     const isValid = EMAIL_REGEX.test(currentEmail);
     setIsEmailInvalid(!isValid);
   }, [user.email])
-
   useEffect(() => {
     // PW 검증 로직
     const currentPassword = user.password.trim();
@@ -70,7 +72,6 @@ function Login() {
     const isValid = PASSWORD_REGEX.test(currentPassword);
     setIsPasswordInvalid(!isValid);
   }, [user.password])
-
   const emailInputClasses = `
     w-full px-4 py-3 rounded-lg focus:outline-none placeholder-gray-500 text-sm 
     transition duration-150 ease-in-out
@@ -81,7 +82,6 @@ function Login() {
         : 'border border-gray-400 focus:border-red-300 focus:ring-1 focus:ring-red-300' // 기본 상태
     }
   `;
-
   const passwordInputClasses = `
     w-full px-4 py-3 rounded-lg focus:outline-none placeholder-gray-500 text-sm 
     transition duration-150 ease-in-out
@@ -180,6 +180,7 @@ function Login() {
         {/* Google 로그인 */}
         <button
           type="button"
+          onClick={() => handleSocialLogin("google")}
           className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150"
         >
           <svg
@@ -203,6 +204,7 @@ function Login() {
         {/* Github 로그인 */}
         <button
           type="button"
+          onClick={() => handleSocialLogin("github")}
           className="w-full flex justify-center items-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition duration-150"
         >
           <img

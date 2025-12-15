@@ -46,9 +46,9 @@ export type StudyData = {
 export type StudyList = {
   id: number;
   leaderId: number;
-  studyImageUrl: string | null;
-  profileImageUrl: string;
+  leaderProfileImageUrl: string;
   title: string;
+  studyImageUrl: string | null;
   description: string;
   memberCount: number;
   maxMembers: number;

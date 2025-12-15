@@ -130,7 +130,7 @@ function Sidebar({ selectedContent }: { selectedContent: StudyList }) {
         <div className="flex items-center mb-2">
           <img
             className="w-16 h-16 rounded-full"
-            src={selectedContent.profileImageUrl !== "defaultUrl" ? selectedContent.profileImageUrl : defaultAvatar}
+            src={selectedContent.leaderProfileImageUrl !== "defaultUrl" ? selectedContent.leaderProfileImageUrl : defaultAvatar}
             alt="프로필 이미지 "
           />
           <div>

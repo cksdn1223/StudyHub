@@ -82,7 +82,8 @@ export const changePassword = async (currentPassword: string, newPassword: strin
     {
       currentPassword,
       newPassword,
-    }
+    },
+    { skipAuthLogout: true }
   );
 }
 
@@ -131,7 +132,7 @@ export const deleteNotification = async (id: number) => {
 }
 
 export const postLogin = async (user: UserLogin) => {
-  const response = await api.post(`/auth/login`, user);
+  const response = await api.post(`/auth/login`, user, { skipAuthLogout: true });
   return response;
 }
 

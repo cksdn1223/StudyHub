@@ -4,8 +4,6 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { fetchStudyList } from '../api/api';
 
-
-
 /**
  * 스터디 목록 데이터를 가져오는 커스텀 훅
  * @returns {object} data, isLoading, error

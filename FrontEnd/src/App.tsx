@@ -7,6 +7,7 @@ import AuthPage from './components/auth/AuthPage';
 import StudyDetail from './components/study-detail/StudyDetail';
 import Study from './components/study-info/Study';
 import UserInfo from './components/user-info/UserInfo';
+import OAuth2Redirect from './components/auth/Oauth2Redirect';
 
 function App() {
   return (
@@ -39,6 +40,10 @@ function App() {
         <Route
           path='/profile'
           element={<LayoutWrapper><UserInfo /></LayoutWrapper>}
+        />
+        <Route
+          path='/oauth2/redirect'
+          element={<OAuth2Redirect />}
         />
         <Route path="*" element={
           <div className='flex flex-col justify-center items-center h-screen'>

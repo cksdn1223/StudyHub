@@ -1,5 +1,6 @@
 package com.project.studyhub.security;
 
+import com.project.studyhub.service.oauth2.Oauth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,12 +27,13 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPoint exceptionHandler;
     private final AuthenticationFilter authenticationFilter;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final Oauth2UserService oauth2UserService;
 
     @Value("${cors.allowed-origins}")
-    private final String[] allowedOrigins;
+    private String[] allowedOrigins;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,8 +47,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
-                                "/auth/login",
-                                "/auth/register",
+                                "/oauth2/**",
                                 "/vworld",
                                 "/ws-stomp/**"
                         ).permitAll()
@@ -54,23 +55,17 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // 세션을 사용하지 않으므로 STATELESS로 설정
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(exceptionHandler)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions ->
+                        exceptions.authenticationEntryPoint(exceptionHandler)
                 )
+                .oauth2Login(customConfigurer -> customConfigurer
+                        .userInfoEndpoint(u -> u.userService(oauth2UserService))
+                        .successHandler(oAuth2SuccessHandler))
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
     }
 
     @Bean

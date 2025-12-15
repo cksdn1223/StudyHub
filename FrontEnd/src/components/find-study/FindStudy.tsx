@@ -13,7 +13,6 @@ function FindStudy() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'RECRUITING' | 'FULL' | 'FINISHED'>('ALL');
   const { data, isLoading, error } = useStudyList();
 
-
   const filteredStudies = useMemo(() => {
     if (!data) return [];
     const normalizedTerm = searchTerm.trim().toLowerCase();
@@ -158,16 +157,17 @@ function FindStudy() {
 
           {/* --- 3. 스터디 목록 섹션 --- */}
           <section>
-            {isLoading ? '로딩중...' : error ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
-              <div className="border-t border-gray-200">
-                {filteredStudies.length > 0 ? (
-                  filteredStudies.map(study => (
-                    <StudyCard key={study.id} {...study} />
-                  ))
-                ) : (
-                  <p className="py-6 text-center text-gray-500">조건에 맞는 스터디가 없습니다.</p>
-                )}
-              </div>
+            {isLoading ? '로딩중...' :
+              error ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
+                <div className="border-t border-gray-200">
+                  {filteredStudies.length > 0 ? (
+                    filteredStudies.map(study => (
+                      <StudyCard key={study.id} {...study} />
+                    ))
+                  ) : (
+                    <p className="py-6 text-center text-gray-500">조건에 맞는 스터디가 없습니다.</p>
+                  )}
+                </div>
             }
           </section>
         </main>

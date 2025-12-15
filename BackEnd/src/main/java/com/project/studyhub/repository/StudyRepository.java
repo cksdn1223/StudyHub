@@ -16,6 +16,7 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
                 SELECT
                     s.id,
                     s.leader_id AS leaderId,
+                    u.profile_image_url As leaderProfileImageUrl,
                     s.title,
                     s.study_image_url As studyImageUrl,
                     s.description,
@@ -37,10 +38,9 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
                         s.geom,
                         :userGeom
                     ) / 1000.0 AS distanceKm
-                FROM
-                    study s
-                ORDER BY
-                    distanceKm ASC
+                FROM study s
+                JOIN users u ON u.user_id = s.leader_id
+                ORDER BY distanceKm ASC
             """, nativeQuery = true)
     List<StudyDistanceProjection> findStudiesWithDistanceOrdered(
             @Param("userGeom") Point userGeom
@@ -48,18 +48,18 @@ public interface StudyRepository extends JpaRepository<Study, Long> {
 
 
     @Query("""
-    select distinct s
-    from Study s
-    left join fetch s.participants p
-    left join fetch p.user u
-    where s.leader = :user
-       or exists (
-           select 1 from StudyParticipant sp
-           where sp.study = s
-             and sp.user = :user
-             and sp.status = :status
-       )
-    """)
+            select distinct s
+            from Study s
+            left join fetch s.participants p
+            left join fetch p.user u
+            where s.leader = :user
+               or exists (
+                   select 1 from StudyParticipant sp
+                   where sp.study = s
+                     and sp.user = :user
+                     and sp.status = :status
+               )
+            """)
     List<Study> findMyStudiesWithMembers(@Param("user") User user,
                                          @Param("status") ParticipantStatus status);
 }
