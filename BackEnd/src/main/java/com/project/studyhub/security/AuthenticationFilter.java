@@ -44,18 +44,17 @@ public class AuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // JWT 토큰에서 사용자 이름을 추출합니다.
-        String username = String.valueOf(jwtService.validateAndExtractUsername(token));
-        if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities()
-        );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // JWT 토큰을 검증하고 Optional<String>으로 사용자 이름을 가져옵니다.
+        jwtService.validateAndExtractUsername(token).ifPresent(username -> {
+            // SecurityContext에 이미 인증 정보가 없는 경우에만 실행합니다.
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        });
 
         // 다음 필터로 요청과 응답을 전달합니다.
         filterChain.doFilter(request, response);
