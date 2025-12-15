@@ -1,4 +1,3 @@
-import axios from "axios";
 import { ChevronRight, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import { axiosErrorType, StudyList, UserInfo } from "../../type";
@@ -8,6 +7,7 @@ import { useToast } from "../../context/ToastContext";
 import defaultAvatar from "../../assets/image/defaultImage.webp"
 import { useStudyList } from "../../hooks/useStudyList";
 import { joinStudy } from "../../api/api";
+import api from "../../api/client";
 
 const tagLink = [
   // 프론트엔드 (Frontend)
@@ -71,7 +71,7 @@ function Sidebar({ selectedContent }: { selectedContent: StudyList }) {
   const [leader, setLeader] = useState<UserInfo>();
   useEffect(() => {
     const getLeaderData = async () => {
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/${selectedContent.leaderId}`);
+      const response = await api.get(`/user/${selectedContent.leaderId}`);
       setLeader(response.data);
     }
     getLeaderData();
