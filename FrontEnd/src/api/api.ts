@@ -1,4 +1,5 @@
-import { ParticipantStatus, StudyData, UserLogin, UserRegister } from "../type";
+import { StudyFormValues } from "../components/create-study/studySchema";
+import { ParticipantStatus, UserLogin, UserRegister } from "../type";
 import api from "./client";
 
 export const getData = async () => {
@@ -36,7 +37,7 @@ export const changeLocation = async (data: { address: string }, location: { lat:
   );
 }
 
-export const createStudy = async (studyData: StudyData) => {
+export const createStudy = async (studyData: StudyFormValues) => {
   await api.post(`/study`, studyData);
 }
 

@@ -150,3 +150,18 @@ export type JwtPayload = {
   userId: number;
   role: string;
 };
+
+export const defaultValues: StudyData = {
+  title: "",
+  description: "",
+  memberCount: 1,
+  maxMembers: 6,
+  frequency: "",
+  duration: "",
+  tags: [],
+  address: "",
+  detailAddress: "",
+  longitude: 0.0,
+  latitude: 0.0,
+  detailLocation: "",
+};
