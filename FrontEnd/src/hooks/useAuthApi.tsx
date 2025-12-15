@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext'; 
 import { axiosErrorType, UserLogin, UserRegister } from '../type';
 import { useNavigate } from 'react-router-dom';
-import { getData, postLogin, postRegister } from '../api/api';
+import { postLogin, postRegister } from '../api/api';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../utils/keys';
 
@@ -16,7 +16,7 @@ export const useAuthApi = () => {
   const handleLogin = async (user: UserLogin) => {
     try {
       const response = await postLogin(user);
-      login(response.headers.authorization);
+      await login(response.headers.authorization);
 
       await Promise.all([
         qc.invalidateQueries({ queryKey: queryKeys.myStudyList() }),
@@ -24,7 +24,6 @@ export const useAuthApi = () => {
       ]);
 
       showToast('로그인에 성공했습니다.', 'success');
-      getData();
       navigate("/");
       return true;
     } catch (error) {

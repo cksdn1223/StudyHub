@@ -19,7 +19,7 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem(TOKEN_KEY);
   if (token) {
     config.headers = config.headers ?? {};
-    config.headers.Authorization = `${token}`;
+    config.headers.Authorization = `${token.startsWith("Bearer ") ? "" : "Bearer "}${token}`;
   }
   // JSON 기본 헤더 (FormData일 때는 설정하지 않음)
   if (!(config.data instanceof FormData)) {

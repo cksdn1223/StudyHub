@@ -43,7 +43,7 @@ function Study() {
         client.deactivate();
       }
     };
-  }, [selectedStudyId, queryClient]);
+  }, [selectedStudyId, queryClient, WS_BASE_URL]);
   // 메시지 전송용 함수
 
 

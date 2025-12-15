@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import type { ChatMessage, MyStudyList } from "../type";
 import { useMyStudyListQuery } from "../hooks/queries/useMyStudyListQuery";
 import { useChatListQuery } from "../hooks/queries/useChatListQuery";
+import { useAuth } from "./AuthContext";
 
 type MyStudyContextValue = {
   myStudyList: MyStudyList[];
@@ -21,7 +22,8 @@ const MyStudyContext = createContext<MyStudyContextValue | null>(null);
 
 export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
   const [selectedStudyId, setSelectedStudyId] = useState<number | null>(null);
-  const enabled = !!localStorage.getItem("studyhub_jwt");
+  const { isLoggedIn } = useAuth();
+  const enabled = isLoggedIn;
 
   const { data: myStudyList = [], isLoading, error } = useMyStudyListQuery(enabled);
   const { data: chatList = [], isLoading: chatListLoading, error: chatListError } = useChatListQuery(selectedStudyId);
