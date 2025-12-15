@@ -1,4 +1,4 @@
-import { BookOpenText, LogOut, MessageCircleCode, Search } from "lucide-react";
+import { BookOpenText, LogIn, LogOut, MessageCircleCode, Search, UserPlus } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "./NotificationBell";
@@ -55,7 +55,7 @@ function Header() {
                 <Link to="/profile" className="flex items-center">
                   <img
                     className="w-12 h-12 rounded-full object-cover border-2 group-hover:border-red-400"
-                    src={user.profileImageUrl!=="defaultUrl" ? user.profileImageUrl : defaultAvatar}
+                    src={user.profileImageUrl !== "defaultUrl" ? user.profileImageUrl : defaultAvatar}
                     alt="프로필 이미지"
                   />
                   <span className={`ml-2 ${isMainPage ? 'text-white' : 'text-neutral-500'} group-hover:text-red-400 font-medium text-sm sm:text-base hidden md:inline`}>
@@ -66,20 +66,23 @@ function Header() {
             </>
           ) : (
             <>
-              <li className="hidden sm:block">
+              <li>
                 <Link
                   to="/auth/login"
-                  className={`px-4 py-2 font-medium transition duration-150 ${isMainPage ? 'text-white' : 'text-neutral-500'} hover:text-red-400`}
+                  className={`flex items-center gap-2 px-3 py-2 font-medium transition duration-150 ${isMainPage ? "text-white" : "text-neutral-500"
+                    } hover:text-red-400`}
                 >
-                  로그인
+                  <LogIn className="w-5 h-5" />
+                  <span className="hidden sm:inline">로그인</span>
                 </Link>
               </li>
               <li>
                 <Link
                   to="/auth/register"
-                  className="px-4 py-2 bg-red-400 text-white font-medium rounded-lg hover:bg-red-500 transition duration-150"
+                  className="flex items-center gap-2 px-3 py-2 bg-red-400 text-white font-medium rounded-lg hover:bg-red-500 transition duration-150"
                 >
-                  회원가입
+                  <UserPlus className="w-5 h-5" />
+                  <span className="hidden sm:inline">회원가입</span>
                 </Link>
               </li>
             </>

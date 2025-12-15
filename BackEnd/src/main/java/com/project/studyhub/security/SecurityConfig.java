@@ -35,6 +35,9 @@ public class SecurityConfig {
     @Value("${cors.allowed-origins}")
     private String[] allowedOrigins;
 
+    @Value("${oauth2.success.redirect-url}")
+    private String redirectUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -56,13 +59,16 @@ public class SecurityConfig {
                 )
                 // 세션을 사용하지 않으므로 STATELESS로 설정
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .exceptionHandling(exceptions ->
                         exceptions.authenticationEntryPoint(exceptionHandler)
                 )
                 .oauth2Login(customConfigurer -> customConfigurer
                         .userInfoEndpoint(u -> u.userService(oauth2UserService))
-                        .successHandler(oAuth2SuccessHandler))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((req, res, ex) -> {
+                            res.sendRedirect(redirectUrl+"/oauth2/redirect?error=oauth_failed");
+                        }))
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
