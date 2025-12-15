@@ -45,7 +45,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
         }
 
         // JWT 토큰에서 사용자 이름을 추출합니다.
-        String username = jwtService.getAuthUser(token);
+        String username = String.valueOf(jwtService.validateAndExtractUsername(token));
         if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
