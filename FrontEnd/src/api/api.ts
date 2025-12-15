@@ -1,19 +1,18 @@
-import axios from "axios";
-import { getHeaders } from "../context/AxiosConfig";
 import { ParticipantStatus, StudyData, UserLogin, UserRegister } from "../type";
+import api from "./client";
 
 export const getData = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/me`, getHeaders());
+  const response = await api.get(`/study/me`);
   return response.data;
 }
 export const getChatData = async (studyId: number) => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study/${studyId}/messages`, getHeaders());
+  const response = await api.get(`/study/${studyId}/messages`);
   return response.data;
 }
 
 export const getLocation = async (data: { address: string }) => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_BASE_URL}/vworld`,
+  const response = await api.get(
+    `/vworld`,
     {
       params: {
         address: data.address,
@@ -27,40 +26,37 @@ export const getLocation = async (data: { address: string }) => {
 }
 
 export const changeLocation = async (data: { address: string }, location: { lat: number, lng: number }) => {
-  await axios.patch(
-    `${import.meta.env.VITE_BASE_URL}/user/address`,
+  await api.patch(
+    `/user/address`,
     {
       address: data.address,
       longitude: location.lng,
       latitude: location.lat,
     },
-    getHeaders()
   );
 }
 
 export const createStudy = async (studyData: StudyData) => {
-  await axios.post(`${import.meta.env.VITE_BASE_URL}/study`, studyData, getHeaders());
+  await api.post(`/study`, studyData);
 }
 
 export const participantStatusChange = async (studyId: number, senderId: number, status: ParticipantStatus) => {
-  await axios.put(`${import.meta.env.VITE_BASE_URL}/participant/${studyId}`, {
+  await api.put(`/participant/${studyId}`, {
     userId: senderId,
     status: status
-  }, getHeaders())
+  })
 }
 
 export const joinStudy = async (id: number) => {
-  await axios.post(`${import.meta.env.VITE_BASE_URL}/participant/${id}`, null, getHeaders());
+  await api.post(`/participant/${id}`, null);
 }
 
 export const changeStudyImg = async (formData: FormData, studyId: number | undefined) => {
-  await axios.patch(
-    `${import.meta.env.VITE_BASE_URL}/study/${studyId}/study-image`,
+  await api.patch(
+    `/study/${studyId}/study-image`,
     formData,
     {
-      ...getHeaders(),
       headers: {
-        ...getHeaders().headers,
         "Content-Type": "multipart/form-data",
       },
     }
@@ -68,13 +64,11 @@ export const changeStudyImg = async (formData: FormData, studyId: number | undef
 }
 
 export const changeProfileImg = async (formData: FormData) => {
-  await axios.patch(
-    `${import.meta.env.VITE_BASE_URL}/user/profile-image`,
+  await api.patch(
+    `/user/profile-image`,
     formData,
     {
-      ...getHeaders(),
       headers: {
-        ...getHeaders().headers,
         "Content-Type": "multipart/form-data",
       },
     }
@@ -82,74 +76,69 @@ export const changeProfileImg = async (formData: FormData) => {
 }
 
 export const changePassword = async (currentPassword: string, newPassword: string) => {
-  await axios.patch(
-    `${import.meta.env.VITE_BASE_URL}/user/password`,
+  await api.patch(
+    `/user/password`,
     {
       currentPassword,
       newPassword,
-    },
-    getHeaders()
+    }
   );
 }
 
 export const changeUserInfo = async (nick: string, des: string) => {
-  await axios.patch(
-    `${import.meta.env.VITE_BASE_URL}/user/info`,
-    { nickname: nick, description: des },
-    getHeaders()
+  await api.patch(
+    `/user/info`,
+    { nickname: nick, description: des }
   );
 }
 
 export const getUserInfo = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_BASE_URL}/user/me`,
-    getHeaders()
+  const response = await api.get(
+    `/user/me`
   );
   return response;
 }
 
 export const pushSubscribe = async (sub: PushSubscription) => {
-  await axios.post(
-    `${import.meta.env.VITE_BASE_URL}/push/subscribe`,
+  await api.post(
+    `/push/subscribe`,
     {
       endpoint: sub.endpoint,
       keys: sub.toJSON().keys, // { p256dh, auth }
-    },
-    getHeaders()
+    }
   );
 }
 
 export const getNotification = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/notifications`, getHeaders());
+  const response = await api.get(`/notifications`);
   return response;
 }
 
 export const readNotification = async (id: number) => {
-  await axios.put(`${import.meta.env.VITE_BASE_URL}/notifications/${id}`, null, getHeaders());
+  await api.put(`/notifications/${id}`, null);
 }
 
 export const readAllNotification = async () => {
-  await axios.put(`${import.meta.env.VITE_BASE_URL}/notifications`, null, getHeaders());
+  await api.put(`/notifications`, null);
 }
 
 export const deleteNotification = async (id: number) => {
-  await axios.delete(
-    `${import.meta.env.VITE_BASE_URL}/notifications/${id}`,
-    getHeaders()
+  await api.delete(
+    `/notifications/${id}`
   );
 
 }
 
 export const postLogin = async (user: UserLogin) => {
-  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/login`, user);
+  const response = await api.post(`/auth/login`, user);
   return response;
 }
 
 export const postRegister = async (user: UserRegister) => {
-  await axios.post(`${import.meta.env.VITE_BASE_URL}/auth/register`, user);
+  await api.post(`/auth/register`, user);
 }
 
 export const fetchStudyList = async () => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/study`, getHeaders());
+  const response = await api.get(`/study`);
   return response.data;
 };

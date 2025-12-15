@@ -28,6 +28,7 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
     queryKey: ["myStudyList"],
     queryFn: getData,
     refetchOnWindowFocus: false,
+    enabled: !!localStorage.getItem("studyhub_jwt")
   });
   useEffect(() => {
     if (!data.length) return;

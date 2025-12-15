@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { JwtPayload, User } from '../type';
 import { registerPush } from '../utils/pushSubscription';
 import { getUserInfo, pushSubscribe } from '../api/api';
+import { setAuthHandlers } from '../api/client';
 
 type AuthContextType = {
   user: User;
@@ -101,15 +102,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // 로그인시 web push 구독
   useEffect(() => {
     const setupPush = async () => {
-      if(user.email.length===0) return;
+      if (user.email.length === 0) return;
       const sub = await registerPush();
       if (!sub) return;
 
       await pushSubscribe(sub);
     };
-
     setupPush();
   }, [user]);
+
+  useEffect(() => {
+    setAuthHandlers({
+      onUnauthorized: () => logout("세션이 만료되었습니다. 다시 로그인해주세요.", "info"),
+    });
+  }, [logout]);
+
 
   return (
     <AuthContext.Provider value={{ user, setUser, isLoggedIn, login, logout, refreshUser }}>

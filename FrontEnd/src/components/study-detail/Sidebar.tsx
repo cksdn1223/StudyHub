@@ -1,7 +1,6 @@
 import axios from "axios";
 import { ChevronRight, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getHeaders } from "../../context/AxiosConfig";
 import { axiosErrorType, StudyList, UserInfo } from "../../type";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -72,7 +71,7 @@ function Sidebar({ selectedContent }: { selectedContent: StudyList }) {
   const [leader, setLeader] = useState<UserInfo>();
   useEffect(() => {
     const getLeaderData = async () => {
-      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/${selectedContent.leaderId}`, getHeaders());
+      const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/user/${selectedContent.leaderId}`);
       setLeader(response.data);
     }
     getLeaderData();
