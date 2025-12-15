@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function OAuth2Redirect() {
   const { showToast } = useToast();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const ranRef = useRef(false);
   const navigate = useNavigate();
 
@@ -27,15 +27,15 @@ export default function OAuth2Redirect() {
     (async () => {
       try {
         await login(studyHubToken);
-        showToast("로그인 성공! 주소를 추가해야 정상적으로 이용할 수 있습니다.", "info");
-        navigate("/profile");
+        showToast("로그인에 성공했습니다.", "success");
+        navigate("/");
       } catch (e) {
         showToast("로그인 처리 중 오류가 발생했습니다.", "error");
         navigate("/auth/login");
       }
     })();
     // (async)(즉시호출);
-  }, [login, navigate, showToast]);
+  }, [login, navigate, showToast, user]);
 
   return <div className="p-6">로그인 처리 중...</div>;
 }

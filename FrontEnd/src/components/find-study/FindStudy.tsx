@@ -158,7 +158,11 @@ function FindStudy() {
           {/* --- 3. 스터디 목록 섹션 --- */}
           <section>
             {isLoading ? '로딩중...' :
-              error ? '문제가 발생했습니다..! 다시 로그인하시거나 관리자에게 문의해주세요.' :
+              error ?
+                <div className='flex flex-col items-center'>
+                  <h1 className='font-bold text-2xl'>스터디 목록을 불러오기 위해선 주소를 추가해야 합니다.</h1>
+                  <a href="/profile" className='text-xl hover:text-blue-400'>주소 추가하기</a>
+                </div> :
                 <div className="border-t border-gray-200">
                   {filteredStudies.length > 0 ? (
                     filteredStudies.map(study => (

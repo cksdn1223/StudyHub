@@ -94,9 +94,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => clearInterval(interval);
   }, [refreshUser, logout, getDecoded])
 
-  const login = (token: string) => {
+  const login = async (token: string) => {
     localStorage.setItem(TOKEN_KEY, token);
-    refreshUser();
+    await refreshUser();
   };
 
   // 로그인시 web push 구독
