@@ -1,91 +1,31 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { Notification, NotificationContextType } from "../type";
+import React, { createContext, useContext, useMemo } from "react";
+import { NotificationContextType } from "../type";
 import { useAuth } from "./AuthContext";
-import { deleteNotification, getNotification, readAllNotification, readNotification } from "../api/api";
+import { useNotificationsQuery } from "../hooks/queries/useNotificationsQuery";
+import { useNotificationsMutations } from "../hooks/queries/useNotificationMutations";
 
 const NotificationContext = createContext<NotificationContextType | null>(null);
 
 export const NotificationProvider = ({ children }: React.PropsWithChildren) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const { isLoggedIn } = useAuth();
-  // 🔹 1) 처음 진입 시 백엔드에서 알림 불러오기
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const fetchInitial = async () => {
-      try {
-        const notifications = await getNotification();
-        const noti = notifications.sort((a:Notification,b:Notification)=> new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setNotifications(noti);
-        setUnreadCount(notifications.filter((noti: Notification) => !noti.isRead).length);
-      } catch (e) {
-        console.error("알림 초기 로딩 실패", e);
-      }
-    };
-    fetchInitial();
-  }, [isLoggedIn]);
+  const enabled = isLoggedIn;
 
-  // 🔹 2) 웹소켓으로 받은 새 알림 추가할 때 사용
-  const addNotification = useCallback((n: Notification) => {
-    setNotifications((prev) => [n, ...prev]);
-    if (!n.isRead) {
-      setUnreadCount((prev) => prev + 1);
-    }
-  }, []);
+  const { data: notifications = [] } = useNotificationsQuery(enabled);
+  const unreadCount = useMemo(
+    () => notifications.filter((n) => !n.isRead).length,
+    [notifications]
+  );
 
-  // 🔹 3) 개별 읽음 처리
-  const markAsRead = async (id: number) => {
-    try {
-      await readNotification(id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-      );
-      setUnreadCount((prev) => Math.max(prev - 1, 0));
-    } catch (e) {
-      console.error("알림 읽음 처리 실패", e);
-    }
-  };
-
-  // 🔹 4) 전체 읽음 처리
-  const markAllAsRead = async () => {
-    try {
-      await readAllNotification();
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
-      setUnreadCount(0);
-    } catch (e) {
-      console.error("알림 전체 읽음 처리 실패", e);
-    }
-  };
-
-  // 5. 알람 삭제
-  const removeNotification = async (id: number) => {
-    try {
-      await deleteNotification(id);
-
-      setNotifications((prev) => {
-        const target = prev.find((n) => n.id === id);
-        const next = prev.filter((n) => n.id !== id);
-
-        if (target && !target.isRead) {
-          setUnreadCount((prevCount) => Math.max(prevCount - 1, 0));
-        }
-
-        return next;
-      });
-    } catch (e) {
-      console.error("알림 삭제 실패", e);
-    }
-  };
+  const { markAsRead, markAllAsRead, removeNotification } = useNotificationsMutations();
 
   return (
     <NotificationContext.Provider
       value={{
         notifications,
         unreadCount,
-        addNotification,
-        markAsRead,
-        markAllAsRead,
-        removeNotification
+        markAsRead: (id: number) => markAsRead.mutateAsync(id),
+        markAllAsRead: () => markAllAsRead.mutateAsync(),
+        removeNotification: (id: number) => removeNotification.mutateAsync(id),
       }}
     >
       {children}

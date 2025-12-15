@@ -10,14 +10,13 @@ import { useNotificationSettings } from "../../context/NotificationSettingsConte
 import { participantStatusChange } from "../../api/api";
 
 function NotificationBell() {
-  const { notifications, markAsRead, markAllAsRead, removeNotification } = useNotification();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, removeNotification } = useNotification();
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { myStudyList, setSelectStudy } = useMyStudy();
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
   const { volume, setVolume } = useNotificationSettings();
 
   const onClickNotification = (n: Notification) => {
@@ -40,11 +39,15 @@ function NotificationBell() {
       showToast("가입 수락 처리중 문제가 발생했습니다.", "error");
     }
   };
-  const handleReject = (e: React.MouseEvent, n: Notification) => {
+  const handleReject = async (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
-    participantStatusChange(n.studyId, n.senderId, "REJECTED")
-    showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 거절하셨습니다.`, "info")
-    removeNotification(n.id);
+    try {
+      participantStatusChange(n.studyId, n.senderId, "REJECTED")
+      showToast(`${n.senderNickname}님의 ${n.studyTitle.length > 5 ? n.studyTitle.substring(0, 5) + '...' : n.studyTitle} 가입을 거절하셨습니다.`, "info")
+      removeNotification(n.id);
+    } catch (err) {
+      showToast("가입 거절 처리중 문제가 발생했습니다.", "error");
+    }
   };
   const handleDelete = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();

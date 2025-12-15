@@ -1,15 +1,15 @@
 import { useEffect, useRef } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { useNotification } from "../../context/NotificationContext";
 import { useAuth } from "../../context/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNotificationSettings } from "../../context/NotificationSettingsContext";
+import { Notification } from "../../type";
+import { queryKeys } from "../../utils/keys";
 
 const NotificationSocketListener = () => {
-  const { addNotification } = useNotification();
   const { user } = useAuth();
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
 
   const msgSoundRef = useRef<HTMLAudioElement | null>(null);
   const otherSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -19,10 +19,12 @@ const NotificationSocketListener = () => {
   useEffect(() => {
     volumeRef.current = volume;
   }, [volume]);
+
   const WS_BASE_URL = import.meta.env.DEV
     ? "" // dev일 땐 "" + "/ws-stomp" => "/ws-stomp" (=> proxy 사용)
     : import.meta.env.VITE_BASE_URL; // prod일 땐 Cloud Run 주소
   const clientRef = useRef<Client | null>(null);
+
   useEffect(() => {
     if (user.email.length === 0) return;
     if (clientRef.current) return;
@@ -30,22 +32,31 @@ const NotificationSocketListener = () => {
       webSocketFactory: () => new SockJS(`${WS_BASE_URL}/ws-stomp`),
       reconnectDelay: 5000,
       onConnect: () => {
-        client.subscribe(`/sub/notification/${user.id}`, (message) => {
+        const sub = client.subscribe(`/sub/notification/${user.id}`, (message) => {
           const notification = JSON.parse(message.body);
-          addNotification(notification);
+
+          qc.setQueryData<Notification[]>(queryKeys.notifications(), (prev) => {
+            const list = prev ?? [];
+            if (list.some((x) => x.id === notification.id)) return list;
+            const next = [notification, ...list];
+            next.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            return next;
+          });
+
           if (notification.type === "BAN" || notification.type === "REQUEST_ACCEPTED") {
-            queryClient.invalidateQueries({ queryKey: ["myStudyList"] });
+            qc.invalidateQueries({ queryKey: queryKeys.myStudyList() });
           }
+
           const targetRef =
             notification.type === "MESSAGE" ? otherSoundRef : msgSoundRef;
-
           if (targetRef.current) {
             targetRef.current.volume = volumeRef.current;
             targetRef.current.currentTime = 0;
             targetRef.current.play().catch(() => { });
           }
         });
-      }
+        void sub;
+      },
     });
 
     clientRef.current = client;
@@ -55,7 +66,7 @@ const NotificationSocketListener = () => {
       client.deactivate();
       clientRef.current = null;
     };
-  }, [addNotification, user, queryClient, WS_BASE_URL]);
+  }, [user, qc, WS_BASE_URL]);
 
   return (
     <>
