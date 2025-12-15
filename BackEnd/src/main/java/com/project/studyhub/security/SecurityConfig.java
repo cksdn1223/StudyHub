@@ -67,7 +67,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(u -> u.userService(oauth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler((req, res, ex) -> {
-                            res.sendRedirect(redirectUrl+"/oauth2/redirect?error=oauth_failed");
+                            res.sendRedirect(redirectUrl+"?error=oauth_failed");
                         }))
                 // JWT 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
                 .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
