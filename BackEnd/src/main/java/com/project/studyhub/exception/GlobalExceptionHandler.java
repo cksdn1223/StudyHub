@@ -16,156 +16,51 @@ import java.time.LocalDateTime;
 @RestControllerAdvice   // @RestController에서 발생하는 예외를 전역적으로 처리합니다
 public class GlobalExceptionHandler {
 
-    /**
-     * 리소스를 찾지 못했을 때 발생하는 사용자 지정 예외
-     *
-     * @param ex - ResourceNotFoundException
-     * @return 404 HttpStatus.NOT_FOUND
-     */
-    // @ExceptionHandler: 특정 예외 클래스를 지정하여 처리할 메소드를 정의합니다.
+    // 공통 에러 응답 빌더 메서드
+    private ResponseEntity<ErrorResponseRecord> buildErrorResponse(Exception ex, HttpStatus status, WebRequest request) {
+        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return new ResponseEntity<>(errorResponseRecord, status);
+    }
+
+    // 2. 예외 종류에 따른 핸들러 통합 및 재구성
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponseRecord> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                "Not Found",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", ""));
-        // 구성된 에러 메시지와 함께 HTTP 404 (Not Found) 상태 코드를 응답합니다.
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.NOT_FOUND);
+        return buildErrorResponse(ex, HttpStatus.NOT_FOUND, request);
     }
 
-    /**
-     * 권한이 없을 때 발생하는 예외 처리
-     *
-     * @param ex - AccessDeniedException
-     * @return 403 HttpStatus.FORBIDDEN
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorResponseRecord> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.FORBIDDEN);
+    @ExceptionHandler({AccessDeniedException.class, PermissionDeniedException.class})
+    public ResponseEntity<ErrorResponseRecord> handleForbiddenException(Exception ex, WebRequest request) {
+        return buildErrorResponse(ex, HttpStatus.FORBIDDEN, request);
     }
 
-
-    /**
-     * 권한이 없을 때 (403)
-     * TravelPermissionService에서 발생한 PermissionDeniedException을 처리합니다.
-     */
-    @ExceptionHandler(PermissionDeniedException.class)
-    public ResponseEntity<ErrorResponseRecord> handlePermissionDeniedException(PermissionDeniedException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.FORBIDDEN.value(),
-                "Forbidden",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.FORBIDDEN);
-    }
-
-
-    /**
-     * 잘못된 요청일 때 (400)
-     * TravelPermissionService에서 발생하는 BadRequestException을 처리합니다.
-     */
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponseRecord> handleBadRequestException(BadRequestException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler({BadRequestException.class, MemberMinException.class})
+    public ResponseEntity<ErrorResponseRecord> handleBadRequestException(Exception ex, WebRequest request) {
+        return buildErrorResponse(ex, HttpStatus.BAD_REQUEST, request);
     }
 
     @ExceptionHandler({UsernameNotFoundException.class, BadCredentialsException.class})
     public ResponseEntity<ErrorResponseRecord> handleAuthenticationException(AuthenticationException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.UNAUTHORIZED.value(),
-                "UnAuthorized",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.UNAUTHORIZED);
+        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED, request);
     }
 
-    @ExceptionHandler(EmailExistsException.class)
-    public ResponseEntity<ErrorResponseRecord> handleRegisterException(EmailExistsException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                "CONFLICT",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
+    @ExceptionHandler({
+            EmailExistsException.class,
+            ParticipantExistsException.class,
+            MemberMaxException.class
+    })
+    public ResponseEntity<ErrorResponseRecord> handleConflictException(Exception ex, WebRequest request) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(ParticipantExistsException.class)
-    public ResponseEntity<ErrorResponseRecord> handleRegisterException(ParticipantExistsException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                "CONFLICT",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(MemberMaxException.class)
-    public ResponseEntity<ErrorResponseRecord> handleRegisterException(MemberMaxException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                "CONFLICT",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(MemberMinException.class)
-    public ResponseEntity<ErrorResponseRecord> handleRegisterException(MemberMinException ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.BAD_REQUEST.value(),
-                "BAD_REQUEST",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.BAD_REQUEST);
-    }
-
-
-
-
-    /**
-     * 위에서 지정하지 않은 모든 예외를 처리
-     *
-     * @param ex - Exception
-     * @return 500 HttpStatus.INTERNAL_SERVER_ERROR
-     */
+    // 예상치 못한 모든 예외를 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseRecord> handleGlobalException(Exception ex, WebRequest request) {
-        ErrorResponseRecord errorResponseRecord = new ErrorResponseRecord(
-                LocalDateTime.now(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
-                ex.getMessage(),
-                request.getDescription(false).replace("uri=", "")
-        );
-        // 예상치 못한 에러이므로 HTTP 500 (Internal Server Error) 상태 코드를 응답합니다.
-        return new ResponseEntity<>(errorResponseRecord, HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildErrorResponse(ex, HttpStatus.INTERNAL_SERVER_ERROR, request);
     }
 }
