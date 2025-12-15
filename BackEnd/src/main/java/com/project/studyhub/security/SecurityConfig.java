@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/api-docs/**",
                                 "/oauth2/**",
+                                "/login/oauth2/**",
                                 "/vworld",
                                 "/ws-stomp/**"
                         ).permitAll()
