@@ -1,9 +1,11 @@
 package com.project.studyhub.controller.notification;
 
 import com.project.studyhub.dto.notification.NotificationResponse;
+import com.project.studyhub.entity.User;
 import com.project.studyhub.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -15,8 +17,8 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/notifications")
-    public ResponseEntity<List<NotificationResponse>> getNotification(Principal principal) {
-        return ResponseEntity.ok(notificationService.getNotification(principal));
+    public ResponseEntity<List<NotificationResponse>> getNotification(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(notificationService.getNotification(user));
     }
 
     @PutMapping("/notifications/{notificationId}")
@@ -27,8 +29,8 @@ public class NotificationController {
     }
 
     @PutMapping("/notifications")
-    public ResponseEntity<Void> readAllNotification(Principal principal) {
-        notificationService.readAllNotification(principal);
+    public ResponseEntity<Void> readAllNotification(@AuthenticationPrincipal User receiver) {
+        notificationService.readAllNotification(receiver);
         return ResponseEntity.ok().build();
     }
 

@@ -15,6 +15,7 @@ import com.project.studyhub.repository.StudyRepository;
 import com.project.studyhub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +31,9 @@ public class StudyParticipantService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public void createParticipant(Long studyId, Principal principal) {
+    public void createParticipant(Long studyId, User sender) {
         Study study = studyRepository.findById(studyId)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 스터디를 찾을 수 없습니다."));
-        User sender = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
 
         if (studyParticipantRepository.existsByStudyAndUser(study, sender)) {
             // 데이터베이스에 요청이 이미 존재하니 그에 해당하는 에러 처리

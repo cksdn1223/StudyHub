@@ -2,9 +2,11 @@ package com.project.studyhub.controller.studyParticipant;
 
 import com.project.studyhub.dto.participant.StudyParticipantRequest;
 import com.project.studyhub.entity.StudyParticipant;
+import com.project.studyhub.entity.User;
 import com.project.studyhub.service.studyParticipant.StudyParticipantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -18,8 +20,8 @@ public class StudyParticipantController {
     @PostMapping("/{studyId}")
     public ResponseEntity<Void> createParticipant(
             @PathVariable Long studyId,
-            Principal principal) {
-        participantService.createParticipant(studyId, principal);
+            @AuthenticationPrincipal User sender) {
+        participantService.createParticipant(studyId, sender);
         return ResponseEntity.ok().build();
     }
 

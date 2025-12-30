@@ -4,6 +4,7 @@ import com.project.studyhub.dto.user.UserAddressUpdateRequest;
 import com.project.studyhub.dto.user.UserInfoResponse;
 import com.project.studyhub.dto.user.UserPasswordChangeRequest;
 import com.project.studyhub.dto.user.UserProfileUpdateRequest;
+import com.project.studyhub.entity.User;
 import com.project.studyhub.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,43 +27,43 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserInfoByUserId(userId));
     }
     @GetMapping("/me")
-    public ResponseEntity<UserInfoResponse> getMyInfo(Principal principal) {
-        return ResponseEntity.ok(userService.getMyInfo(principal));
+    public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(UserInfoResponse.from(user));
     }
 
     @PatchMapping("/info")
     public ResponseEntity<Void> updateProfile(
-            Principal principal,
+            @AuthenticationPrincipal User user,
             @RequestBody @Valid UserProfileUpdateRequest request
             ) {
-        userService.updateProfile(principal, request);
+        userService.updateProfile(user, request);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/address")
     public ResponseEntity<Void> updateAddress(
-            Principal principal,
+            @AuthenticationPrincipal User user,
             @RequestBody @Valid UserAddressUpdateRequest request
     ) {
-        userService.updateAddress(principal, request);
+        userService.updateAddress(user, request);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/password")
     public ResponseEntity<Void> changePassword(
-            Principal principal,
+            @AuthenticationPrincipal User user,
             @RequestBody @Valid UserPasswordChangeRequest request
     ) {
-        userService.changePassword(principal, request);
+        userService.changePassword(user, request);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/profile-image")
     public ResponseEntity<Void> changeProfileImage(
-            Principal principal,
+            @AuthenticationPrincipal User user,
             @RequestParam("file") MultipartFile file
     ){
-        userService.changeProfileImage(principal, file);
+        userService.changeProfileImage(user, file);
         return ResponseEntity.noContent().build();
     }
 }

@@ -13,6 +13,7 @@ import com.project.studyhub.repository.UserRepository;
 import com.project.studyhub.service.gcs.ProfileImageService;
 import com.project.studyhub.service.gcs.StudyImageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,9 +32,7 @@ public class StudyService {
     private final StudyImageService studyImageService;
 
     @Transactional
-    public void createStudy(StudyCreateRequest studyCreateRequest, Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+    public void createStudy(StudyCreateRequest studyCreateRequest, User user) {
         Study study = StudyCreateRequest.from(studyCreateRequest, user);
         if (studyCreateRequest.tags() != null) {
             for (String tagName : studyCreateRequest.tags()) {
@@ -45,9 +44,7 @@ public class StudyService {
         studyRepository.save(study);
     }
 
-    public List<StudyDistanceResponse> getAllStudy(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+    public List<StudyDistanceResponse> getAllStudy(User user) {
         List<StudyDistanceProjection> results = studyRepository.findStudiesWithDistanceOrdered(user.getGeom());
         return results.stream().map(
                         projection -> {
@@ -76,11 +73,8 @@ public class StudyService {
                 .collect(Collectors.toList());
     }
 
-    public List<MyStudyResponse> getJoinStudy(Principal principal) {
-        User me = userRepository.findByEmail(principal.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+    public List<MyStudyResponse> getJoinStudy(User me) {
         List<Study> studies = studyRepository.findMyStudiesWithMembers(me, ParticipantStatus.ACCEPTED);
-
         return studies.stream()
                 .map(this::toMyStudyResponseDto)
                 .collect(Collectors.toList());

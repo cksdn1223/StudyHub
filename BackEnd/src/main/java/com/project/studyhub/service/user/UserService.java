@@ -13,6 +13,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -37,26 +38,24 @@ public class UserService {
     }
 
     public UserInfoResponse getUserInfoByUserId(Long userId) {
-        User user = findUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(()->new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
         return UserInfoResponse.from(user);
     }
-    public UserInfoResponse getMyInfo(Principal principal) {
-        User user = findUserByPrincipal(principal);
-        return UserInfoResponse.from(user);
-    }
+
     @Transactional
-    public void updateProfile(Principal principal, @Valid UserProfileUpdateRequest request) {
-        User user = findUserByPrincipal(principal);
+    public void updateProfile(User user, @Valid UserProfileUpdateRequest request) {
+        user = findUserById(user.getUserId());
         user.changeInfo(request.nickname(), request.description());
     }
     @Transactional
-    public void updateAddress(Principal principal, @Valid UserAddressUpdateRequest request) {
-        User user = findUserByPrincipal(principal);
+    public void updateAddress(User user, @Valid UserAddressUpdateRequest request) {
+        user = findUserById(user.getUserId());
         user.changeAddress(request.address(), request.longitude(), request.latitude());
     }
     @Transactional
-    public void changePassword(Principal principal, @Valid UserPasswordChangeRequest request) {
-        User user = findUserByPrincipal(principal);
+    public void changePassword(User user, @Valid UserPasswordChangeRequest request) {
+        user = findUserById(user.getUserId());
         if(!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new BadCredentialsException("현재 비밀번호가 일치하지 않습니다.");
         }
@@ -64,18 +63,15 @@ public class UserService {
         user.changePassword(encoded);
     }
     @Transactional
-    public void changeProfileImage(Principal principal, MultipartFile file) {
-        User user = findUserByPrincipal(principal);
+    public void changeProfileImage(User user, MultipartFile file) {
+        user = findUserById(user.getUserId());
         String newUrl = profileImageService.uploadProfileImage(user.getUserId(), file);
         // 필요하면 기존 이미지 삭제 로직도 추가 (oldUrl 파싱 → GCS 삭제)
         user.changeUrl(newUrl);
     }
 
-    // 헬퍼메세ㅓ드
-    public User findUserByPrincipal(Principal principal) {
-        return userRepository.findByEmail(principal.getName())
-                .orElseThrow(()->new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
-    }
+
+//    헬퍼메서드
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(()->new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));

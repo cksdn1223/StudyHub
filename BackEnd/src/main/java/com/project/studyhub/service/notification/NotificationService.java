@@ -28,9 +28,7 @@ public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
     private final WebPushService webPushService;
 
-    public List<NotificationResponse> getNotification(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+    public List<NotificationResponse> getNotification(User user) {
         List<Notification> notificationList = notificationRepository.findByReceiver_UserId(user.getUserId());
         if(notificationList.isEmpty()) return new ArrayList<>();
         return notificationList.stream()
@@ -45,9 +43,7 @@ public class NotificationService {
         notification.markAsRead();
     }
     @Transactional
-    public void readAllNotification(Principal principal) {
-        User receiver = userRepository.findByEmail(principal.getName())
-                .orElseThrow(()-> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다."));
+    public void readAllNotification(User receiver) {
         List<Notification> notification = notificationRepository.findByReceiver_UserId(receiver.getUserId());
         notification.stream().filter(noti-> !noti.isRead()).forEach(Notification::markAsRead);
     }

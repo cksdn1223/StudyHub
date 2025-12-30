@@ -60,7 +60,7 @@ public class SecurityConfig {
                 )
                 // 세션을 사용하지 않으므로 STATELESS로 설정
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions ->
                         exceptions.authenticationEntryPoint(exceptionHandler)
                 )

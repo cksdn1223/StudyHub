@@ -8,6 +8,7 @@ import defaultAvatar from '../../assets/image/defaultImage.webp';
 import { useImageCropUpload } from '../../hooks/useImageCropUpload';
 import ProfileImageCropModal from '../user-info/ProfileImageCropModal';
 import { changeStudyImg } from '../../api/api';
+import { motion, AnimatePresence } from "framer-motion";
 
 function Chat({ stompClient }: { stompClient: Client | null }) {
   const [inputMessage, setInputMessage] = useState('');
@@ -15,6 +16,7 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const { chatList, chatListLoading, chatListError, selectStudy } = useMyStudy();
   const { user } = useAuth();
+  const isFirstLoad = useRef(true);
   const selectedStudyId = selectStudy?.studyId;
   const {
     uploading,
@@ -30,11 +32,37 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
       await changeStudyImg(formData, selectStudy?.studyId)
     },
   });
+
+  // 방이 바뀔 때 리셋하는 Effect
   useEffect(() => {
-    if (!messagesContainerRef.current) return;
+    // 방 ID가 바뀌면 첫 로딩 상태를 true로 되돌림
+    isFirstLoad.current = true;
+  }, [selectedStudyId]);
+
+  useEffect(() => {
     const el = messagesContainerRef.current;
-    el.scrollTop = el.scrollHeight;
-  }, [chatList]);
+    if (!el || chatListLoading) return;
+
+    // 새 방에 들어온 후 첫 채팅 목록이 로드되었을 때
+    if (isFirstLoad.current && chatList.length > 0) {
+      el.scrollTop = el.scrollHeight;
+      isFirstLoad.current = false;
+      return;
+    }
+
+    // 그 외 실시간 새 메시지 조건부 스크롤
+    const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 150;
+    if (isAtBottom) {
+      const timer = setTimeout(() => {
+        el.scrollTo({
+          top: el.scrollHeight,
+          behavior: "auto",
+        });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [chatList, chatListLoading]);
+
   const sendMessage = () => {
     if (stompClient && stompClient.connected && inputMessage.trim() !== "") {
       stompClient.publish({
@@ -48,6 +76,21 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
       setInputMessage('');
     }
   };
+
+  const messageVariants = {
+    initial: {
+      opacity: 0,
+      y: 10,
+      scale: 0.95,
+    },
+    animate: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: "spring", stiffness: 500, damping: 30 }
+    }
+  } as const;
+
   if (selectStudy && user)
     return (
       <>
@@ -112,81 +155,66 @@ function Chat({ stompClient }: { stompClient: Client | null }) {
 
           <div
             ref={messagesContainerRef}
-            className="py-4 space-y-4 flex-1 overflow-y-auto chat-scroll scroll-smooth"
+            className="py-4 space-y-4 flex-1 overflow-y-auto overflow-x-hidden chat-scroll scroll-smooth"
           >
-            {chatListLoading
-              ? "로딩중입니다..."
-              : chatListError
-                ? "채팅내역을 불러오는데 실패했습니다.. 관리자에게 문의해주세요."
-                : chatList.map((message, index) => {
+            {chatListLoading ? (
+              "로딩중입니다..."
+            ) : chatListError ? (
+              "에러 메시지..."
+            ) : (
+              <AnimatePresence initial={false}> {/* initial={false}로 첫 로딩 시 전체 애니메이션 방지 */}
+                {chatList.map((message, index) => {
                   const isMine = message.senderId === user.id;
-
-                  const formattedTime = new Intl.DateTimeFormat("ko-KR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                    timeZone: "Asia/Seoul",
-                  }).format(new Date(message.sentAt));
+                  const formattedTime = new Intl.DateTimeFormat("ko-KR", { /* ... */ }).format(new Date(message.sentAt));
 
                   return (
-                    <div
-                      key={index}
+                    <motion.div
+                      key={index} // 되도록 고유 ID 권장
+                      variants={messageVariants}
+                      initial="initial"
+                      animate="animate"
+                      layout // 메시지가 추가될 때 기존 메시지 위치 이동을 부드럽게 함
                       className={`flex ${isMine ? "justify-end" : "justify-start"}`}
                     >
                       {/* 상대방일 때: 아바타 */}
                       {!isMine && (
-                        <div className="mr-2">
+                        <div className="mr-2 flex-shrink-0">
                           <img
-                            src={message.senderImageUrl === "defaultUrl" ? defaultAvatar : message.senderImageUrl} alt="유저 프로필 이미지" className='w-10 h-10 rounded-2xl' />
+                            src={message.senderImageUrl === "defaultUrl" ? defaultAvatar : message.senderImageUrl}
+                            alt="프로필"
+                            className="w-10 h-10 rounded-2xl"
+                          />
                         </div>
                       )}
 
-                      {/* 말풍선 + 이름/시간 영역 */}
-                      <div
-                        className={`flex flex-col ${isMine ? "items-end" : "items-start"
-                          } max-w-[70%]`}
-                      >
-                        {/* 상대방 이름 */}
+                      {/* 말풍선 영역 */}
+                      <div className={`flex flex-col ${isMine ? "items-end" : "items-start"} max-w-[70%]`}>
                         {!isMine && (
-                          <span className="text-xs text-gray-700 mb-1">
-                            {message.senderNickname}
-                          </span>
+                          <span className="text-xs text-gray-700 mb-1">{message.senderNickname}</span>
                         )}
 
-                        {/* 말풍선 + 시간 한 줄 */}
-                        <div
-                          className={`flex items-end gap-1 ${isMine ? "flex-row" : "flex-row"
-                            }`}
-                        >
-                          {/* 내 메시지: 시간 - 말풍선(노랑) */}
-                          {/* 상대 메시지: 말풍선(흰색) - 시간 */}
-                          {isMine && (
-                            <span className="text-[11px] text-gray-500">
-                              {formattedTime}
-                            </span>
-                          )}
+                        <div className={`flex items-end gap-1`}>
+                          {isMine && <span className="text-[11px] text-gray-500">{formattedTime}</span>}
 
-                          <div
-                            className={`rounded-xl px-3 py-2 shadow-sm ${isMine
-                              ? "bg-yellow-300"
-                              : "bg-white border border-gray-200"
+                          {/* 말풍선 애니메이션 효과 추가 (선택사항: 스케일링) */}
+                          <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            className={`rounded-xl px-3 py-2 shadow-sm ${isMine ? "bg-yellow-300" : "bg-white border border-gray-200"
                               }`}
                           >
-                            <p className={`text-sm break-words font-medium ${isMine ? "text-gray-900" : "text-gray-900"}`}>
+                            <p className="text-sm break-words font-medium text-gray-900">
                               {message.content}
                             </p>
-                          </div>
+                          </motion.div>
 
-                          {!isMine && (
-                            <span className="text-[11px] text-gray-500">
-                              {formattedTime}
-                            </span>
-                          )}
+                          {!isMine && <span className="text-[11px] text-gray-500">{formattedTime}</span>}
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })}
+              </AnimatePresence>
+            )}
             <div ref={messagesEndRef}></div>
           </div>
           {/* 메시지 전송 구역 */}

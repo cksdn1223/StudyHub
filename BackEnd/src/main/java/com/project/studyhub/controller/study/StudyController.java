@@ -3,9 +3,11 @@ package com.project.studyhub.controller.study;
 import com.project.studyhub.dto.study.MyStudyResponse;
 import com.project.studyhub.dto.study.StudyCreateRequest;
 import com.project.studyhub.dto.study.StudyDistanceResponse;
+import com.project.studyhub.entity.User;
 import com.project.studyhub.service.study.StudyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,19 +21,21 @@ public class StudyController {
     private final StudyService studyService;
 
     @PostMapping
-    public ResponseEntity<Void> createStudy(@RequestBody StudyCreateRequest studyCreateRequest, Principal principal) {
-        studyService.createStudy(studyCreateRequest, principal);
+    public ResponseEntity<Void> createStudy(
+            @RequestBody StudyCreateRequest studyCreateRequest,
+            @AuthenticationPrincipal User user) {
+        studyService.createStudy(studyCreateRequest, user);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping
-    public ResponseEntity<List<StudyDistanceResponse>> getAllStudy(Principal principal) {
-        return ResponseEntity.ok(studyService.getAllStudy(principal));
+    public ResponseEntity<List<StudyDistanceResponse>> getAllStudy(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(studyService.getAllStudy(user));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<MyStudyResponse>> getJoinStudy(Principal principal) {
-        return ResponseEntity.ok(studyService.getJoinStudy(principal));
+    public ResponseEntity<List<MyStudyResponse>> getJoinStudy(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(studyService.getJoinStudy(user));
     }
 
     @PatchMapping("/{studyId}/study-image")

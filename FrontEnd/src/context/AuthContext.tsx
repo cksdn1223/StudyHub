@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { JwtPayload, User } from '../type';
 import { registerPush } from '../utils/pushSubscription';
 import { getUserInfo, pushSubscribe } from '../api/api';
-import { setAuthHandlers } from '../api/client';
+import api, { setAuthHandlers } from '../api/client';
+import { useQueryClient } from '@tanstack/react-query';
 
 type AuthContextType = {
   user: User;
@@ -32,21 +33,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     profileImageUrl: '',
   });
   const isLoggedIn = user.email.length !== 0
+  const qc = useQueryClient();
 
-  const logout = useCallback((message: string, type: 'success' | 'error' | 'info') => {
-    navigate("/")
+  const login = async (token: string) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    api.defaults.headers.common['Authorization'] = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+    await refreshUser();
+  };
+
+  const logout = useCallback(async(message: string, type: 'success' | 'error' | 'info') => {
+    await qc.cancelQueries();
+    qc.clear();
+
     localStorage.removeItem(TOKEN_KEY);
-    setUser({
-      id: 0,
-      email: '',
-      nickname: '',
-      address: '',
-      description: '',
-      role: '',
-      profileImageUrl: '',
-    });
+    delete api.defaults.headers.common['Authorization'];
+    setUser({id: 0, email: '', nickname: '', address: '', description: '', role: '', profileImageUrl: '',});
+    navigate("/")
     showToast(message, type);
-  }, [showToast, navigate]);
+  }, [showToast, navigate, qc]);
 
   const getDecoded = useCallback((token: string): JwtPayload | null => {
     try {
@@ -94,10 +98,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return () => clearInterval(interval);
   }, [refreshUser, logout, getDecoded])
 
-  const login = async (token: string) => {
-    localStorage.setItem(TOKEN_KEY, token);
-    await refreshUser();
-  };
+
 
   // 로그인시 web push 구독
   useEffect(() => {

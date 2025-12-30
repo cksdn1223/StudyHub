@@ -26,7 +26,7 @@ export const MyStudyProvider = ({ children }: React.PropsWithChildren) => {
   const enabled = isLoggedIn;
 
   const { data: myStudyList = [], isLoading, error } = useMyStudyListQuery(enabled);
-  const { data: chatList = [], isLoading: chatListLoading, error: chatListError } = useChatListQuery(selectedStudyId);
+  const { data: chatList = [], isLoading: chatListLoading, error: chatListError } = useChatListQuery(selectedStudyId, {enabled: isLoggedIn && selectedStudyId !== null});
   
   useEffect(() => {
     if (!myStudyList.length) return;

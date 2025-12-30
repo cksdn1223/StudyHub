@@ -3,10 +3,10 @@ import type { ChatMessage } from "../../type";
 import { getChatData } from "../../api/api";
 import { queryKeys } from "../../utils/keys";
 
-export function useChatListQuery(studyId: number | null) {
+export function useChatListQuery(studyId: number | null, options?: { enabled?: boolean }) {
   return useQuery<ChatMessage[]>({
     queryKey: queryKeys.chatList(studyId),
     queryFn: () => getChatData(studyId as number),
-    enabled: !!studyId,
+    enabled: options?.enabled ?? !!studyId,
   });
 }

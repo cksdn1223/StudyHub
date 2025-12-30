@@ -4,6 +4,7 @@ import StudyCard from './StudyCard';
 import Footer from '../../Footer';
 import { useStudyList } from '../../hooks/useStudyList';
 import { Search } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 function FindStudy() {
   const navigate = useNavigate();
@@ -40,6 +41,27 @@ function FindStudy() {
       }
     });
   }, [data, distanceFilter, searchTerm, sortOption, statusFilter]);
+
+  // 리스트 전체 컨테이너용 애니메이션
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        // 카드 사이의 시간 간격 (0.1초마다 하나씩 등장)
+        staggerChildren: 0.1,
+      },
+    },
+  };
+  // 개별 카드용 애니메이션
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 }, // 아래에서 20px 위치에서 투명하게 시작
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: "spring", stiffness: 300, damping: 24 },
+    },
+  } as const;
 
   return (
     <>
@@ -163,15 +185,34 @@ function FindStudy() {
                   <h1 className='font-bold text-2xl'>스터디 목록을 불러오기 위해선 주소를 추가해야 합니다.</h1>
                   <a href="/profile" className='text-xl hover:text-blue-400'>주소 추가하기</a>
                 </div> :
-                <div className="border-t border-gray-200">
-                  {filteredStudies.length > 0 ? (
-                    filteredStudies.map(study => (
-                      <StudyCard key={study.id} {...study} />
-                    ))
-                  ) : (
-                    <p className="py-6 text-center text-gray-500">조건에 맞는 스터디가 없습니다.</p>
-                  )}
-                </div>
+                <motion.div
+                  className="border-t border-gray-200"
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                >
+                  <AnimatePresence mode="popLayout">
+                    {filteredStudies.length > 0 ? (
+                      filteredStudies.map(study => (
+                        <motion.div
+                          key={study.id}
+                          variants={itemVariants}
+                          layout
+                        >
+                          <StudyCard {...study} />
+                        </motion.div>
+                      ))
+                    ) : (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="py-6 text-center text-gray-500"
+                      >
+                        조건에 맞는 스터디가 없습니다.
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
             }
           </section>
         </main>
