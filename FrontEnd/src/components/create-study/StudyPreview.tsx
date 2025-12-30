@@ -48,8 +48,6 @@ const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, 
         onClick={() => showToast("AI 추천 기능은 현재 준비 중입니다.", "info")}
       >
         AI에게 추천받기
-
-        
       </button>
     </>
   );

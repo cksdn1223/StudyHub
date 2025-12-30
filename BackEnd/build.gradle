@@ -25,6 +25,12 @@ repositories {
     maven { url 'https://maven.google.com' }
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:1.1.2"
+    }
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -46,7 +52,7 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
 
 	// Hibernate Spatial: PostGIS의 GEOMETRY 타입을 JPA Entity에 매핑하기 위해 필수
-	implementation 'org.hibernate.orm:hibernate-spatial:6.4.4.Final' // hibernate-spatial -> hibernate.orm:hibernate-spatial
+	implementation 'org.hibernate.orm:hibernate-spatial' // hibernate-spatial -> hibernate.orm:hibernate-spatial
     // WebClient 의존성
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // websocket
@@ -61,8 +67,9 @@ dependencies {
     implementation 'com.google.cloud.sql:postgres-socket-factory:1.15.0'
     implementation 'org.postgresql:postgresql'
     // Google Oauth2 의존성
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+    // Spring AI 의존성
+    implementation 'org.springframework.ai:spring-ai-starter-model-google-genai'
 }
 
 tasks.named('test') {
