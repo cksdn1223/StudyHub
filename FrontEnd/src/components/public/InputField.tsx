@@ -1,11 +1,11 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
 
 type CommonProps = React.PropsWithChildren<{
   id?: string;
   name?: string;
   label?: string;
   placeholder?: string;
-
+  size?: number;
   value?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -35,6 +35,7 @@ const InputField = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputField
       name,
       label,
       placeholder,
+      size,
       value,
       defaultValue,
       disabled = false,
@@ -49,11 +50,46 @@ const InputField = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputField
   ) => {
     const controlId = id ?? name ?? label ?? undefined;
 
-    const baseClass = `w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 text-sm placeholder-gray-500
-      ${rows ? "" : "h-11"}
-      ${disabled ? "disabled:bg-gray-50 disabled:text-gray-500" : ""}
-      ${errorMessage ? "border border-red-400 focus:ring-red-200" : "border border-gray-300 focus:ring-red-300 focus:border-red-300"}`;
+    const localRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
+    useImperativeHandle(ref, () => localRef.current!);
+
+    const adjustHeight = useCallback(() => {
+      if (rows && localRef.current && localRef.current instanceof HTMLTextAreaElement) {
+        const target = localRef.current;
+        target.style.height = "auto";
+        target.style.height = `${target.scrollHeight}px`;
+      }
+    }, [rows]);
+
+    useEffect(() => {
+      adjustHeight();
+    }, [value, adjustHeight])
+
+
+    
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { value: newValue } = e.target;
+      
+      if (size) {
+        // 이미 1000자인 상태에서 글자를 더 추가하려고 하면 (중간 입력 포함) 아예 무시
+        if (value && value.length >= size && newValue.length > value.length) {
+          return;
+        }
+        // 붙여넣기 등으로 한번에 size를 초과해서 들어온 경우, 앞부분만 자름
+        if (newValue.length > size) {
+          e.target.value = newValue.substring(0, size);
+        }
+      }
+      onChange?.(e);
+      adjustHeight();
+    };
+    
+    const baseClass = `w-full px-4 py-3 rounded-lg focus:outline-none text-sm placeholder-gray-500 ring-1 focus:ring-2 focus:ring-red-200
+      ${rows ? "resize-none overflow-hidden" : "h-11"} 
+      ${disabled ? "disabled:bg-gray-50 disabled:text-gray-500" : ""}
+      ${errorMessage ? "ring-red-400 " : "ring-gray-300"}`;
+    
     return (
       <div className={`mt-2 ${fullWidth ? "w-full" : ""}`}>
         {label !== undefined && label !== "" && (
@@ -63,18 +99,18 @@ const InputField = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputField
           </label>
         )}
 
-        <div className="flex items-center mt-1">
+        <div className="flex items-center mt-1 relative">
           {rows ? (
             <textarea
               id={controlId}
               name={name}
-              ref={ref as React.Ref<HTMLTextAreaElement>}
+              ref={localRef as React.Ref<HTMLTextAreaElement>}
               value={value}
               defaultValue={defaultValue}
               disabled={disabled}
               placeholder={placeholder}
               rows={rows}
-              onChange={onChange}
+              onChange={handleChange}
               onKeyDown={onKeyDown}
               onFocus={onFocus}
               onBlur={onBlur}
@@ -85,13 +121,13 @@ const InputField = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputField
             <input
               id={controlId}
               name={name}
-              ref={ref as React.Ref<HTMLInputElement>}
+              ref={localRef as React.Ref<HTMLInputElement>}
               type={type}
               value={value}
               defaultValue={defaultValue}
               disabled={disabled}
               placeholder={placeholder}
-              onChange={onChange}
+              onChange={handleChange}
               onKeyDown={onKeyDown}
               onFocus={onFocus}
               onBlur={onBlur}
@@ -99,8 +135,13 @@ const InputField = forwardRef<HTMLInputElement | HTMLTextAreaElement, InputField
               className={baseClass}
             />
           )}
-
           {children}
+          {/* size가 true면 글자 수 오른쪽 아래에 표시 */}
+          {size &&
+            <p className="absolute bottom-[-20px] right-0 text-[11px] text-gray-400">
+              {value?.length || 0}/{size}
+            </p>
+          }
         </div>
 
         {errorMessage && <p className="mt-1 text-xs text-red-500">{errorMessage}</p>}

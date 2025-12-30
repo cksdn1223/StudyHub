@@ -58,7 +58,6 @@ function CreateStudy() {
 
   const title = watch("title");
   const description = watch("description");
-  const memberCount = watch("memberCount");
   const maxMembers = watch("maxMembers");
   const frequency = watch("frequency");
   const duration = watch("duration");
@@ -73,7 +72,7 @@ function CreateStudy() {
   };
 
   const handleAiRecommendation = async () => {
-    if (!title) {
+    if (!title.trim()) {
       showToast("스터디 제목을 먼저 입력해주세요.", "error");
       return;
     }
@@ -83,7 +82,7 @@ function CreateStudy() {
       setIsLoading(true);
       showToast("AI가 스터디 설정을 생성하고 있습니다...", "info");
       const data = await getAiRecommendation(title); // 서버에서 받은 StudyRecommendation 객체
-      
+
       setValue("title", data.title, { shouldValidate: true });
       setValue("description", data.description, { shouldValidate: true });
       setValue("maxMembers", data.memberCount, { shouldValidate: true });
@@ -99,6 +98,14 @@ function CreateStudy() {
       showToast("AI 추천 중 오류가 발생했습니다.", "error");
     }
   };
+
+  const handleMaxMembers = (e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    let val = Number(e.target.value);
+    if (val > 100) val = 100;
+    if (val < 1 && e.target.value !== "") val = 1;
+    setValue("maxMembers", val, { shouldValidate: true });
+  }
 
   return (
     <div className="min-h-screen p-6 md:p-10">
@@ -119,8 +126,8 @@ function CreateStudy() {
                   type="button"
                   className={`relative px-4 py-2 rounded-md transition-colors
                   ${isLoading
-                    ? "bg-gray-300 cursor-wait"
-                    : "bg-blue-500 text-white hover:bg-blue-600"}`}
+                      ? "bg-gray-300 cursor-wait"
+                      : "bg-blue-500 text-white hover:bg-blue-600"}`}
                   onClick={() => handleAiRecommendation()}
                   disabled={isSubmitting || isLoading}
                 >
@@ -132,15 +139,18 @@ function CreateStudy() {
                 control={control}
                 name="title"
                 render={({ field, fieldState }) => (
-                  <InputField
-                    id="title"
-                    label="스터디 제목"
-                    placeholder="예: React 심화 스터디 모집합니다"
-                    required
-                    {...field}
-                    onBlur={() => field.onBlur()}
-                    errorMessage={fieldState.error?.message}
-                  />
+                  <>
+                    <InputField
+                      id="title"
+                      label="스터디 제목"
+                      placeholder="예: React 심화 스터디 모집합니다"
+                      size={50}
+                      required
+                      {...field}
+                      onBlur={() => field.onBlur()}
+                      errorMessage={fieldState.error?.message}
+                    />
+                  </>
                 )}
               />
 
@@ -152,6 +162,7 @@ function CreateStudy() {
                     id="description"
                     label="스터디 설명"
                     placeholder="스터디의 목표, 진행 방식, 예상 커리큘럼 등을 자세히 작성해주세요."
+                    size={1500}
                     rows={5}
                     required
                     {...field}
@@ -163,30 +174,25 @@ function CreateStudy() {
             </Card>
 
             <Card title="스터디 설정">
-              <div className="flex gap-4 items-end">
-                <div className="w-1/2">
+              <div className="flex gap-4 items-start">
+                <div className="w-1/2 mt-2">
                   <label className="text-sm font-semibold text-gray-800">모집 인원</label>
-                  <div className="flex items-center mt-1">
+                  <div className="flex items-center mt-1 h-11">
                     <input
                       type="number"
                       min="1"
-                      disabled
-                      value={memberCount}
-                      className="w-1/2 px-4 py-3 border border-gray-300 rounded-l-lg text-sm text-center"
-                    />
-                    <span className="px-2 py-3 text-gray-500">/</span>
-                    <input
-                      type="number"
-                      min="1"
+                      max="100"
                       value={maxMembers}
-                      onChange={(e) => setValue("maxMembers", Number(e.target.value), { shouldValidate: true })}
-                      className="w-1/2 px-4 py-3 border border-gray-300 rounded-r-lg text-sm text-center"
+                      onChange={(e) => handleMaxMembers(e)}
+                      className={`w-20 px-4 py-3 rounded-lg ring-1 ring-gray-300 focus:outline-none focus:ring-2 focus:ring-red-200 text-sm text-center ${errors.maxMembers ? "ring-red-400 " : "ring-gray-300"}`}
                     />
-                    <span className="ml-1 text-sm text-gray-600">명</span>
+                    <span className="ml-2 text-sm text-gray-600">명</span>
                   </div>
-                  {errors.maxMembers?.message && (
-                    <p className="mt-1 text-xs text-red-500">{errors.maxMembers.message as string}</p>
-                  )}
+                  <div className="min-h-[20px] mt-1">
+                    {errors.maxMembers?.message ? (
+                      <p className="text-xs text-red-500">{errors.maxMembers.message as string}</p>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="w-1/2">
@@ -243,7 +249,7 @@ function CreateStudy() {
               </div>
             </Card>
 
-            <Card title="기술 스택 태그">
+            <Card title="기술 스택 태그" required>
               <TagSection {...tagSelector} />
               {errors.tags?.message && (
                 <p className="mt-2 text-xs text-red-500">{errors.tags.message}</p>
@@ -268,7 +274,6 @@ function CreateStudy() {
             <StudyPreview
               title={title || "스터디 제목을 입력해주세요"}
               description={description || "스터디 설명을 입력해주세요"}
-              memberCount={memberCount}
               maxMembers={maxMembers}
               frequency={frequency || "선택해주세요"}
               duration={duration || "선택해주세요"}
@@ -289,7 +294,7 @@ function CreateStudy() {
             <button
               className={`flex items-center justify-center px-6 py-3 text-sm font-semibold text-white rounded-lg transition
                 ${isSubmitting ? "bg-gray-300 cursor-wait" : "bg-red-500 hover:bg-red-600"}`}
-              onClick={handleSubmit(onSubmit)}
+              onClick={handleSubmit(onSubmit, () => showToast("입력값을 확인해주세요.", "error"))}
               disabled={isSubmitting}
             >
               {isSubmitting ? "생성 중..." : (

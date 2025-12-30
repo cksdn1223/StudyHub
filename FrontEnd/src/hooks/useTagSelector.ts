@@ -18,6 +18,7 @@ export function useTagSelector(
     (inputTag: string) => {
       const t = inputTag.trim();
       if (!t) return showToast("빈 태그는 입력하실 수 없습니다.", "error");
+      if (tags.length >= 10) return showToast("태그는 최대 10개까지 선택 가능합니다.", "info");
       if (tags.includes(t)) return showToast("중복된 태그는 입력하실 수 없습니다.", "info");
 
       setValue("tags", [...tags, t], { shouldValidate: true, shouldDirty: true });

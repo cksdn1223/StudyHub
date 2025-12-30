@@ -146,8 +146,6 @@ export const fetchStudyList = async () => {
 };
 
 export const getAiRecommendation = async (title: string) => {
-  const response = await api.get(`ai/recommend`, {
-    params: { title }
-  });
+  const response = await api.post(`ai/recommend`, title);
   return response.data;
 }

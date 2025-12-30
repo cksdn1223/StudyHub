@@ -1,9 +1,8 @@
 import Card from '../public/Card'; // Card 컴포넌트 import
 
-const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, duration, detailLocation }: React.PropsWithChildren<{
+const StudyPreview = ({ title, description, maxMembers, frequency, duration, detailLocation }: React.PropsWithChildren<{
   title: string;
   description: string;
-  memberCount: number;
   maxMembers: number;
   frequency: string;
   duration: string;
@@ -19,12 +18,12 @@ const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, 
           <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
 
           <div className="flex text-sm text-gray-600 mb-3 space-x-4">
-            <div className="flex items-center"><span className="mr-1">🧑‍🤝‍🧑</span> {memberCount}/{maxMembers} 명</div>
+            <div className="flex items-center"><span className="mr-1">🧑‍🤝‍🧑</span> 1/{maxMembers} 명</div>
             <div className="flex items-center"><span className="mr-1">🗓️</span> {frequency}</div>
             <div className="flex items-center"><span className="mr-1">🕒</span> {duration}</div>
           </div>
 
-          <div className="text-sm text-gray-700 whitespace-pre-line">{description}</div>
+          <div className="text-sm text-gray-700 whitespace-pre-line break-all overflow-hidden">{description}</div>
         </div>
 
         {/* 작성 팁 */}

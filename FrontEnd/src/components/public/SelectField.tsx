@@ -49,8 +49,8 @@ const SelectField = forwardRef<HTMLSelectElement, Props>(
           onChange={onChange}
           onBlur={onBlur}
           aria-invalid={!!errorMessage}
-          className={`w-full px-4 py-3 rounded-lg appearance-none bg-white text-sm h-11 focus:outline-none focus:ring-2
-            ${errorMessage ? "border-red-400 focus:ring-red-200" : "border-gray-300 focus:ring-red-300 focus:border-red-300"}`}
+          className={`w-full px-4 py-3 rounded-lg appearance-none text-sm h-11 focus:outline-none ring-1 focus:ring-2 focus:ring-red-200
+            ${errorMessage ? "ring-red-400" : "ring-gray-300"}`}
         >
           {defaultValue && (
             <option value="" disabled hidden>
