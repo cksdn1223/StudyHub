@@ -87,7 +87,7 @@ public Flux<String> stream(@RequestParam String message) {
 
 AI의 답변을 단순히 텍스트가 아니라 자바 객체(DTO)로 바로 변환해서 받을 수 있습니다. 데이터를 가공해서 DB에 넣거나 화면에 표로 보여줄 때 필수입니다.
 
-// 응답받고 싶은 구조를 Record나 Class로 정의
+응답받고 싶은 구조를 Record나 Class로 정의
 ```java
 public record BookInfo(String title, String author, int year) {}
 

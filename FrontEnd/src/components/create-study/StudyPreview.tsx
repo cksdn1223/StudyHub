@@ -1,4 +1,3 @@
-import { useToast } from '../../context/ToastContext';
 import Card from '../public/Card'; // Card 컴포넌트 import
 
 const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, duration, detailLocation }: React.PropsWithChildren<{
@@ -10,7 +9,6 @@ const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, 
   duration: string;
   detailLocation: string,
 }>) => {
-  const { showToast } = useToast();
   return (
     <>
       <Card className="bg-red-50 border-red-300">
@@ -42,13 +40,6 @@ const StudyPreview = ({ title, description, memberCount, maxMembers, frequency, 
           </ul>
         </div>
       </Card>
-      <button
-        type="button"
-        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
-        onClick={() => showToast("AI 추천 기능은 현재 준비 중입니다.", "info")}
-      >
-        AI에게 추천받기
-      </button>
     </>
   );
 };

@@ -5,7 +5,7 @@ import SelectField from "../public/SelectField";
 import StudyPreview from "./StudyPreview";
 import { useNavigate } from "react-router-dom";
 import { Controller } from "react-hook-form";
-import { createStudy } from "../../api/api";
+import { createStudy, getAiRecommendation } from "../../api/api";
 import { useToast } from "../../context/ToastContext";
 import { useStudyForm } from "../../hooks/useStudyForm";
 import { useAddressSearch } from "../../hooks/useAddressSearch";
@@ -13,6 +13,7 @@ import { useTagSelector } from "../../hooks/useTagSelector";
 import { TagSection } from "./TagSection";
 import { AddressSection } from "./AddressSection";
 import { StudyFormValues } from "../../schema/studySchema";
+import { useState } from "react";
 
 const tagList = [
   // 프론트엔드 (Frontend)
@@ -42,7 +43,7 @@ const tagList = [
 function CreateStudy() {
   const navigate = useNavigate();
   const { showToast } = useToast();
-
+  const [isLoading, setIsLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -71,6 +72,34 @@ function CreateStudy() {
     navigate("/find");
   };
 
+  const handleAiRecommendation = async () => {
+    if (!title) {
+      showToast("스터디 제목을 먼저 입력해주세요.", "error");
+      return;
+    }
+
+    try {
+      // 로딩 상태 처리 (필요 시 별도 state 추가)
+      setIsLoading(true);
+      showToast("AI가 스터디 설정을 생성하고 있습니다...", "info");
+      const data = await getAiRecommendation(title); // 서버에서 받은 StudyRecommendation 객체
+      
+      setValue("title", data.title, { shouldValidate: true });
+      setValue("description", data.description, { shouldValidate: true });
+      setValue("maxMembers", data.memberCount, { shouldValidate: true });
+      setValue("frequency", data.frequency, { shouldValidate: true });
+      setValue("duration", data.duration, { shouldValidate: true });
+      setValue("detailLocation", data.method, { shouldValidate: true });
+      setValue("tags", data.tags, { shouldValidate: true });
+
+      showToast("AI 추천 내용이 반영되었습니다.", "success");
+      setIsLoading(false);
+    } catch (error) {
+      console.error("AI 추천 오류:", error);
+      showToast("AI 추천 중 오류가 발생했습니다.", "error");
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 md:p-10">
       <div className="max-w-7xl mx-auto">
@@ -83,7 +112,22 @@ function CreateStudy() {
 
         <div className="mt-8 flex flex-col lg:flex-row gap-8">
           <div className="lg:w-2/3 space-y-8">
-            <Card title="기본 정보">
+            <Card
+              title="기본 정보"
+              actionButton={
+                <button
+                  type="button"
+                  className={`relative px-4 py-2 rounded-md transition-colors
+                  ${isLoading
+                    ? "bg-gray-300 cursor-wait"
+                    : "bg-blue-500 text-white hover:bg-blue-600"}`}
+                  onClick={() => handleAiRecommendation()}
+                  disabled={isSubmitting || isLoading}
+                >
+                  {isLoading ? "AI가 생각하는중.." : "AI에게 추천받기"}
+                </button>
+              }>
+
               <Controller
                 control={control}
                 name="title"
@@ -257,8 +301,8 @@ function CreateStudy() {
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 

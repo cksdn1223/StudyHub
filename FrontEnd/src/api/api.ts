@@ -144,3 +144,10 @@ export const fetchStudyList = async () => {
   const response = await api.get(`/study`);
   return response.data;
 };
+
+export const getAiRecommendation = async (title: string) => {
+  const response = await api.get(`ai/recommend`, {
+    params: { title }
+  });
+  return response.data;
+}
